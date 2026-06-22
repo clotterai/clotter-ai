@@ -1,0 +1,243 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { LogoutButton } from "./logout-button";
+
+export type SidebarUser = {
+  email: string;
+  fullName: string | null;
+  avatarUrl: string | null;
+  initials: string;
+};
+
+const navItems = [
+  {
+    label: "Dashboard",
+    href: "/dashboard",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+        <path
+          d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5Z"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    label: "AI Chat",
+    href: "/dashboard/chat",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+        <path
+          d="M8 10h8M8 14h5M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 0 1-4-.8L3 21l1.8-4.2A8.8 8.8 0 0 1 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8Z"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    label: "Content Ideas",
+    href: "/dashboard/content-ideas",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+        <path
+          d="M9.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
+        <path
+          d="M12 6v6l3 2"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    label: "Caption Generator",
+    href: "/dashboard/captions",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+        <path
+          d="M4 6h16M4 12h12M4 18h8M20 18l-2 2-4-4"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    label: "Hook Generator",
+    href: "/dashboard/hooks",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+        <path
+          d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    label: "Content Planner",
+    href: "/dashboard/planner",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+        <path
+          d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    label: "Trend Analyzer",
+    href: "/dashboard/trends",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+        <path
+          d="M3 17l6-6 4 4 8-10"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M14 5h7v7"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
+];
+
+export function DashboardSidebar({ user }: { user: SidebarUser }) {
+  const pathname = usePathname();
+
+  return (
+    <aside className="fixed inset-y-0 left-0 z-30 flex w-[17.5rem] flex-col border-r border-[#7C3AED]/10 bg-[#0D0D1A]/70 backdrop-blur-2xl">
+      {/* Glowing right edge */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-[#A855F7]/40 to-transparent"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-y-0 -right-px w-px bg-[#7C3AED]/15"
+      />
+
+      {/* Logo */}
+      <div className="relative border-b border-[#7C3AED]/10 px-6 py-7">
+        <div className="flex items-center gap-3.5">
+          <div className="dash-logo-pulse relative flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#A855F7] to-[#7C3AED] ring-1 ring-white/15 transition-transform duration-500 hover:scale-105">
+            <span className="text-base font-bold text-white">C</span>
+            <div
+              aria-hidden
+              className="absolute inset-0 rounded-2xl bg-[#A855F7]/20 blur-md"
+            />
+          </div>
+          <div>
+            <p className="text-base font-semibold tracking-[-0.03em] text-white">
+              Clotter AI
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-6">
+        <p className="mb-4 px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/25">
+          Workspace
+        </p>
+        {navItems.map((item) => {
+          const active =
+            item.href === "/dashboard"
+              ? pathname === "/dashboard"
+              : pathname.startsWith(item.href) && item.href !== "#";
+
+          return (
+            <Link
+              key={item.label}
+              href={item.href}
+              className={`dash-nav-item group relative flex items-center gap-3.5 overflow-hidden rounded-xl px-3.5 py-3 text-[15px] font-medium tracking-[-0.02em] ${
+                active
+                  ? "bg-[#7C3AED]/15 text-[#E9D5FF] shadow-[0_0_40px_-8px_#A855F7] ring-1 ring-[#A855F7]/35"
+                  : "text-white/45 hover:text-white/90"
+              }`}
+              aria-current={active ? "page" : undefined}
+            >
+              {active && (
+                <>
+                  <span
+                    aria-hidden
+                    className="absolute inset-0 bg-gradient-to-r from-[#7C3AED]/25 via-[#A855F7]/12 to-transparent"
+                  />
+                  <span aria-hidden className="dash-nav-glow-bar" />
+                </>
+              )}
+              <span
+                className={`relative z-[1] transition-all duration-300 ${
+                  active
+                    ? "text-[#C084FC] drop-shadow-[0_0_8px_rgba(168,85,247,0.6)]"
+                    : "text-white/30 group-hover:text-[#A855F7]/70"
+                }`}
+              >
+                {item.icon}
+              </span>
+              <span className="relative z-[1]">{item.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Profile */}
+      <div className="border-t border-[#7C3AED]/10 p-5">
+        <div className="dash-glass-v2 !rounded-2xl !p-4">
+          <div className="flex items-center gap-3.5">
+            {user.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={user.avatarUrl}
+                alt=""
+                className="h-10 w-10 shrink-0 rounded-full object-cover ring-1 ring-[#A855F7]/30"
+              />
+            ) : (
+              <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#A855F7]/40 to-[#7C3AED]/20 text-sm font-semibold text-[#E9D5FF] ring-1 ring-[#A855F7]/30">
+                {user.initials}
+                <div
+                  aria-hidden
+                  className="absolute inset-0 rounded-full bg-[#A855F7]/20 blur-sm"
+                />
+              </div>
+            )}
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[15px] font-medium tracking-[-0.02em] text-white/95">
+                {user.fullName ?? "Creator"}
+              </p>
+              <p className="truncate text-xs text-white/40">{user.email}</p>
+            </div>
+          </div>
+          <LogoutButton />
+        </div>
+      </div>
+    </aside>
+  );
+}
