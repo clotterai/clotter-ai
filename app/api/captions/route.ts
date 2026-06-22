@@ -2,14 +2,11 @@ import { NextResponse } from "next/server";
 
 const MODEL = "openai/gpt-4o-mini";
 
-  "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";
-
 const VALID_TONES = ["funny", "professional", "viral", "emotional"] as const;
 type Tone = (typeof VALID_TONES)[number];
 
 function getApiKey() {
-  const envKey = process.env.OPENROUTER_API_KEY?.trim();
-  return envKey || FALLBACK_API_KEY;
+  return process.env.OPENROUTER_API_KEY?.trim() || "";
 }
 
 export async function POST(request: Request) {
