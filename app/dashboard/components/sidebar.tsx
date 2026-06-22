@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState, type ReactNode } from "react";
 import { LogoutButton } from "./logout-button";
 
 export type SidebarUser = {
@@ -129,11 +130,25 @@ const navItems = [
   },
 ];
 
-export function DashboardSidebar({ user }: { user: SidebarUser }) {
+type DashboardSidebarProps = {
+  user: SidebarUser;
+  isMobileOpen: boolean;
+  onClose: () => void;
+};
+
+export function DashboardSidebar({
+  user,
+  isMobileOpen,
+  onClose,
+}: DashboardSidebarProps) {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-30 flex w-[17.5rem] flex-col border-r border-[#7C3AED]/10 bg-[#0D0D1A]/70 backdrop-blur-2xl">
+    <aside
+      className={`fixed inset-y-0 left-0 z-50 flex w-[17.5rem] flex-col border-r border-[#7C3AED]/10 bg-[#0D0D1A]/95 backdrop-blur-2xl transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:translate-x-0 ${
+        isMobileOpen ? "translate-x-0" : "-translate-x-full"
+      }`}
+    >
       {/* Glowing right edge */}
       <div
         aria-hidden
@@ -177,6 +192,7 @@ export function DashboardSidebar({ user }: { user: SidebarUser }) {
             <Link
               key={item.label}
               href={item.href}
+              onClick={onClose}
               className={`dash-nav-item group relative flex items-center gap-3.5 overflow-hidden rounded-xl px-3.5 py-3 text-[15px] font-medium tracking-[-0.02em] ${
                 active
                   ? "bg-[#7C3AED]/15 text-[#E9D5FF] shadow-[0_0_40px_-8px_#A855F7] ring-1 ring-[#A855F7]/35"
@@ -239,5 +255,120 @@ export function DashboardSidebar({ user }: { user: SidebarUser }) {
         </div>
       </div>
     </aside>
+  );
+}
+
+type DashboardMobileHeaderProps = {
+  isMobileOpen: boolean;
+  onToggle: () => void;
+};
+
+function DashboardMobileHeader({
+  isMobileOpen,
+  onToggle,
+}: DashboardMobileHeaderProps) {
+  return (
+    <header className="fixed inset-x-0 top-0 z-40 flex h-14 items-center gap-3 border-b border-[#7C3AED]/10 bg-[#0D0D1A]/85 px-4 backdrop-blur-xl md:hidden">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#A855F7]/60 to-transparent"
+      />
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-label={isMobileOpen ? "Close menu" : "Open menu"}
+        aria-expanded={isMobileOpen}
+        className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-xl text-white/90 transition-all duration-300 hover:border-[#A855F7]/35 hover:bg-[#7C3AED]/10 active:scale-95"
+      >
+        {isMobileOpen ? (
+          <span className="text-lg leading-none">✕</span>
+        ) : (
+          <span className="leading-none">☰</span>
+        )}
+      </button>
+      <div className="flex min-w-0 flex-1 items-center gap-2.5">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#A855F7] to-[#7C3AED] text-sm font-bold text-white ring-1 ring-white/10">
+          C
+        </div>
+        <p className="truncate text-[15px] font-semibold tracking-[-0.03em] text-white">
+          Clotter AI
+        </p>
+      </div>
+    </header>
+  );
+}
+
+type DashboardSidebarBackdropProps = {
+  isMobileOpen: boolean;
+  onClose: () => void;
+};
+
+function DashboardSidebarBackdrop({
+  isMobileOpen,
+  onClose,
+}: DashboardSidebarBackdropProps) {
+  return (
+    <button
+      type="button"
+      aria-label="Close menu"
+      onClick={onClose}
+      className={`fixed inset-0 z-40 bg-[#05050f]/70 backdrop-blur-[2px] transition-opacity duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:hidden ${
+        isMobileOpen
+          ? "pointer-events-auto opacity-100"
+          : "pointer-events-none opacity-0"
+      }`}
+    />
+  );
+}
+
+type DashboardNavigationProps = {
+  user: SidebarUser;
+  children: ReactNode;
+};
+
+export function DashboardNavigation({
+  user,
+  children,
+}: DashboardNavigationProps) {
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    setIsMobileOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!isMobileOpen) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isMobileOpen]);
+
+  const closeSidebar = () => setIsMobileOpen(false);
+  const toggleSidebar = () => setIsMobileOpen((open) => !open);
+
+  return (
+    <>
+      <DashboardSidebarBackdrop
+        isMobileOpen={isMobileOpen}
+        onClose={closeSidebar}
+      />
+      <DashboardSidebar
+        user={user}
+        isMobileOpen={isMobileOpen}
+        onClose={closeSidebar}
+      />
+      <DashboardMobileHeader
+        isMobileOpen={isMobileOpen}
+        onToggle={toggleSidebar}
+      />
+      {children}
+    </>
   );
 }

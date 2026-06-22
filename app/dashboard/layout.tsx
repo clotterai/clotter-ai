@@ -1,6 +1,6 @@
 import { DashboardParticles } from "./components/particles";
 import {
-  DashboardSidebar,
+  DashboardNavigation,
   type SidebarUser,
 } from "./components/sidebar";
 import { createClient } from "@/lib/supabase/server";
@@ -74,14 +74,14 @@ export default async function DashboardLayout({
       {/* Global grid texture */}
       <div aria-hidden className="dash-grid" />
 
-      <DashboardSidebar user={sidebarUser} />
-
-      <div className="relative z-[1] flex min-h-full min-w-0 flex-1 flex-col pl-[17.5rem]">
-        <div aria-hidden className="dash-grid-main" />
-        <div className="dash-page-enter relative z-[1] flex min-h-full flex-col">
-          {children}
+      <DashboardNavigation user={sidebarUser}>
+        <div className="relative z-[1] flex min-h-full min-w-0 flex-1 flex-col pt-14 md:pt-0 md:pl-[17.5rem]">
+          <div aria-hidden className="dash-grid-main" />
+          <div className="dash-page-enter relative z-[1] flex min-h-full flex-col">
+            {children}
+          </div>
         </div>
-      </div>
+      </DashboardNavigation>
     </div>
   );
 }
