@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 const MODEL = "openai/gpt-4o-mini";
-const FALLBACK_API_KEY =
+
   "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";
 
 const VALID_PLATFORMS = ["instagram", "youtube", "tiktok", "linkedin"] as const;

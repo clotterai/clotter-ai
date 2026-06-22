@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 const MODEL = "openai/gpt-4o-mini";
 const SYSTEM_PROMPT =
   "You are an AI assistant for creators and influencers.";
-const FALLBACK_API_KEY =
+
   "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";
 
 function getApiKey() {
