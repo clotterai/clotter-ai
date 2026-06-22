@@ -17,7 +17,7 @@ const suggestedPrompts = [
 
 function ClotterLogo() {
   return (
-    <div className="chat-logo-glow relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#EAB308] to-[#D97706] ring-1 ring-white/15">
+    <div className="chat-logo-glow relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#A855F7] to-[#7C3AED] ring-1 ring-white/15">
       <span className="text-2xl font-bold text-white">C</span>
     </div>
   );
@@ -110,7 +110,7 @@ export function ChatInterface() {
         {isEmpty ? (
           <div className="chat-welcome flex h-full flex-col items-center justify-center px-6 py-12">
             <ClotterLogo />
-            <h2 className="chat-welcome-title mt-8 text-center text-[2rem] font-semibold leading-[1.15] tracking-[-0.045em] text-white sm:text-[2.75rem]">
+            <h2 className="font-heading chat-welcome-title mt-8 text-center text-[2rem] font-bold leading-[1.12] tracking-[-0.02em] text-white sm:text-[2.75rem]">
               What are we creating today?
             </h2>
             <p className="chat-welcome-subtitle mt-4 max-w-md text-center text-[1.0625rem] leading-relaxed tracking-[-0.018em] text-white/45">
@@ -147,7 +147,7 @@ export function ChatInterface() {
                   </div>
                 ) : (
                   <div className="flex w-full gap-4">
-                    <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#EAB308] to-[#D97706] text-xs font-bold text-white shadow-[0_0_24px_-4px_#EAB308] ring-1 ring-white/10">
+                    <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#A855F7] to-[#7C3AED] text-xs font-bold text-white shadow-[0_0_24px_-4px_#A855F7] ring-1 ring-white/10">
                       AI
                     </div>
                     <div className="chat-ai-bubble min-w-0">
@@ -160,7 +160,7 @@ export function ChatInterface() {
 
             {isLoading && (
               <div className="chat-msg-enter flex w-full gap-4">
-                <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#EAB308] to-[#D97706] text-xs font-bold text-white ring-1 ring-white/10">
+                <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#A855F7] to-[#7C3AED] text-xs font-bold text-white ring-1 ring-white/10">
                   AI
                 </div>
                 <div className="chat-ai-bubble">
@@ -179,10 +179,10 @@ export function ChatInterface() {
       </div>
 
       {/* Input area */}
-      <div className="relative shrink-0 border-t border-[#D97706]/10 bg-[#05050f]/35 px-6 py-6 backdrop-blur-xl sm:px-10 sm:py-8">
+      <div className="relative shrink-0 border-t border-[#7C3AED]/10 bg-[#05050f]/35 px-6 py-6 backdrop-blur-xl sm:px-10 sm:py-8">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#EAB308]/30 to-transparent"
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#A855F7]/30 to-transparent"
         />
         <div className="mx-auto w-full max-w-4xl">
           {error && (
@@ -225,7 +225,7 @@ export function ChatInterface() {
               type="button"
               onClick={() => void sendMessage()}
               disabled={!input.trim() || isLoading}
-              className="chat-send-btn inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#EAB308] to-[#D97706] text-white shadow-[0_0_40px_-6px_#EAB308] ring-1 ring-white/10 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:scale-100"
+              className="chat-send-btn inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#A855F7] to-[#7C3AED] text-white shadow-[0_0_40px_-6px_#A855F7] ring-1 ring-white/10 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:scale-100"
               aria-label="Send message"
             >
               <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>

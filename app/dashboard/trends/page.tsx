@@ -58,9 +58,9 @@ export default function TrendsPage() {
 
       <header className="captions-fade-in relative z-10 shrink-0 px-6 pb-2 pt-10 sm:px-10 sm:pt-14">
         <span className="captions-glow-badge">Trend Analyzer</span>
-        <h1 className="mt-6 max-w-3xl text-[2.5rem] font-bold leading-[1.08] tracking-[-0.045em] text-white sm:text-5xl lg:text-[3.25rem]">
+        <h1 className="font-heading mt-6 max-w-3xl text-[2.5rem] font-bold leading-[1.08] tracking-[-0.02em] text-white sm:text-5xl lg:text-[3.25rem]">
           Catch trends before they{" "}
-          <span className="bg-gradient-to-r from-[#FCD34D] via-[#EAB308] to-[#D97706] bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-[#C084FC] via-[#A855F7] to-[#7C3AED] bg-clip-text text-transparent">
             peak.
           </span>
         </h1>

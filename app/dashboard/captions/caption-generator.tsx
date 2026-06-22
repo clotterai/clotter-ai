@@ -134,7 +134,7 @@ export function CaptionGenerator() {
           <section className="mt-16">
             <div className="mb-6 flex items-end justify-between gap-4">
               <div>
-                <h2 className="text-lg font-semibold tracking-[-0.03em] text-white">
+                <h2 className="font-heading text-lg font-bold tracking-[-0.02em] text-white">
                   Your captions
                 </h2>
                 <p className="mt-1 text-sm text-white/40">

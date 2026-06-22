@@ -53,7 +53,7 @@ export default async function LoginPage({
           <span className="text-2xl font-bold text-white">C</span>
         </div>
 
-        <h1 className="mt-6 text-2xl font-bold tracking-[-0.04em] text-white">
+        <h1 className="font-heading mt-6 text-[2rem] font-bold tracking-[-0.02em] text-white sm:text-[2.25rem]">
           Clotter AI
         </h1>
         <p className="mt-3 text-base tracking-[-0.02em] text-white/45">

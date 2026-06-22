@@ -133,7 +133,7 @@ export function HookGenerator() {
         {hooks.length > 0 && (
           <section className="mt-16">
             <div className="mb-6">
-              <h2 className="text-lg font-semibold tracking-[-0.03em] text-white">
+              <h2 className="font-heading text-lg font-bold tracking-[-0.02em] text-white">
                 Your hooks
               </h2>
               <p className="mt-1 text-sm text-white/40">
