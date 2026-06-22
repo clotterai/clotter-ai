@@ -58,7 +58,7 @@ const orbBaseStyle: CSSProperties = {
   height: "500px",
   borderRadius: "50%",
   background:
-    "radial-gradient(circle, rgba(168, 85, 247, 0.9) 0%, rgba(124, 58, 237, 0.5) 40%, transparent 70%)",
+    "radial-gradient(circle, rgba(234, 179, 8, 0.9) 0%, rgba(217, 119, 6, 0.5) 40%, transparent 70%)",
   filter: "blur(80px)",
   opacity: 0.15,
   pointerEvents: "none",

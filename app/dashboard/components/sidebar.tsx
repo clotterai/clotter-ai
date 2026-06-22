@@ -145,28 +145,28 @@ export function DashboardSidebar({
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-50 flex w-[17.5rem] flex-col border-r border-[#7C3AED]/10 bg-[#0D0D1A]/95 backdrop-blur-2xl transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:translate-x-0 ${
+      className={`fixed inset-y-0 left-0 z-50 flex w-[17.5rem] flex-col border-r border-[#D97706]/10 bg-[#0D0D1A]/95 backdrop-blur-2xl transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:translate-x-0 ${
         isMobileOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >
       {/* Glowing right edge */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-[#A855F7]/40 to-transparent"
+        className="pointer-events-none absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-[#EAB308]/40 to-transparent"
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-y-0 -right-px w-px bg-[#7C3AED]/15"
+        className="pointer-events-none absolute inset-y-0 -right-px w-px bg-[#D97706]/15"
       />
 
       {/* Logo */}
-      <div className="relative border-b border-[#7C3AED]/10 px-6 py-7">
+      <div className="relative border-b border-[#D97706]/10 px-6 py-7">
         <div className="flex items-center gap-3.5">
-          <div className="dash-logo-pulse relative flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#A855F7] to-[#7C3AED] ring-1 ring-white/15 transition-transform duration-500 hover:scale-105">
+          <div className="dash-logo-pulse relative flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#EAB308] to-[#D97706] ring-1 ring-white/15 transition-transform duration-500 hover:scale-105">
             <span className="text-base font-bold text-white">C</span>
             <div
               aria-hidden
-              className="absolute inset-0 rounded-2xl bg-[#A855F7]/20 blur-md"
+              className="absolute inset-0 rounded-2xl bg-[#EAB308]/20 blur-md"
             />
           </div>
           <div>
@@ -195,7 +195,7 @@ export function DashboardSidebar({
               onClick={onClose}
               className={`dash-nav-item group relative flex items-center gap-3.5 overflow-hidden rounded-xl px-3.5 py-3 text-[15px] font-medium tracking-[-0.02em] ${
                 active
-                  ? "bg-[#7C3AED]/15 text-[#E9D5FF] shadow-[0_0_40px_-8px_#A855F7] ring-1 ring-[#A855F7]/35"
+                  ? "bg-[#D97706]/15 text-[#FEF3C7] shadow-[0_0_40px_-8px_#EAB308] ring-1 ring-[#EAB308]/35"
                   : "text-white/45 hover:text-white/90"
               }`}
               aria-current={active ? "page" : undefined}
@@ -204,7 +204,7 @@ export function DashboardSidebar({
                 <>
                   <span
                     aria-hidden
-                    className="absolute inset-0 bg-gradient-to-r from-[#7C3AED]/25 via-[#A855F7]/12 to-transparent"
+                    className="absolute inset-0 bg-gradient-to-r from-[#D97706]/25 via-[#EAB308]/12 to-transparent"
                   />
                   <span aria-hidden className="dash-nav-glow-bar" />
                 </>
@@ -212,8 +212,8 @@ export function DashboardSidebar({
               <span
                 className={`relative z-[1] transition-all duration-300 ${
                   active
-                    ? "text-[#C084FC] drop-shadow-[0_0_8px_rgba(168,85,247,0.6)]"
-                    : "text-white/30 group-hover:text-[#A855F7]/70"
+                    ? "text-[#FCD34D] drop-shadow-[0_0_8px_rgba(234,179,8,0.6)]"
+                    : "text-white/30 group-hover:text-[#EAB308]/70"
                 }`}
               >
                 {item.icon}
@@ -225,7 +225,7 @@ export function DashboardSidebar({
       </nav>
 
       {/* Profile */}
-      <div className="border-t border-[#7C3AED]/10 p-5">
+      <div className="border-t border-[#D97706]/10 p-5">
         <div className="dash-glass-v2 !rounded-2xl !p-4">
           <div className="flex items-center gap-3.5">
             {user.avatarUrl ? (
@@ -233,14 +233,14 @@ export function DashboardSidebar({
               <img
                 src={user.avatarUrl}
                 alt=""
-                className="h-10 w-10 shrink-0 rounded-full object-cover ring-1 ring-[#A855F7]/30"
+                className="h-10 w-10 shrink-0 rounded-full object-cover ring-1 ring-[#EAB308]/30"
               />
             ) : (
-              <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#A855F7]/40 to-[#7C3AED]/20 text-sm font-semibold text-[#E9D5FF] ring-1 ring-[#A855F7]/30">
+              <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#EAB308]/40 to-[#D97706]/20 text-sm font-semibold text-[#FEF3C7] ring-1 ring-[#EAB308]/30">
                 {user.initials}
                 <div
                   aria-hidden
-                  className="absolute inset-0 rounded-full bg-[#A855F7]/20 blur-sm"
+                  className="absolute inset-0 rounded-full bg-[#EAB308]/20 blur-sm"
                 />
               </div>
             )}
@@ -268,17 +268,17 @@ function DashboardMobileHeader({
   onToggle,
 }: DashboardMobileHeaderProps) {
   return (
-    <header className="fixed inset-x-0 top-0 z-40 flex h-14 items-center gap-3 border-b border-[#7C3AED]/10 bg-[#0D0D1A]/85 px-4 backdrop-blur-xl md:hidden">
+    <header className="fixed inset-x-0 top-0 z-40 flex h-14 items-center gap-3 border-b border-[#D97706]/10 bg-[#0D0D1A]/85 px-4 backdrop-blur-xl md:hidden">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#A855F7]/60 to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#EAB308]/60 to-transparent"
       />
       <button
         type="button"
         onClick={onToggle}
         aria-label={isMobileOpen ? "Close menu" : "Open menu"}
         aria-expanded={isMobileOpen}
-        className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-xl text-white/90 transition-all duration-300 hover:border-[#A855F7]/35 hover:bg-[#7C3AED]/10 active:scale-95"
+        className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-xl text-white/90 transition-all duration-300 hover:border-[#EAB308]/35 hover:bg-[#D97706]/10 active:scale-95"
       >
         {isMobileOpen ? (
           <span className="text-lg leading-none">✕</span>
@@ -287,7 +287,7 @@ function DashboardMobileHeader({
         )}
       </button>
       <div className="flex min-w-0 flex-1 items-center gap-2.5">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#A855F7] to-[#7C3AED] text-sm font-bold text-white ring-1 ring-white/10">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#EAB308] to-[#D97706] text-sm font-bold text-white ring-1 ring-white/10">
           C
         </div>
         <p className="truncate text-[15px] font-semibold tracking-[-0.03em] text-white">

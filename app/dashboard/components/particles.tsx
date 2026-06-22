@@ -14,6 +14,11 @@ const particles = [
   { top: "92%", left: "52%", size: 3, delay: "1s", duration: "22s" },
   { top: "18%", left: "38%", size: 2, delay: "3.5s", duration: "17s" },
   { top: "65%", left: "95%", size: 2, delay: "0.9s", duration: "19s" },
+  { top: "12%", left: "75%", size: 2, delay: "1.4s", duration: "16s" },
+  { top: "33%", left: "5%", size: 3, delay: "2.8s", duration: "20s" },
+  { top: "68%", left: "48%", size: 2, delay: "0.2s", duration: "18s" },
+  { top: "44%", left: "62%", size: 1, delay: "3.2s", duration: "14s" },
+  { top: "88%", left: "12%", size: 2, delay: "1.7s", duration: "21s" },
 ];
 
 export function DashboardParticles() {
@@ -30,6 +35,7 @@ export function DashboardParticles() {
             height: p.size,
             animationDelay: p.delay,
             animationDuration: p.duration,
+            opacity: i % 3 === 0 ? 0.85 : 0.55,
           }}
         />
       ))}

@@ -197,7 +197,7 @@ export function ContentPlanner() {
         <span className="captions-glow-badge">Content Planner</span>
         <h1 className="mt-6 max-w-3xl text-[2.5rem] font-bold leading-[1.08] tracking-[-0.045em] text-white sm:text-5xl lg:text-[3.25rem]">
           Plan your week.{" "}
-          <span className="bg-gradient-to-r from-[#C084FC] via-[#A855F7] to-[#7C3AED] bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-[#FCD34D] via-[#EAB308] to-[#D97706] bg-clip-text text-transparent">
             Own your growth.
           </span>
         </h1>
@@ -245,7 +245,7 @@ export function ContentPlanner() {
           <button
             type="button"
             onClick={goToThisWeek}
-            className="ml-1 rounded-full border border-[#7C3AED]/25 bg-[#7C3AED]/10 px-3.5 py-1.5 text-xs font-semibold text-[#C084FC] transition-colors hover:border-[#A855F7]/40 hover:bg-[#7C3AED]/20"
+            className="ml-1 rounded-full border border-[#D97706]/25 bg-[#D97706]/10 px-3.5 py-1.5 text-xs font-semibold text-[#FCD34D] transition-colors hover:border-[#EAB308]/40 hover:bg-[#D97706]/20"
           >
             Today
           </button>
@@ -273,7 +273,7 @@ export function ContentPlanner() {
                   <div className="flex items-baseline justify-between gap-2">
                     <span
                       className={`text-xs font-semibold uppercase tracking-[0.08em] ${
-                        today ? "text-[#C084FC]" : "text-white/40"
+                        today ? "text-[#FCD34D]" : "text-white/40"
                       }`}
                     >
                       {name}
@@ -343,7 +343,7 @@ export function ContentPlanner() {
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[#A855F7]/70">
+                <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[#EAB308]/70">
                   {modalDate.toLocaleDateString("en-US", {
                     weekday: "long",
                     month: "long",
@@ -379,7 +379,7 @@ export function ContentPlanner() {
                 {modalItems.map((item) => (
                   <li
                     key={item.id}
-                    className="flex items-start gap-3 rounded-xl border border-[#7C3AED]/12 bg-[#0D0D1A]/60 p-3"
+                    className="flex items-start gap-3 rounded-xl border border-[#D97706]/12 bg-[#0D0D1A]/60 p-3"
                   >
                     <span
                       className={`mt-0.5 shrink-0 rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase ${PLATFORM_CHIP[item.platform]}`}
@@ -406,7 +406,7 @@ export function ContentPlanner() {
               </ul>
             )}
 
-            <div className="mt-6 space-y-5 border-t border-[#7C3AED]/12 pt-6">
+            <div className="mt-6 space-y-5 border-t border-[#D97706]/12 pt-6">
               <div>
                 <label
                   htmlFor="planner-idea"

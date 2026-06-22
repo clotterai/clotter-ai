@@ -65,7 +65,7 @@ export default function CaptionsPage() {
         <span className="captions-glow-badge">Caption Generator</span>
         <h1 className="mt-6 max-w-3xl text-[2.5rem] font-bold leading-[1.08] tracking-[-0.045em] text-white sm:text-5xl lg:text-[3.25rem]">
           Write captions that stop the{" "}
-          <span className="bg-gradient-to-r from-[#C084FC] via-[#A855F7] to-[#7C3AED] bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-[#FCD34D] via-[#EAB308] to-[#D97706] bg-clip-text text-transparent">
             scroll.
           </span>
         </h1>

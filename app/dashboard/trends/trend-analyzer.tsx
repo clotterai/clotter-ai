@@ -177,7 +177,7 @@ export function TrendAnalyzer() {
                   className="trends-card captions-glass-card !items-start !gap-0 !p-0"
                   style={{ animationDelay: `${Math.min(index * 0.06, 0.5)}s` }}
                 >
-                  <div className="flex w-full items-start justify-between gap-4 border-b border-[#7C3AED]/10 px-5 py-4 sm:px-6">
+                  <div className="flex w-full items-start justify-between gap-4 border-b border-[#D97706]/10 px-5 py-4 sm:px-6">
                     <div className="flex min-w-0 items-start gap-3">
                       <span className="captions-num-badge shrink-0">
                         {index + 1}
@@ -195,7 +195,7 @@ export function TrendAnalyzer() {
 
                   <div className="space-y-4 px-5 py-4 sm:px-6">
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#A855F7]/60">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#EAB308]/60">
                         Why it&apos;s trending
                       </p>
                       <p className="mt-1.5 text-sm leading-relaxed text-white/70">
@@ -203,7 +203,7 @@ export function TrendAnalyzer() {
                       </p>
                     </div>
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#A855F7]/60">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#EAB308]/60">
                         Content angle
                       </p>
                       <p className="mt-1.5 text-sm leading-relaxed text-white/70">
@@ -212,7 +212,7 @@ export function TrendAnalyzer() {
                     </div>
                   </div>
 
-                  <div className="flex justify-end border-t border-[#7C3AED]/10 px-5 py-3 sm:px-6">
+                  <div className="flex justify-end border-t border-[#D97706]/10 px-5 py-3 sm:px-6">
                     <button
                       type="button"
                       onClick={() => void copyTrend(trend, index)}
