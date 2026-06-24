@@ -8,6 +8,8 @@ import {
   type SidebarUser,
 } from "./components/sidebar";
 
+export const dynamic = "force-dynamic";
+
 function getInitials(name: string, email: string): string {
   const source = name.trim() || email.split("@")[0] || "U";
   const parts = source.split(/\s+/).filter(Boolean);

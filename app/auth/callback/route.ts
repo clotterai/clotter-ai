@@ -1,9 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/supabase/config";
 
 function getRedirectOrigin(request: NextRequest) {
-  const requestUrl = new URL(request.url);
   const forwardedHost = request.headers.get("x-forwarded-host");
   const forwardedProto = request.headers.get("x-forwarded-proto") ?? "https";
 
@@ -11,37 +11,28 @@ function getRedirectOrigin(request: NextRequest) {
     return `${forwardedProto}://${forwardedHost}`;
   }
 
-  return requestUrl.origin;
+  return new URL(request.url).origin;
 }
 
 export async function GET(request: NextRequest) {
+  const origin = getRedirectOrigin(request);
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
-  const origin = getRedirectOrigin(request);
-  const nextParam = requestUrl.searchParams.get("next");
-  const next =
-    nextParam?.startsWith("/") && !nextParam.startsWith("//")
-      ? nextParam
-      : "/dashboard";
 
   if (!code) {
     return NextResponse.redirect(new URL("/login?error=auth", origin));
   }
 
-  let response = NextResponse.redirect(new URL(next, origin));
+  const cookieStore = await cookies();
 
   const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     cookies: {
       getAll() {
-        return request.cookies.getAll();
+        return cookieStore.getAll();
       },
       setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) => {
-          request.cookies.set(name, value);
-        });
-        response = NextResponse.redirect(new URL(next, origin));
         cookiesToSet.forEach(({ name, value, options }) => {
-          response.cookies.set(name, value, options);
+          cookieStore.set(name, value, options);
         });
       },
     },
@@ -53,5 +44,5 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/login?error=auth", origin));
   }
 
-  return response;
+  return NextResponse.redirect(new URL("/dashboard", origin));
 }

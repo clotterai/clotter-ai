@@ -30,6 +30,7 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
+  // Refresh the auth session — required so tokens stay valid across requests.
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -37,26 +38,40 @@ export async function updateSession(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isOnboarding = pathname.startsWith("/dashboard/onboarding");
   const isDashboard = pathname.startsWith("/dashboard");
+  const isAuthCallback = pathname.startsWith("/auth/callback");
 
   if (isDashboard && !user) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    return NextResponse.redirect(url);
+    url.search = "";
+    const loginRedirect = NextResponse.redirect(url);
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+      loginRedirect.cookies.set(cookie);
+    });
+    return loginRedirect;
   }
 
-  if (user && isDashboard) {
+  if (user && isDashboard && !isAuthCallback) {
     const profileExists = await hasCreatorProfile(supabase, user.id);
 
     if (!profileExists && !isOnboarding) {
       const url = request.nextUrl.clone();
       url.pathname = "/dashboard/onboarding";
-      return NextResponse.redirect(url);
+      const onboardingRedirect = NextResponse.redirect(url);
+      supabaseResponse.cookies.getAll().forEach((cookie) => {
+        onboardingRedirect.cookies.set(cookie);
+      });
+      return onboardingRedirect;
     }
 
     if (profileExists && isOnboarding) {
       const url = request.nextUrl.clone();
       url.pathname = "/dashboard";
-      return NextResponse.redirect(url);
+      const dashboardRedirect = NextResponse.redirect(url);
+      supabaseResponse.cookies.getAll().forEach((cookie) => {
+        dashboardRedirect.cookies.set(cookie);
+      });
+      return dashboardRedirect;
     }
   }
 
