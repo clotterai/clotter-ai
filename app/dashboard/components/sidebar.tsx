@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { LogoutButton } from "./logout-button";
+import { ClotterLogo } from "./clotter-logo";
 
 export type SidebarUser = {
   email: string;
@@ -162,13 +163,7 @@ export function DashboardSidebar({
       {/* Logo */}
       <div className="relative border-b border-[#7C3AED]/10 px-6 py-7">
         <div className="flex items-center gap-3.5">
-          <div className="dash-logo-pulse relative flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#A855F7] to-[#7C3AED] ring-1 ring-white/15 transition-transform duration-500 hover:scale-105">
-            <span className="text-base font-bold text-white">C</span>
-            <div
-              aria-hidden
-              className="absolute inset-0 rounded-2xl bg-[#A855F7]/20 blur-md"
-            />
-          </div>
+          <ClotterLogo size={32} className="dash-logo-pulse" />
           <div>
             <p className="font-heading text-base font-bold tracking-[-0.02em] text-white">
               Clotter AI
@@ -287,9 +282,7 @@ function DashboardMobileHeader({
         )}
       </button>
       <div className="flex min-w-0 flex-1 items-center gap-2.5">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#A855F7] to-[#7C3AED] text-sm font-bold text-white ring-1 ring-white/10">
-          C
-        </div>
+        <ClotterLogo size={32} />
         <p className="truncate font-heading text-[15px] font-bold tracking-[-0.02em] text-white">
           Clotter AI
         </p>

@@ -347,6 +347,10 @@ h6,
 }
 
 /* ── Logo pulse ── */
+.clotter-logo {
+  filter: invert(1) brightness(2);
+}
+
 .dash-logo-pulse {
   animation: dash-logo-pulse 3s ease-in-out infinite;
 }

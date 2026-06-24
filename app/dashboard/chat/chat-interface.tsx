@@ -15,12 +15,10 @@ const suggestedPrompts = [
   "Write a hook",
 ];
 
-function ClotterLogo() {
-  return (
-    <div className="chat-logo-glow relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#A855F7] to-[#7C3AED] ring-1 ring-white/15">
-      <span className="text-2xl font-bold text-white">C</span>
-    </div>
-  );
+import { ClotterLogo } from "../components/clotter-logo";
+
+function ClotterLogoMark() {
+  return <ClotterLogo size={64} className="chat-logo-glow" />;
 }
 
 export function ChatInterface() {
@@ -109,7 +107,7 @@ export function ChatInterface() {
       <div className="flex-1 overflow-y-auto">
         {isEmpty ? (
           <div className="chat-welcome flex h-full flex-col items-center justify-center px-6 py-12">
-            <ClotterLogo />
+            <ClotterLogoMark />
             <h2 className="font-heading chat-welcome-title mt-8 text-center text-[2rem] font-bold leading-[1.12] tracking-[-0.02em] text-white sm:text-[2.75rem]">
               What are we creating today?
             </h2>

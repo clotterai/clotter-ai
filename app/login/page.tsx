@@ -1,4 +1,5 @@
 import { PremiumBackground } from "@/app/dashboard/components/premium-background";
+import { ClotterLogo } from "@/app/dashboard/components/clotter-logo";
 import { LoginForm } from "./login-form";
 
 export default async function LoginPage({
@@ -49,9 +50,7 @@ export default async function LoginPage({
       <div aria-hidden className="captions-top-shimmer" />
 
       <div className="captions-fade-in relative z-10 flex w-full max-w-md flex-col items-center text-center">
-        <div className="chat-logo-glow relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#A855F7] to-[#7C3AED] ring-1 ring-white/15">
-          <span className="text-2xl font-bold text-white">C</span>
-        </div>
+        <ClotterLogo size={64} className="chat-logo-glow" />
 
         <h1 className="font-heading mt-6 text-[2rem] font-bold tracking-[-0.02em] text-white sm:text-[2.25rem]">
           Clotter AI
