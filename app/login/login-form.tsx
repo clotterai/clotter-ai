@@ -36,7 +36,7 @@ export function LoginForm() {
 
     try {
       const supabase = createClient();
-      const redirectTo = `${window.location.origin}/auth/callback?next=/dashboard`;
+      const redirectTo = `${window.location.origin}/auth/callback`;
       const { error: authError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
