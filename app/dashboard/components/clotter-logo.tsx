@@ -6,8 +6,8 @@ type ClotterLogoProps = {
 export function ClotterLogo({ size = 32, className = "" }: ClotterLogoProps) {
   return (
     <span
-      className={`clotter-logo-wrap inline-flex shrink-0 items-center justify-center bg-transparent ${className}`.trim()}
-      style={{ width: size, height: size }}
+      className={`clotter-logo-wrap inline-flex shrink-0 items-center justify-center ${className}`.trim()}
+      style={{ width: size, height: size, background: "transparent" }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
@@ -16,7 +16,10 @@ export function ClotterLogo({ size = 32, className = "" }: ClotterLogoProps) {
         width={size}
         height={size}
         className="clotter-logo h-full w-full object-contain"
-        style={{ filter: "invert(1) brightness(10)" }}
+        style={{
+          filter: "invert(1) brightness(10)",
+          mixBlendMode: "screen",
+        }}
       />
     </span>
   );
