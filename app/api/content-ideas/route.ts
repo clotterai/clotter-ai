@@ -1,3 +1,5 @@
+import { saveContentHistory } from "@/lib/memory/getCreatorContext";
+import { buildSystemPromptWithMemory } from "@/lib/memory/injectMemory";
 import { NextResponse } from "next/server";
 
 const MODEL = "openai/gpt-4o-mini";
@@ -49,8 +51,11 @@ export async function POST(request: Request) {
 
   const platformLabel = PLATFORM_LABELS[platform];
 
-  const systemPrompt =
+  const systemPromptBase =
     "You are an expert content strategist for creators and influencers. You generate viral, high-performing content ideas tailored to specific niches and platforms.";
+
+  const { systemPrompt, supabase, user } =
+    await buildSystemPromptWithMemory(systemPromptBase);
 
   const userPrompt = `Generate exactly 20 unique viral content ideas for this niche: "${niche}"
 
@@ -127,6 +132,16 @@ Return ONLY valid JSON in this exact format with no markdown or extra text:
         { error: "No content ideas were generated." },
         { status: 502 },
       );
+    }
+
+    if (user) {
+      await saveContentHistory(supabase, {
+        userId: user.id,
+        contentType: "idea",
+        topic: niche,
+        contentText: ideas.join("\n"),
+        platform: platformLabel,
+      });
     }
 
     return NextResponse.json({ ideas });

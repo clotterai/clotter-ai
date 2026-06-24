@@ -1,3 +1,5 @@
+import { saveContentHistory } from "@/lib/memory/getCreatorContext";
+import { buildSystemPromptWithMemory } from "@/lib/memory/injectMemory";
 import { NextResponse } from "next/server";
 
 const MODEL = "openai/gpt-4o-mini";
@@ -43,6 +45,10 @@ export async function POST(request: Request) {
     );
   }
 
+  const { systemPrompt, supabase, user } =
+    await buildSystemPromptWithMemory(SYSTEM_PROMPT);
+  const lastUserMessage = [...messages].reverse().find((m) => m.role === "user");
+
   try {
     const response = await fetch(
       "https://openrouter.ai/api/v1/chat/completions",
@@ -58,7 +64,7 @@ export async function POST(request: Request) {
         body: JSON.stringify({
           model: MODEL,
           messages: [
-            { role: "system", content: SYSTEM_PROMPT },
+            { role: "system", content: systemPrompt },
             ...messages,
           ],
         }),
@@ -81,6 +87,15 @@ export async function POST(request: Request) {
         { error: "No response content received." },
         { status: 502 },
       );
+    }
+
+    if (user) {
+      await saveContentHistory(supabase, {
+        userId: user.id,
+        contentType: "chat",
+        topic: lastUserMessage?.content.slice(0, 500) || "Chat conversation",
+        contentText: content,
+      });
     }
 
     return NextResponse.json({ content });

@@ -1,3 +1,5 @@
+import { saveContentHistory } from "@/lib/memory/getCreatorContext";
+import { buildSystemPromptWithMemory } from "@/lib/memory/injectMemory";
 import { NextResponse } from "next/server";
 
 const MODEL = "openai/gpt-4o-mini";
@@ -54,8 +56,11 @@ export async function POST(request: Request) {
 
   const platformLabel = PLATFORM_LABELS[platform];
 
-  const systemPrompt =
+  const systemPromptBase =
     "You are an expert short-form video hook writer for creators and influencers. You write scroll-stopping opening lines that maximize watch time and engagement.";
+
+  const { systemPrompt, supabase, user } =
+    await buildSystemPromptWithMemory(systemPromptBase);
 
   const userPrompt = `Generate exactly 10 unique scroll-stopping video hooks for this topic: "${topic}"
 
@@ -132,6 +137,16 @@ Return ONLY valid JSON in this exact format with no markdown or extra text:
         { error: "No hooks were generated." },
         { status: 502 },
       );
+    }
+
+    if (user) {
+      await saveContentHistory(supabase, {
+        userId: user.id,
+        contentType: "hook",
+        topic,
+        contentText: hooks.join("\n\n"),
+        platform: platformLabel,
+      });
     }
 
     return NextResponse.json({ hooks });

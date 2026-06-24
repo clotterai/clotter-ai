@@ -1,9 +1,12 @@
+import { hasCreatorProfile } from "@/lib/memory/getCreatorContext";
+import { createClient } from "@/lib/supabase/server";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { DashboardParticles } from "./components/particles";
 import {
   DashboardNavigation,
   type SidebarUser,
 } from "./components/sidebar";
-import { createClient } from "@/lib/supabase/server";
 
 const guestUser: SidebarUser = {
   email: "guest@clotter.ai",
@@ -52,6 +55,22 @@ export default async function DashboardLayout({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  const headerList = await headers();
+  const pathname = headerList.get("x-pathname") ?? "";
+  const isOnboarding = pathname.startsWith("/dashboard/onboarding");
+
+  if (user) {
+    const profileExists = await hasCreatorProfile(supabase, user.id);
+
+    if (!profileExists && !isOnboarding) {
+      redirect("/dashboard/onboarding");
+    }
+
+    if (profileExists && isOnboarding) {
+      redirect("/dashboard");
+    }
+  }
 
   const sidebarUser = user ? toSidebarUser(user) : guestUser;
 

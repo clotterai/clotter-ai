@@ -1,3 +1,5 @@
+import { saveContentHistory } from "@/lib/memory/getCreatorContext";
+import { buildSystemPromptWithMemory } from "@/lib/memory/injectMemory";
 import { NextResponse } from "next/server";
 
 const MODEL = "openai/gpt-4o-mini";
@@ -105,8 +107,11 @@ export async function POST(request: Request) {
 
   const platformLabel = PLATFORM_LABELS[platform];
 
-  const systemPrompt =
+  const systemPromptBase =
     "You are a world-class video scriptwriter for creators and influencers. You write viral-worthy, retention-optimized scripts that sound natural when spoken on camera. You understand pacing, pattern interrupts, and platform-native storytelling.";
+
+  const { systemPrompt, supabase, user } =
+    await buildSystemPromptWithMemory(systemPromptBase);
 
   const userPrompt = `Write a complete spoken video script for this topic: "${topic}"
 
@@ -215,6 +220,23 @@ Return ONLY valid JSON in this exact format with no markdown or extra text:
         { error: "Incomplete script was generated." },
         { status: 502 },
       );
+    }
+
+    const scriptText = [
+      hook,
+      opening,
+      ...sections.map((s) => `${s.title}: ${s.content}`),
+      cta,
+    ].join("\n\n");
+
+    if (user) {
+      await saveContentHistory(supabase, {
+        userId: user.id,
+        contentType: "script",
+        topic,
+        contentText: scriptText,
+        platform: platformLabel,
+      });
     }
 
     return NextResponse.json({

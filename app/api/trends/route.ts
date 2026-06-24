@@ -1,3 +1,5 @@
+import { saveContentHistory } from "@/lib/memory/getCreatorContext";
+import { buildSystemPromptWithMemory } from "@/lib/memory/injectMemory";
 import { NextResponse } from "next/server";
 
 const MODEL = "openai/gpt-4o-mini";
@@ -62,8 +64,11 @@ export async function POST(request: Request) {
 
   const platformLabel = PLATFORM_LABELS[platform];
 
-  const systemPrompt =
+  const systemPromptBase =
     "You are an expert social media trend analyst for creators and influencers. You identify emerging and current trending topics, explain why they resonate, and suggest actionable content angles.";
+
+  const { systemPrompt, supabase, user } =
+    await buildSystemPromptWithMemory(systemPromptBase);
 
   const userPrompt = `Analyze current trending topics for this niche: "${niche}"
 Platform focus: ${platformLabel}
@@ -152,6 +157,21 @@ Return ONLY valid JSON in this exact format with no markdown or extra text:
         { error: "No trends were generated." },
         { status: 502 },
       );
+    }
+
+    if (user) {
+      await saveContentHistory(supabase, {
+        userId: user.id,
+        contentType: "trend",
+        topic: niche,
+        contentText: trends
+          .map(
+            (t) =>
+              `${t.topic}\nWhy: ${t.whyTrending}\nAngle: ${t.contentAngle}`,
+          )
+          .join("\n\n"),
+        platform: platformLabel,
+      });
     }
 
     return NextResponse.json({ trends });

@@ -1,9 +1,15 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from "./config";
+import { hasCreatorProfile } from "@/lib/memory/getCreatorContext";
 
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request });
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", request.nextUrl.pathname);
+
+  let supabaseResponse = NextResponse.next({
+    request: { headers: requestHeaders },
+  });
 
   const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     cookies: {
@@ -22,8 +28,29 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  // Refresh session if expired — required for Server Components.
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const pathname = request.nextUrl.pathname;
+  const isOnboarding = pathname.startsWith("/dashboard/onboarding");
+  const isDashboard = pathname.startsWith("/dashboard");
+
+  if (user && isDashboard) {
+    const profileExists = await hasCreatorProfile(supabase, user.id);
+
+    if (!profileExists && !isOnboarding) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard/onboarding";
+      return NextResponse.redirect(url);
+    }
+
+    if (profileExists && isOnboarding) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard";
+      return NextResponse.redirect(url);
+    }
+  }
 
   return supabaseResponse;
 }

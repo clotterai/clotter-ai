@@ -1,3 +1,5 @@
+import { saveContentHistory } from "@/lib/memory/getCreatorContext";
+import { buildSystemPromptWithMemory } from "@/lib/memory/injectMemory";
 import { NextResponse } from "next/server";
 
 const MODEL = "openai/gpt-4o-mini";
@@ -40,8 +42,11 @@ export async function POST(request: Request) {
     );
   }
 
-  const systemPrompt =
+  const systemPromptBase =
     "You are an expert social media caption writer for creators and influencers. Write engaging, platform-ready captions.";
+
+  const { systemPrompt, supabase, user } =
+    await buildSystemPromptWithMemory(systemPromptBase);
 
   const userPrompt = `Generate exactly 5 unique social media captions for this post topic: "${topic}"
 
@@ -116,6 +121,15 @@ Return ONLY valid JSON in this exact format with no markdown or extra text:
         { error: "No captions were generated." },
         { status: 502 },
       );
+    }
+
+    if (user) {
+      await saveContentHistory(supabase, {
+        userId: user.id,
+        contentType: "caption",
+        topic,
+        contentText: captions.join("\n\n"),
+      });
     }
 
     return NextResponse.json({ captions });
