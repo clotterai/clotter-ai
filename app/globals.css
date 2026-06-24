@@ -347,8 +347,10 @@ h6,
 }
 
 /* ── Logo pulse ── */
-.clotter-logo {
-  filter: invert(1) brightness(2);
+.clotter-logo-wrap {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 4px 16px -6px rgba(0, 0, 0, 0.45);
 }
 
 .dash-logo-pulse {
