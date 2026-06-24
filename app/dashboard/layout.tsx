@@ -8,13 +8,6 @@ import {
   type SidebarUser,
 } from "./components/sidebar";
 
-const guestUser: SidebarUser = {
-  email: "guest@clotter.ai",
-  fullName: "Guest",
-  avatarUrl: null,
-  initials: "G",
-};
-
 function getInitials(name: string, email: string): string {
   const source = name.trim() || email.split("@")[0] || "U";
   const parts = source.split(/\s+/).filter(Boolean);
@@ -29,20 +22,24 @@ function toSidebarUser(user: {
   user_metadata?: Record<string, unknown>;
 }): SidebarUser {
   const email = user.email ?? "";
+  const meta = user.user_metadata ?? {};
+
   const fullName =
-    typeof user.user_metadata?.full_name === "string"
-      ? user.user_metadata.full_name
-      : null;
+    (typeof meta.full_name === "string" && meta.full_name.trim()) ||
+    (typeof meta.name === "string" && meta.name.trim()) ||
+    email.split("@")[0] ||
+    "Creator";
+
   const avatarUrl =
-    typeof user.user_metadata?.avatar_url === "string"
-      ? user.user_metadata.avatar_url
-      : null;
+    (typeof meta.avatar_url === "string" && meta.avatar_url) ||
+    (typeof meta.picture === "string" && meta.picture) ||
+    null;
 
   return {
     email,
     fullName,
     avatarUrl,
-    initials: getInitials(fullName ?? "", email),
+    initials: getInitials(fullName, email),
   };
 }
 
@@ -56,23 +53,25 @@ export default async function DashboardLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
+  if (!user) {
+    redirect("/login");
+  }
+
   const headerList = await headers();
   const pathname = headerList.get("x-pathname") ?? "";
   const isOnboarding = pathname.startsWith("/dashboard/onboarding");
 
-  if (user) {
-    const profileExists = await hasCreatorProfile(supabase, user.id);
+  const profileExists = await hasCreatorProfile(supabase, user.id);
 
-    if (!profileExists && !isOnboarding) {
-      redirect("/dashboard/onboarding");
-    }
-
-    if (profileExists && isOnboarding) {
-      redirect("/dashboard");
-    }
+  if (!profileExists && !isOnboarding) {
+    redirect("/dashboard/onboarding");
   }
 
-  const sidebarUser = user ? toSidebarUser(user) : guestUser;
+  if (profileExists && isOnboarding) {
+    redirect("/dashboard");
+  }
+
+  const sidebarUser = toSidebarUser(user);
 
   return (
     <div className="dash-shell relative flex min-h-full overflow-hidden bg-[#0D0D1A] font-sans text-white">

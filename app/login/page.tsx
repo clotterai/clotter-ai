@@ -1,5 +1,7 @@
 import { PremiumBackground } from "@/app/dashboard/components/premium-background";
 import { ClotterLogo } from "@/app/dashboard/components/clotter-logo";
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 import { LoginForm } from "./login-form";
 
 export default async function LoginPage({
@@ -7,6 +9,15 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    redirect("/dashboard");
+  }
+
   const params = await searchParams;
   const authError = params.error === "auth";
 

@@ -281,7 +281,7 @@ export function DashboardSidebar({
             )}
             <div className="min-w-0 flex-1">
               <p className="truncate text-[15px] font-medium tracking-[-0.02em] text-white/95">
-                {user.fullName ?? "Creator"}
+                {user.fullName}
               </p>
               <p className="truncate text-xs text-white/40">{user.email}</p>
             </div>
