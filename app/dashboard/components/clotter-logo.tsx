@@ -16,6 +16,7 @@ export function ClotterLogo({ size = 32, className = "" }: ClotterLogoProps) {
         width={size}
         height={size}
         className="clotter-logo h-full w-full object-contain"
+        style={{ filter: "invert(1) brightness(10)" }}
       />
     </span>
   );

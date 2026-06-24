@@ -351,10 +351,6 @@ h6,
   background: transparent;
 }
 
-.clotter-logo {
-  filter: invert(1);
-}
-
 .dash-logo-pulse {
   animation: dash-logo-pulse 3s ease-in-out infinite;
 }
