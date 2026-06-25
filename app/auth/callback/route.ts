@@ -30,5 +30,5 @@ export async function GET(request: NextRequest) {
     await supabase.auth.exchangeCodeForSession(code);
   }
 
-  return NextResponse.redirect("https://clotter.ai/dashboard");
+  return NextResponse.redirect("https://www.clotter.ai/dashboard");
 }
