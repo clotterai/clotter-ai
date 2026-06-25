@@ -36,7 +36,7 @@ export function LoginForm() {
 
     try {
       const supabase = createClient();
-      const redirectTo = `${window.location.origin}/auth/callback`;
+      const redirectTo = `https://clotter.ai/auth/callback`;
       const { error: authError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
