@@ -1,5 +1,4 @@
 import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/supabase/config";
 
@@ -17,22 +16,32 @@ function getRedirectOrigin(request: NextRequest) {
 export async function GET(request: NextRequest) {
   const origin = getRedirectOrigin(request);
   const requestUrl = new URL(request.url);
-  const code = requestUrl.searchParams.get("code");
 
+  const oauthError = requestUrl.searchParams.get("error");
+  if (oauthError) {
+    return NextResponse.redirect(new URL("/login?error=auth", origin));
+  }
+
+  const code = requestUrl.searchParams.get("code");
   if (!code) {
     return NextResponse.redirect(new URL("/login?error=auth", origin));
   }
 
-  const cookieStore = await cookies();
+  const redirectUrl = new URL("/dashboard", origin);
+  let response = NextResponse.redirect(redirectUrl);
 
   const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     cookies: {
       getAll() {
-        return cookieStore.getAll();
+        return request.cookies.getAll();
       },
       setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) => {
+          request.cookies.set(name, value);
+        });
+        response = NextResponse.redirect(redirectUrl);
         cookiesToSet.forEach(({ name, value, options }) => {
-          cookieStore.set(name, value, options);
+          response.cookies.set(name, value, options);
         });
       },
     },
@@ -44,5 +53,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/login?error=auth", origin));
   }
 
-  return NextResponse.redirect(new URL("/dashboard", origin));
+  return response;
 }
+
+export const runtime = "nodejs";
