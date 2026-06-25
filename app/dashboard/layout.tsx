@@ -1,8 +1,5 @@
-import { hasCreatorProfile } from "@/lib/memory/getCreatorContext";
 import { createClient } from "@/lib/supabase/server";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { DashboardParticles } from "./components/particles";
+import { redirect } from "next/navigation";import { DashboardParticles } from "./components/particles";
 import {
   DashboardNavigation,
   type SidebarUser,
@@ -59,22 +56,7 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
-  const headerList = await headers();
-  const pathname = headerList.get("x-pathname") ?? "";
-  const isOnboarding = pathname.startsWith("/dashboard/onboarding");
-
-  const profileExists = await hasCreatorProfile(supabase, user.id);
-
-  if (!profileExists && !isOnboarding) {
-    redirect("/dashboard/onboarding");
-  }
-
-  if (profileExists && isOnboarding) {
-    redirect("/dashboard");
-  }
-
   const sidebarUser = toSidebarUser(user);
-
   return (
     <div className="dash-shell relative flex min-h-full overflow-hidden bg-[#0D0D1A] font-sans text-white">
       {/* Top gradient progress bar with shimmer */}

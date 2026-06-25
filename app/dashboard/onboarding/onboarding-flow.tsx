@@ -188,7 +188,7 @@ export function OnboardingFlow() {
     <>
       {showConfetti && <Confetti />}
 
-      <div className="relative flex min-h-screen flex-col bg-[#0D0D1A]">
+      <div className="relative z-10 flex min-h-screen flex-col bg-[#0D0D1A] text-white">
         <div className="memory-onboarding-progress">
           <div
             className="memory-onboarding-progress-fill"
