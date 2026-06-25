@@ -28,10 +28,7 @@ export function LoginForm() {
         provider: "google",
         options: {
           redirectTo: "https://clotter.ai/auth/callback",
-          queryParams: {
-            access_type: "offline",
-            prompt: "consent",
-          },
+          skipBrowserRedirect: false,
         },
       });
 
