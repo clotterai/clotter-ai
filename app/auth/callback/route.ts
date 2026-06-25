@@ -1,42 +1,48 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { NextResponse, type NextRequest } from "next/server";
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/supabase/config";
 
-export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
+function getRedirectOrigin(request: NextRequest) {
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const forwardedProto = request.headers.get("x-forwarded-proto") ?? "https";
 
-export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const code = searchParams.get("code");
-
-  if (!code) {
-    return NextResponse.redirect(new URL("/login?error=auth", request.url));
+  if (forwardedHost) {
+    return `${forwardedProto}://${forwardedHost}`;
   }
 
-  const response = NextResponse.redirect(new URL("/dashboard", "https://clotter.ai"));
+  return new URL(request.url).origin;
+}
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options);
-          });
-        },
+export async function GET(request: NextRequest) {
+  const origin = getRedirectOrigin(request);
+  const requestUrl = new URL(request.url);
+  const code = requestUrl.searchParams.get("code");
+
+  if (!code) {
+    return NextResponse.redirect(new URL("/login?error=auth", origin));
+  }
+
+  const cookieStore = await cookies();
+
+  const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
       },
-    }
-  );
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value, options }) => {
+          cookieStore.set(name, value, options);
+        });
+      },
+    },
+  });
 
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
-    return NextResponse.redirect(new URL("/login?error=auth", request.url));
+    return NextResponse.redirect(new URL("/login?error=auth", origin));
   }
 
-  return response;
+  return NextResponse.redirect(new URL("/dashboard", origin));
 }
