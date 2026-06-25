@@ -1,20 +1,18 @@
-import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
-  const error = requestUrl.searchParams.get("error");
-
-  if (error) {
-    return NextResponse.redirect(new URL("/login?error=auth", "https://clotter.ai"));
-  }
 
   if (!code) {
-    return NextResponse.redirect(new URL("/login?error=auth", "https://clotter.ai"));
+    return NextResponse.redirect("https://clotter.ai/login?error=auth");
   }
 
-  const supabaseResponse = NextResponse.redirect(new URL("/dashboard", "https://clotter.ai"));
+  const response = NextResponse.redirect("https://clotter.ai/dashboard");
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -26,20 +24,18 @@ export async function GET(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => {
-            supabaseResponse.cookies.set(name, value, options);
+            response.cookies.set(name, value, options);
           });
         },
       },
     }
   );
 
-  const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
 
-  if (exchangeError) {
-    return NextResponse.redirect(new URL("/login?error=auth", "https://clotter.ai"));
+  if (error) {
+    return NextResponse.redirect("https://clotter.ai/login?error=auth");
   }
 
-  return supabaseResponse;
+  return response;
 }
-
-export const runtime = "nodejs";
