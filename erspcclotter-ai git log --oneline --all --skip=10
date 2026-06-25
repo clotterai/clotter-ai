@@ -1,0 +1,32 @@
+[33mc800a4f[m fix: restore supabase ssr version
+[33me43c343[m fix: downgrade supabase ssr to stable version
+[33ma80999d[m fix: simplify auth callback, remove proxy
+[33mbc4fc5f[m fix: skip auth callback in proxy to prevent double code exchange
+[33m753ac50[m fix: rewrite auth callback to fix code exchange
+[33m8af6cee[m fix: hardcode OAuth redirect URL
+[33m00c8bb0[m fix: add proxy.ts for auth session handling
+[33m30af708[m Fix login redirect URL
+[33m2e8893d[m Fix login loop and auth callback
+[33m0b2b52a[m Fix authentication and user session
+[33mc19a3e0[m Add AI Memory system with onboarding
+[33m9caad30[m Add world-class Script Generator
+[33m5d6bbc7[m Fix logo white filter and chat send arrow direction
+[33m20e6ec3[m Fix logo background
+[33m03d2b0a[m Fix logo filename
+[33m2ba6b1c[m Make logo white on dark background
+[33md2e7036[m Update logo with transparent background
+[33m3fd7b57[m Fix logo color for dark theme
+[33mbda2622[m Add correct logo file
+[33m7b0c3f3[m Add Clotter AI logo
+[33mf6df7cc[m Premium AI badge design and purple theme with better fonts
+[33mc879ad5[m Revert to purple theme with premium fonts
+[33mbfc0adf[m Yellow theme and premium animations
+[33m9c68cf0[m Fix auth callback and improve AI badge design
+[33m75910bc[m Fix mobile responsiveness
+[33m94d18e4[m Redirect landing page to dashboard
+[33ma262af0[m Expand AI to talk about everything
+[33m3840987[m Add founder info to AI system prompt
+[33mcebfa0e[m Fix: clean up API key references
+[33mc720c0e[m Fix: remove hardcoded API keys
+[33m98cf498[m Fix: remove hardcoded secrets
+[33m10acb32[m Initial commit - ClotterAi MVP
