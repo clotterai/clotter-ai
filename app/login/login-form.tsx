@@ -32,7 +32,6 @@ export function LoginForm() {
             access_type: "offline",
             prompt: "consent",
           },
-          flowType: "implicit",
         },
       });
 
