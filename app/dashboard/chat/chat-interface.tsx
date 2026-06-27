@@ -151,9 +151,13 @@ export function ChatInterface({
   const [error, setError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<Record<number, MessageFeedback>>({});
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [feedbackThanksIndex, setFeedbackThanksIndex] = useState<number | null>(
+    null,
+  );
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isEmpty = messages.length === 0;
 
@@ -167,6 +171,9 @@ export function ChatInterface({
     return () => {
       if (copyTimeoutRef.current) {
         clearTimeout(copyTimeoutRef.current);
+      }
+      if (feedbackTimeoutRef.current) {
+        clearTimeout(feedbackTimeoutRef.current);
       }
     };
   }, []);
@@ -195,6 +202,17 @@ export function ChatInterface({
       ...current,
       [messageIndex]: value,
     }));
+    setFeedbackThanksIndex(messageIndex);
+
+    if (feedbackTimeoutRef.current) {
+      clearTimeout(feedbackTimeoutRef.current);
+    }
+
+    feedbackTimeoutRef.current = setTimeout(() => {
+      setFeedbackThanksIndex((current) =>
+        current === messageIndex ? null : current,
+      );
+    }, 2000);
   }
 
   async function sendMessage(text?: string) {
@@ -324,7 +342,7 @@ export function ChatInterface({
                         <MessageText content={message.content} />
                       </div>
                     </div>
-                    <div className="relative z-10 mt-2 flex shrink-0 items-center gap-1.5 pl-14">
+                    <div className="relative z-10 mt-2 flex shrink-0 flex-wrap items-center gap-1.5 pl-14">
                       <FeedbackButtons
                         messageIndex={index}
                         feedback={feedback[index]}
@@ -336,6 +354,11 @@ export function ChatInterface({
                         copiedIndex={copiedIndex}
                         onCopy={handleCopy}
                       />
+                      {feedbackThanksIndex === index && (
+                        <span className="text-[11px] font-medium text-white/50">
+                          Thanks for the feedback!
+                        </span>
+                      )}
                     </div>
                   </div>
                 )}
