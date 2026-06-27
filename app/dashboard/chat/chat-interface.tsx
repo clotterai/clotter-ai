@@ -115,26 +115,66 @@ function FeedbackButtons({
       <button
         type="button"
         onClick={() => onFeedback(messageIndex, "like")}
-        className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border text-sm transition ${
+        className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border transition ${
           feedback === "like"
             ? "border-green-500/50 bg-green-500/20 text-green-400"
-            : "border-[#7C3AED]/20 bg-[#0D0D1A] text-white/60 hover:border-[#7C3AED]/35 hover:text-white/80"
+            : "border-[#7C3AED]/20 bg-[#0D0D1A] text-white/50 hover:border-[#7C3AED]/35 hover:text-white/70"
         }`}
         aria-label="Like response"
       >
-        👍
+        <svg
+          viewBox="0 0 16 16"
+          fill="none"
+          className="h-3.5 w-3.5"
+          aria-hidden
+        >
+          <path
+            d="M5 14V7.5M5 7.5L6.8 3.2a1 1 0 0 1 .95-.7H10a1 1 0 0 1 1 1v2h2.2a1 1 0 0 1 .98 1.2l-.8 4A1 1 0 0 1 12.4 11H8.5"
+            stroke="currentColor"
+            strokeWidth="1.25"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M5 7.5H3.5a1 1 0 0 0-1 1V13a1 1 0 0 0 1 1H5"
+            stroke="currentColor"
+            strokeWidth="1.25"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </button>
       <button
         type="button"
         onClick={() => onFeedback(messageIndex, "dislike")}
-        className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border text-sm transition ${
+        className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border transition ${
           feedback === "dislike"
             ? "border-red-500/50 bg-red-500/20 text-red-400"
-            : "border-[#7C3AED]/20 bg-[#0D0D1A] text-white/60 hover:border-[#7C3AED]/35 hover:text-white/80"
+            : "border-[#7C3AED]/20 bg-[#0D0D1A] text-white/50 hover:border-[#7C3AED]/35 hover:text-white/70"
         }`}
         aria-label="Dislike response"
       >
-        👎
+        <svg
+          viewBox="0 0 16 16"
+          fill="none"
+          className="h-3.5 w-3.5"
+          aria-hidden
+        >
+          <path
+            d="M5 2v6.5M5 8.5L6.8 12.8a1 1 0 0 0 .95.7H10a1 1 0 0 0 1-1v-2h2.2a1 1 0 0 0 .98-1.2l-.8-4A1 1 0 0 0 12.4 5H8.5"
+            stroke="currentColor"
+            strokeWidth="1.25"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M5 8.5H3.5a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1H5"
+            stroke="currentColor"
+            strokeWidth="1.25"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </button>
     </>
   );
@@ -420,6 +460,7 @@ export function ChatInterface({
           <div className="chat-input-bar flex items-end gap-4 p-3 sm:p-4">
             <textarea
               ref={textareaRef}
+              autoFocus
               value={input}
               onChange={handleInput}
               onKeyDown={handleKeyDown}
