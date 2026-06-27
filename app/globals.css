@@ -1829,7 +1829,8 @@ h6,
   right: 0;
   z-index: 110;
   height: 3px;
-  background: rgba(99, 102, 241, 0.12);
+  background: #0d0d1a;
+  border-bottom: 1px solid rgba(99, 102, 241, 0.12);
 }
 
 .memory-onboarding-progress-fill {
@@ -2077,4 +2078,19 @@ h6,
   border-radius: 9999px;
   background: #6366f1;
   box-shadow: 0 0 12px rgba(99, 102, 241, 0.8);
+}
+
+.onboarding-flow {
+  background-color: #0d0d1a;
+  color: #ffffff;
+}
+
+.onboarding-input {
+  background-color: #13131f !important;
+  color: #ffffff !important;
+  caret-color: #ffffff;
+}
+
+.onboarding-input::placeholder {
+  color: rgba(255, 255, 255, 0.35) !important;
 }

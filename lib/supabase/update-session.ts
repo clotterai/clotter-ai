@@ -1,7 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from "./config";
-import { hasCreatorProfile } from "@/lib/memory/getCreatorContext";
 
 export async function updateSession(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
@@ -35,10 +34,7 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const pathname = request.nextUrl.pathname;
-  const isOnboarding = pathname.startsWith("/dashboard/onboarding");
-  const isDashboard = pathname.startsWith("/dashboard");
-  const isAuthCallback = pathname.startsWith("/auth/callback");
+  const isDashboard = request.nextUrl.pathname.startsWith("/dashboard");
 
   if (isDashboard && !user) {
     const url = request.nextUrl.clone();
@@ -49,30 +45,6 @@ export async function updateSession(request: NextRequest) {
       loginRedirect.cookies.set(cookie);
     });
     return loginRedirect;
-  }
-
-  if (user && isDashboard && !isAuthCallback) {
-    const profileExists = await hasCreatorProfile(supabase, user.id);
-
-    if (!profileExists && !isOnboarding) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/dashboard/onboarding";
-      const onboardingRedirect = NextResponse.redirect(url);
-      supabaseResponse.cookies.getAll().forEach((cookie) => {
-        onboardingRedirect.cookies.set(cookie);
-      });
-      return onboardingRedirect;
-    }
-
-    if (profileExists && isOnboarding) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/dashboard";
-      const dashboardRedirect = NextResponse.redirect(url);
-      supabaseResponse.cookies.getAll().forEach((cookie) => {
-        dashboardRedirect.cookies.set(cookie);
-      });
-      return dashboardRedirect;
-    }
   }
 
   return supabaseResponse;

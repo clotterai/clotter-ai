@@ -185,10 +185,19 @@ export function OnboardingFlow() {
   }
 
   return (
-    <>
+    <div
+      className="onboarding-flow fixed inset-0 z-[100] overflow-y-auto bg-[#0D0D1A] text-white"
+      style={{ backgroundColor: "#0D0D1A", color: "#ffffff" }}
+    >
       {showConfetti && <Confetti />}
 
-      <div className="relative z-10 flex min-h-screen flex-col bg-[#0D0D1A] text-white">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[#0D0D1A]"
+        style={{ backgroundColor: "#0D0D1A" }}
+      />
+
+      <div className="relative z-10 flex min-h-screen flex-col">
         <div className="memory-onboarding-progress">
           <div
             className="memory-onboarding-progress-fill"
@@ -243,7 +252,7 @@ export function OnboardingFlow() {
                     value={subNiche}
                     onChange={(e) => setSubNiche(e.target.value)}
                     placeholder="Describe your niche..."
-                    className="captions-textarea mt-4 !min-h-0 !py-3.5"
+                    className="captions-textarea onboarding-input mt-4 !min-h-0 !py-3.5"
                   />
                 )}
               </section>
@@ -428,7 +437,7 @@ export function OnboardingFlow() {
                   onChange={(e) => setUniqueAngle(e.target.value)}
                   rows={5}
                   placeholder="e.g. I break down complex AI tools for non-technical creators in under 60 seconds..."
-                  className="captions-textarea mt-6 w-full resize-none"
+                  className="captions-textarea onboarding-input mt-6 w-full resize-none"
                 />
               </section>
             )}
@@ -472,6 +481,6 @@ export function OnboardingFlow() {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
