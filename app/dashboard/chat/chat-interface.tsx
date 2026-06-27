@@ -49,27 +49,27 @@ function MessageText({ content }: { content: string }) {
 }
 
 function CopyButton({
-  messageId,
+  messageIndex,
   content,
-  copiedId,
+  copiedIndex,
   onCopy,
   align = "start",
 }: {
-  messageId: string;
+  messageIndex: number;
   content: string;
-  copiedId: string | null;
-  onCopy: (messageId: string, content: string) => void;
+  copiedIndex: number | null;
+  onCopy: (messageIndex: number, content: string) => void;
   align?: "start" | "end";
 }) {
-  const isCopied = copiedId === messageId;
+  const isCopied = copiedIndex === messageIndex;
 
   return (
     <button
       type="button"
-      onClick={() => onCopy(messageId, content)}
-      className={`inline-flex h-7 items-center gap-1 rounded-md border border-[#7C3AED]/15 bg-[#0D0D1A]/80 px-2 text-[11px] font-medium text-white/45 transition hover:border-[#7C3AED]/30 hover:text-white/70 ${
+      onClick={() => onCopy(messageIndex, content)}
+      className={`inline-flex h-7 min-w-[1.75rem] shrink-0 items-center justify-center gap-1 rounded-md border border-[#7C3AED]/20 bg-[#0D0D1A] px-2 text-[11px] font-medium text-white/60 transition hover:border-[#7C3AED]/35 hover:text-white/80 ${
         align === "end" ? "self-end" : ""
-      } ${isCopied ? "border-[#A855F7]/30 text-[#A855F7]" : ""}`}
+      } ${isCopied ? "border-[#A855F7]/40 text-[#A855F7]" : ""}`}
       aria-label={isCopied ? "Copied" : "Copy message"}
     >
       {isCopied ? (
@@ -102,23 +102,23 @@ function CopyButton({
 }
 
 function FeedbackButtons({
-  messageId,
+  messageIndex,
   feedback,
   onFeedback,
 }: {
-  messageId: string;
+  messageIndex: number;
   feedback?: MessageFeedback;
-  onFeedback: (messageId: string, value: MessageFeedback) => void;
+  onFeedback: (messageIndex: number, value: MessageFeedback) => void;
 }) {
   return (
     <>
       <button
         type="button"
-        onClick={() => onFeedback(messageId, "like")}
-        className={`inline-flex h-7 w-7 items-center justify-center rounded-md border text-sm transition ${
+        onClick={() => onFeedback(messageIndex, "like")}
+        className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border text-sm transition ${
           feedback === "like"
-            ? "border-green-500/40 bg-green-500/15 text-green-400"
-            : "border-[#7C3AED]/15 bg-[#0D0D1A]/80 text-white/45 hover:border-[#7C3AED]/30 hover:text-white/70"
+            ? "border-green-500/50 bg-green-500/20 text-green-400"
+            : "border-[#7C3AED]/20 bg-[#0D0D1A] text-white/60 hover:border-[#7C3AED]/35 hover:text-white/80"
         }`}
         aria-label="Like response"
       >
@@ -126,11 +126,11 @@ function FeedbackButtons({
       </button>
       <button
         type="button"
-        onClick={() => onFeedback(messageId, "dislike")}
-        className={`inline-flex h-7 w-7 items-center justify-center rounded-md border text-sm transition ${
+        onClick={() => onFeedback(messageIndex, "dislike")}
+        className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border text-sm transition ${
           feedback === "dislike"
-            ? "border-red-500/40 bg-red-500/15 text-red-400"
-            : "border-[#7C3AED]/15 bg-[#0D0D1A]/80 text-white/45 hover:border-[#7C3AED]/30 hover:text-white/70"
+            ? "border-red-500/50 bg-red-500/20 text-red-400"
+            : "border-[#7C3AED]/20 bg-[#0D0D1A] text-white/60 hover:border-[#7C3AED]/35 hover:text-white/80"
         }`}
         aria-label="Dislike response"
       >
@@ -149,8 +149,8 @@ export function ChatInterface({
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<Record<string, MessageFeedback>>({});
-  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<Record<number, MessageFeedback>>({});
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -171,27 +171,29 @@ export function ChatInterface({
     };
   }, []);
 
-  async function handleCopy(messageId: string, content: string) {
+  async function handleCopy(messageIndex: number, content: string) {
     try {
       await navigator.clipboard.writeText(content);
-      setCopiedId(messageId);
+      setCopiedIndex(messageIndex);
 
       if (copyTimeoutRef.current) {
         clearTimeout(copyTimeoutRef.current);
       }
 
       copyTimeoutRef.current = setTimeout(() => {
-        setCopiedId((current) => (current === messageId ? null : current));
+        setCopiedIndex((current) =>
+          current === messageIndex ? null : current,
+        );
       }, 2000);
     } catch {
       // Clipboard access can fail in unsupported contexts.
     }
   }
 
-  function handleFeedback(messageId: string, value: MessageFeedback) {
+  function handleFeedback(messageIndex: number, value: MessageFeedback) {
     setFeedback((current) => ({
       ...current,
-      [messageId]: value,
+      [messageIndex]: value,
     }));
   }
 
@@ -290,48 +292,50 @@ export function ChatInterface({
           </div>
         ) : (
           <div className="mx-auto flex w-full max-w-4xl flex-col gap-10 px-6 py-10 sm:gap-12 sm:px-10 sm:py-12">
-            {messages.map((message) => (
+            {messages.map((message, index) => (
               <div
                 key={message.id}
-                className={`chat-msg-enter flex w-full pb-1 ${
-                  message.role === "user" ? "justify-end" : "justify-start"
+                className={`chat-msg-enter w-full pb-1 ${
+                  message.role === "user" ? "flex justify-end" : ""
                 }`}
               >
                 {message.role === "user" ? (
-                  <div className="flex max-w-[75%] flex-col items-end gap-2.5">
+                  <div className="flex max-w-[75%] flex-col items-end gap-2">
                     <div className="chat-user-bubble">
                       <MessageText content={message.content} />
                     </div>
-                    <CopyButton
-                      messageId={message.id}
-                      content={message.content}
-                      copiedId={copiedId}
-                      onCopy={handleCopy}
-                      align="end"
-                    />
+                    <div className="relative z-10 flex shrink-0 items-center">
+                      <CopyButton
+                        messageIndex={index}
+                        content={message.content}
+                        copiedIndex={copiedIndex}
+                        onCopy={handleCopy}
+                        align="end"
+                      />
+                    </div>
                   </div>
                 ) : (
-                  <div className="flex w-full gap-4">
-                    <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#A855F7] to-[#7C3AED] text-xs font-bold text-white shadow-[0_0_24px_-4px_#A855F7] ring-1 ring-white/10">
-                      AI
-                    </div>
-                    <div className="flex min-w-0 flex-1 flex-col gap-2.5">
-                      <div className="chat-ai-bubble min-w-0">
+                  <div className="w-full">
+                    <div className="flex w-full gap-4">
+                      <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#A855F7] to-[#7C3AED] text-xs font-bold text-white shadow-[0_0_24px_-4px_#A855F7] ring-1 ring-white/10">
+                        AI
+                      </div>
+                      <div className="chat-ai-bubble min-w-0 flex-1">
                         <MessageText content={message.content} />
                       </div>
-                      <div className="flex items-center gap-1.5 pl-1">
-                        <FeedbackButtons
-                          messageId={message.id}
-                          feedback={feedback[message.id]}
-                          onFeedback={handleFeedback}
-                        />
-                        <CopyButton
-                          messageId={message.id}
-                          content={message.content}
-                          copiedId={copiedId}
-                          onCopy={handleCopy}
-                        />
-                      </div>
+                    </div>
+                    <div className="relative z-10 mt-2 flex shrink-0 items-center gap-1.5 pl-14">
+                      <FeedbackButtons
+                        messageIndex={index}
+                        feedback={feedback[index]}
+                        onFeedback={handleFeedback}
+                      />
+                      <CopyButton
+                        messageIndex={index}
+                        content={message.content}
+                        copiedIndex={copiedIndex}
+                        onCopy={handleCopy}
+                      />
                     </div>
                   </div>
                 )}
