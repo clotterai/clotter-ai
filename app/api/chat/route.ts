@@ -2,7 +2,8 @@ import { saveContentHistory } from "@/lib/memory/getCreatorContext";
 import { buildSystemPromptWithMemory } from "@/lib/memory/injectMemory";
 import { NextResponse } from "next/server";
 
-const MODEL = "google/gemini-2.5-flash";
+const MODEL_LITE = "google/gemini-2.5-flash";
+const MODEL_MINI = "openai/gpt-4o-mini";
 const SYSTEM_PROMPT = `You are Clotter AI — the world's most powerful AI operating system built exclusively for creators and influencers.
 
 You are not a generic AI. You are a specialist. You think like a top creator strategist, viral content expert, and growth advisor combined into one.
@@ -53,7 +54,7 @@ type ChatMessage = {
 export async function POST(request: Request) {
   const apiKey = getApiKey();
 
-  let body: { messages?: ChatMessage[] };
+  let body: { messages?: ChatMessage[]; selectedModel?: string };
 
   try {
     body = await request.json();
@@ -64,7 +65,10 @@ export async function POST(request: Request) {
     );
   }
 
-  const { messages } = body;
+  const { messages, selectedModel } = body;
+
+  const model =
+    selectedModel === "Clotter Mini" ? MODEL_MINI : MODEL_LITE;
 
   if (!messages?.length) {
     return NextResponse.json(
@@ -90,7 +94,7 @@ export async function POST(request: Request) {
           "X-Title": "Clotter AI",
         },
         body: JSON.stringify({
-          model: MODEL,
+          model,
           messages: [
             { role: "system", content: systemPrompt },
             ...messages,

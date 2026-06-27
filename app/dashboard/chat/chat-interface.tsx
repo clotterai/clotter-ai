@@ -21,7 +21,11 @@ function ClotterLogoMark() {
   return <ClotterLogo size={64} className="chat-logo-glow" />;
 }
 
-export function ChatInterface() {
+export function ChatInterface({
+  selectedModel = "Clotter Lite",
+}: {
+  selectedModel?: string;
+}) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -63,7 +67,7 @@ export function ChatInterface() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: history }),
+        body: JSON.stringify({ messages: history, selectedModel }),
       });
 
       const data = await response.json();

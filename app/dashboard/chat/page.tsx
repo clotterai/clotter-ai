@@ -1,7 +1,14 @@
+"use client";
+
+import { useState } from "react";
 import { ChatBackground } from "./chat-background";
 import { ChatInterface } from "./chat-interface";
 
+export type ChatModel = "Clotter Lite" | "Clotter Mini";
+
 export default function ChatPage() {
+  const [selectedModel, setSelectedModel] = useState<ChatModel>("Clotter Lite");
+
   return (
     <div className="relative flex h-screen flex-col overflow-hidden">
       <ChatBackground />
@@ -12,7 +19,7 @@ export default function ChatPage() {
           aria-hidden
           className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#A855F7]/35 to-transparent"
         />
-        <div className="flex items-start justify-between gap-4 sm:items-center sm:gap-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
           <div className="min-w-0 flex-1">
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#A855F7]/70">
               AI Chat
@@ -21,31 +28,34 @@ export default function ChatPage() {
               Creative co-pilot
             </h1>
           </div>
-          <div className="chat-model-badge shrink-0">
-            <span className="chat-model-badge-icon" aria-hidden>
-              <svg
-                viewBox="0 0 16 16"
-                fill="none"
-                className="h-3 w-3 sm:h-3.5 sm:w-3.5"
-              >
-                <path
-                  d="M8 1.5l1.1 3.4h3.6l-2.9 2.1 1.1 3.4L8 8.3l-2.9 2.1 1.1-3.4-2.9-2.1h3.6L8 1.5Z"
-                  fill="currentColor"
-                  className="text-white/95"
-                />
-                <path
-                  d="M12.5 2.5l.4 1.2 1.2.4-1.2.4-.4 1.2-.4-1.2-1.2-.4 1.2-.4.4-1.2Z"
-                  fill="currentColor"
-                  className="text-white/70"
-                />
-              </svg>
-            </span>
-            <span className="chat-model-badge-text">Clotter Lite</span>
+          <div className="flex shrink-0 gap-2">
+            <button
+              type="button"
+              onClick={() => setSelectedModel("Clotter Lite")}
+              className={`rounded-full border px-4 py-2 text-xs font-semibold tracking-[-0.01em] transition sm:px-5 sm:text-sm ${
+                selectedModel === "Clotter Lite"
+                  ? "border-[#A855F7]/50 bg-gradient-to-r from-[#7C3AED] to-[#A855F7] text-white shadow-[0_0_24px_-6px_#A855F7]"
+                  : "border-[#7C3AED]/20 bg-[#0D0D1A] text-white/55 hover:border-[#7C3AED]/35 hover:text-white/75"
+              }`}
+            >
+              ⚡ Clotter Lite
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedModel("Clotter Mini")}
+              className={`rounded-full border px-4 py-2 text-xs font-semibold tracking-[-0.01em] transition sm:px-5 sm:text-sm ${
+                selectedModel === "Clotter Mini"
+                  ? "border-[#A855F7]/50 bg-gradient-to-r from-[#7C3AED] to-[#A855F7] text-white shadow-[0_0_24px_-6px_#A855F7]"
+                  : "border-[#7C3AED]/20 bg-[#0D0D1A] text-white/55 hover:border-[#7C3AED]/35 hover:text-white/75"
+              }`}
+            >
+              🧠 Clotter Mini
+            </button>
           </div>
         </div>
       </header>
 
-      <ChatInterface />
+      <ChatInterface selectedModel={selectedModel} />
     </div>
   );
 }
