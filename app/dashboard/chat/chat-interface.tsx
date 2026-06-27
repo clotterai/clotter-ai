@@ -8,6 +8,8 @@ type Message = {
   content: string;
 };
 
+type MessageFeedback = "like" | "dislike";
+
 const suggestedPrompts = [
   "Give me reel ideas",
   "Write a caption",
@@ -21,6 +23,123 @@ function ClotterLogoMark() {
   return <ClotterLogo size={64} className="chat-logo-glow" />;
 }
 
+function MessageText({ content }: { content: string }) {
+  const paragraphs = content.split(/\n+/).filter(Boolean);
+
+  if (paragraphs.length <= 1) {
+    return (
+      <p className="whitespace-pre-wrap leading-[1.85] tracking-[-0.018em]">
+        {content}
+      </p>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      {paragraphs.map((paragraph, index) => (
+        <p
+          key={index}
+          className="leading-[1.85] tracking-[-0.018em] last:mb-0"
+        >
+          {paragraph}
+        </p>
+      ))}
+    </div>
+  );
+}
+
+function CopyButton({
+  messageId,
+  content,
+  copiedId,
+  onCopy,
+  align = "start",
+}: {
+  messageId: string;
+  content: string;
+  copiedId: string | null;
+  onCopy: (messageId: string, content: string) => void;
+  align?: "start" | "end";
+}) {
+  const isCopied = copiedId === messageId;
+
+  return (
+    <button
+      type="button"
+      onClick={() => onCopy(messageId, content)}
+      className={`inline-flex h-7 items-center gap-1 rounded-md border border-[#7C3AED]/15 bg-[#0D0D1A]/80 px-2 text-[11px] font-medium text-white/45 transition hover:border-[#7C3AED]/30 hover:text-white/70 ${
+        align === "end" ? "self-end" : ""
+      } ${isCopied ? "border-[#A855F7]/30 text-[#A855F7]" : ""}`}
+      aria-label={isCopied ? "Copied" : "Copy message"}
+    >
+      {isCopied ? (
+        "Copied!"
+      ) : (
+        <svg
+          viewBox="0 0 16 16"
+          fill="none"
+          className="h-3.5 w-3.5"
+          aria-hidden
+        >
+          <rect
+            x="5"
+            y="5"
+            width="8"
+            height="8"
+            rx="1.5"
+            stroke="currentColor"
+            strokeWidth="1.25"
+          />
+          <path
+            d="M5 11H4a1.5 1.5 0 0 1-1.5-1.5V4A1.5 1.5 0 0 1 4 2.5h5.5A1.5 1.5 0 0 1 11 4v1"
+            stroke="currentColor"
+            strokeWidth="1.25"
+          />
+        </svg>
+      )}
+    </button>
+  );
+}
+
+function FeedbackButtons({
+  messageId,
+  feedback,
+  onFeedback,
+}: {
+  messageId: string;
+  feedback?: MessageFeedback;
+  onFeedback: (messageId: string, value: MessageFeedback) => void;
+}) {
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => onFeedback(messageId, "like")}
+        className={`inline-flex h-7 w-7 items-center justify-center rounded-md border text-sm transition ${
+          feedback === "like"
+            ? "border-green-500/40 bg-green-500/15 text-green-400"
+            : "border-[#7C3AED]/15 bg-[#0D0D1A]/80 text-white/45 hover:border-[#7C3AED]/30 hover:text-white/70"
+        }`}
+        aria-label="Like response"
+      >
+        👍
+      </button>
+      <button
+        type="button"
+        onClick={() => onFeedback(messageId, "dislike")}
+        className={`inline-flex h-7 w-7 items-center justify-center rounded-md border text-sm transition ${
+          feedback === "dislike"
+            ? "border-red-500/40 bg-red-500/15 text-red-400"
+            : "border-[#7C3AED]/15 bg-[#0D0D1A]/80 text-white/45 hover:border-[#7C3AED]/30 hover:text-white/70"
+        }`}
+        aria-label="Dislike response"
+      >
+        👎
+      </button>
+    </>
+  );
+}
+
 export function ChatInterface({
   selectedModel = "Clotter Lite",
 }: {
@@ -30,8 +149,11 @@ export function ChatInterface({
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<Record<string, MessageFeedback>>({});
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isEmpty = messages.length === 0;
 
@@ -40,6 +162,38 @@ export function ChatInterface({
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, isLoading, isEmpty]);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  async function handleCopy(messageId: string, content: string) {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopiedId(messageId);
+
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+
+      copyTimeoutRef.current = setTimeout(() => {
+        setCopiedId((current) => (current === messageId ? null : current));
+      }, 2000);
+    } catch {
+      // Clipboard access can fail in unsupported contexts.
+    }
+  }
+
+  function handleFeedback(messageId: string, value: MessageFeedback) {
+    setFeedback((current) => ({
+      ...current,
+      [messageId]: value,
+    }));
+  }
 
   async function sendMessage(text?: string) {
     const trimmed = (text ?? input).trim();
@@ -135,25 +289,49 @@ export function ChatInterface({
             </div>
           </div>
         ) : (
-          <div className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-6 py-10 sm:px-10">
+          <div className="mx-auto flex w-full max-w-4xl flex-col gap-10 px-6 py-10 sm:gap-12 sm:px-10 sm:py-12">
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`chat-msg-enter flex w-full ${
+                className={`chat-msg-enter flex w-full pb-1 ${
                   message.role === "user" ? "justify-end" : "justify-start"
                 }`}
               >
                 {message.role === "user" ? (
-                  <div className="chat-user-bubble">
-                    <p className="whitespace-pre-wrap">{message.content}</p>
+                  <div className="flex max-w-[75%] flex-col items-end gap-2.5">
+                    <div className="chat-user-bubble">
+                      <MessageText content={message.content} />
+                    </div>
+                    <CopyButton
+                      messageId={message.id}
+                      content={message.content}
+                      copiedId={copiedId}
+                      onCopy={handleCopy}
+                      align="end"
+                    />
                   </div>
                 ) : (
                   <div className="flex w-full gap-4">
                     <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#A855F7] to-[#7C3AED] text-xs font-bold text-white shadow-[0_0_24px_-4px_#A855F7] ring-1 ring-white/10">
                       AI
                     </div>
-                    <div className="chat-ai-bubble min-w-0">
-                      <p className="whitespace-pre-wrap">{message.content}</p>
+                    <div className="flex min-w-0 flex-1 flex-col gap-2.5">
+                      <div className="chat-ai-bubble min-w-0">
+                        <MessageText content={message.content} />
+                      </div>
+                      <div className="flex items-center gap-1.5 pl-1">
+                        <FeedbackButtons
+                          messageId={message.id}
+                          feedback={feedback[message.id]}
+                          onFeedback={handleFeedback}
+                        />
+                        <CopyButton
+                          messageId={message.id}
+                          content={message.content}
+                          copiedId={copiedId}
+                          onCopy={handleCopy}
+                        />
+                      </div>
                     </div>
                   </div>
                 )}
