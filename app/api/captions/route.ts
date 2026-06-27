@@ -2,7 +2,7 @@ import { saveContentHistory } from "@/lib/memory/getCreatorContext";
 import { buildSystemPromptWithMemory } from "@/lib/memory/injectMemory";
 import { NextResponse } from "next/server";
 
-const MODEL = "openai/gpt-4o-mini";
+const MODEL = "google/gemini-flash-1.5";
 
 const VALID_TONES = ["funny", "professional", "viral", "emotional"] as const;
 type Tone = (typeof VALID_TONES)[number];

@@ -40,7 +40,7 @@ export default function ChatPage() {
                 />
               </svg>
             </span>
-            <span className="chat-model-badge-text">GPT-4o Mini</span>
+            <span className="chat-model-badge-text">Clotter Lite</span>
           </div>
         </div>
       </header>

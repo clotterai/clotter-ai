@@ -2,7 +2,7 @@ import { saveContentHistory } from "@/lib/memory/getCreatorContext";
 import { buildSystemPromptWithMemory } from "@/lib/memory/injectMemory";
 import { NextResponse } from "next/server";
 
-const MODEL = "openai/gpt-4o-mini";
+const MODEL = "google/gemini-flash-1.5";
 const SYSTEM_PROMPT = `You are Clotter AI — the world's best AI operating system for creators and influencers. You are a creative co-pilot that helps creators with content ideas, captions, hooks, scripts, trends, and growth strategy.
 
 About Clotter AI:

@@ -2,7 +2,7 @@ import { saveContentHistory } from "@/lib/memory/getCreatorContext";
 import { buildSystemPromptWithMemory } from "@/lib/memory/injectMemory";
 import { NextResponse } from "next/server";
 
-const MODEL = "openai/gpt-4o-mini";
+const MODEL = "google/gemini-flash-1.5";
 
 const VALID_PLATFORMS = ["instagram", "youtube", "tiktok", "linkedin"] as const;
 type Platform = (typeof VALID_PLATFORMS)[number];
