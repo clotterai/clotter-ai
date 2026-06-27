@@ -2,7 +2,7 @@ import { saveContentHistory } from "@/lib/memory/getCreatorContext";
 import { buildSystemPromptWithMemory } from "@/lib/memory/injectMemory";
 import { NextResponse } from "next/server";
 
-const MODEL = "google/gemini-flash-1.5";
+const MODEL = "google/gemini-2.0-flash-001";
 
 const VALID_PLATFORMS = ["instagram", "youtube", "tiktok", "linkedin"] as const;
 type Platform = (typeof VALID_PLATFORMS)[number];
