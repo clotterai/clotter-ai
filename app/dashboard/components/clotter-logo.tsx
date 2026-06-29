@@ -1,5 +1,5 @@
 type ClotterLogoProps = {
-  size?: 32 | 64;
+  size?: 28 | 32 | 64;
   className?: string;
 };
 

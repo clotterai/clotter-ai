@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 type Message = {
   id: string;
@@ -17,7 +17,7 @@ const suggestedPrompts = [
   "Write a hook",
 ];
 
-import { ClotterLogo } from "../components/clotter-logo";
+import { ClotterLogo } from "@/app/dashboard/components/clotter-logo";
 
 function ClotterLogoMark() {
   return <ClotterLogo size={64} />;
@@ -48,6 +48,34 @@ function MessageText({ content }: { content: string }) {
   );
 }
 
+function ChatAiAvatar({ animate = true }: { animate?: boolean }) {
+  return (
+    <div
+      className={`mt-0.5 shrink-0 ${animate ? "chat-msg-enter" : ""}`}
+    >
+      <ClotterLogo size={28} />
+    </div>
+  );
+}
+
+function MessageActions({
+  children,
+  align = "start",
+}: {
+  children: ReactNode;
+  align?: "start" | "end";
+}) {
+  return (
+    <div
+      className={`flex items-center gap-0.5 pt-1 ${
+        align === "end" ? "justify-end" : "justify-start"
+      }`}
+    >
+      {children}
+    </div>
+  );
+}
+
 function CopyButton({
   messageIndex,
   content,
@@ -67,9 +95,9 @@ function CopyButton({
     <button
       type="button"
       onClick={() => onCopy(messageIndex, content)}
-      className={`inline-flex h-7 min-w-[1.75rem] shrink-0 items-center justify-center gap-1 rounded-md border border-[#7C3AED]/20 bg-[#0D0D1A] px-2 text-[11px] font-medium text-white/60 transition hover:border-[#7C3AED]/35 hover:text-white/80 ${
+      className={`inline-flex h-6 min-w-[1.5rem] shrink-0 items-center justify-center rounded-md border border-transparent bg-transparent px-1.5 text-[10px] font-medium text-white/40 transition hover:border-white/10 hover:bg-white/[0.04] hover:text-white/70 ${
         align === "end" ? "self-end" : ""
-      } ${isCopied ? "border-[#A855F7]/40 text-[#A855F7]" : ""}`}
+      } ${isCopied ? "text-[#A855F7]" : ""}`}
       aria-label={isCopied ? "Copied" : "Copy message"}
     >
       {isCopied ? (
@@ -78,7 +106,7 @@ function CopyButton({
         <svg
           viewBox="0 0 16 16"
           fill="none"
-          className="h-3.5 w-3.5"
+          className="h-3 w-3"
           aria-hidden
         >
           <rect
@@ -115,17 +143,17 @@ function FeedbackButtons({
       <button
         type="button"
         onClick={() => onFeedback(messageIndex, "like")}
-        className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border transition ${
+        className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-transparent bg-transparent transition hover:bg-white/[0.04] ${
           feedback === "like"
-            ? "border-green-500/50 bg-green-500/20 text-green-400"
-            : "border-[#7C3AED]/20 bg-[#0D0D1A] text-white/50 hover:border-[#7C3AED]/35 hover:text-white/70"
+            ? "text-green-400"
+            : "text-white/35 hover:text-white/60"
         }`}
         aria-label="Like response"
       >
         <svg
           viewBox="0 0 16 16"
           fill="none"
-          className="h-3.5 w-3.5"
+          className="h-3 w-3"
           aria-hidden
         >
           <path
@@ -147,17 +175,17 @@ function FeedbackButtons({
       <button
         type="button"
         onClick={() => onFeedback(messageIndex, "dislike")}
-        className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border transition ${
+        className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-transparent bg-transparent transition hover:bg-white/[0.04] ${
           feedback === "dislike"
-            ? "border-red-500/50 bg-red-500/20 text-red-400"
-            : "border-[#7C3AED]/20 bg-[#0D0D1A] text-white/50 hover:border-[#7C3AED]/35 hover:text-white/70"
+            ? "text-red-400"
+            : "text-white/35 hover:text-white/60"
         }`}
         aria-label="Dislike response"
       >
         <svg
           viewBox="0 0 16 16"
           fill="none"
-          className="h-3.5 w-3.5"
+          className="h-3 w-3"
           aria-hidden
         >
           <path
@@ -349,20 +377,20 @@ export function ChatInterface({
             </div>
           </div>
         ) : (
-          <div className="mx-auto flex w-full max-w-4xl flex-col gap-10 px-6 py-10 sm:gap-12 sm:px-10 sm:py-12">
+          <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-8 sm:gap-10 sm:px-6 sm:py-10">
             {messages.map((message, index) => (
               <div
                 key={message.id}
-                className={`chat-msg-enter w-full pb-1 ${
-                  message.role === "user" ? "flex justify-end" : ""
+                className={`chat-msg-enter w-full ${
+                  message.role === "user" ? "flex justify-end" : "flex justify-start"
                 }`}
               >
                 {message.role === "user" ? (
-                  <div className="flex max-w-[75%] flex-col items-end gap-2">
-                    <div className="chat-user-bubble">
+                  <div className="flex max-w-[85%] flex-col items-end">
+                    <div className="rounded-2xl rounded-br-md bg-white/[0.08] px-4 py-3 text-[15px] leading-[1.7] tracking-[-0.018em] text-white ring-1 ring-white/10 sm:px-5 sm:py-3.5">
                       <MessageText content={message.content} />
                     </div>
-                    <div className="relative z-10 flex shrink-0 items-center">
+                    <MessageActions align="end">
                       <CopyButton
                         messageIndex={index}
                         content={message.content}
@@ -370,35 +398,33 @@ export function ChatInterface({
                         onCopy={handleCopy}
                         align="end"
                       />
-                    </div>
+                    </MessageActions>
                   </div>
                 ) : (
-                  <div className="w-full">
-                    <div className="flex w-full gap-4">
-                      <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#A855F7] to-[#7C3AED] text-xs font-bold text-white shadow-[0_0_24px_-4px_#A855F7] ring-1 ring-white/10">
-                        AI
-                      </div>
-                      <div className="chat-ai-bubble min-w-0 flex-1">
+                  <div className="flex w-full max-w-[92%] gap-3 sm:max-w-[88%] sm:gap-3.5">
+                    <ChatAiAvatar />
+                    <div className="min-w-0 flex-1">
+                      <div className="rounded-2xl rounded-tl-md border border-white/[0.06] bg-white/[0.03] px-4 py-3 text-[15px] leading-[1.7] tracking-[-0.018em] text-white/90 sm:px-5 sm:py-3.5">
                         <MessageText content={message.content} />
                       </div>
-                    </div>
-                    <div className="relative z-10 mt-2 flex shrink-0 flex-wrap items-center gap-1.5 pl-14">
-                      <FeedbackButtons
-                        messageIndex={index}
-                        feedback={feedback[index]}
-                        onFeedback={handleFeedback}
-                      />
-                      <CopyButton
-                        messageIndex={index}
-                        content={message.content}
-                        copiedIndex={copiedIndex}
-                        onCopy={handleCopy}
-                      />
-                      {feedbackThanksIndex === index && (
-                        <span className="text-[11px] font-medium text-white/50">
-                          Thanks for the feedback!
-                        </span>
-                      )}
+                      <MessageActions>
+                        <FeedbackButtons
+                          messageIndex={index}
+                          feedback={feedback[index]}
+                          onFeedback={handleFeedback}
+                        />
+                        <CopyButton
+                          messageIndex={index}
+                          content={message.content}
+                          copiedIndex={copiedIndex}
+                          onCopy={handleCopy}
+                        />
+                        {feedbackThanksIndex === index && (
+                          <span className="ml-1 text-[10px] font-medium text-white/40">
+                            Thanks for the feedback!
+                          </span>
+                        )}
+                      </MessageActions>
                     </div>
                   </div>
                 )}
@@ -406,11 +432,9 @@ export function ChatInterface({
             ))}
 
             {isLoading && (
-              <div className="chat-msg-enter flex w-full gap-4">
-                <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#A855F7] to-[#7C3AED] text-xs font-bold text-white ring-1 ring-white/10">
-                  AI
-                </div>
-                <div className="chat-ai-bubble">
+              <div className="chat-msg-enter flex w-full max-w-[92%] gap-3 sm:max-w-[88%] sm:gap-3.5">
+                <ChatAiAvatar animate={false} />
+                <div className="rounded-2xl rounded-tl-md border border-white/[0.06] bg-white/[0.03] px-5 py-4">
                   <div className="chat-typing-dots">
                     <span className="chat-typing-dot" />
                     <span className="chat-typing-dot" />
@@ -431,7 +455,7 @@ export function ChatInterface({
           aria-hidden
           className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#A855F7]/30 to-transparent"
         />
-        <div className="mx-auto w-full max-w-4xl">
+        <div className="mx-auto w-full max-w-3xl">
           {error && (
             <p className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-3 text-[15px] leading-relaxed text-red-300">
               {error}
@@ -457,7 +481,7 @@ export function ChatInterface({
             </div>
           )}
 
-          <div className="chat-input-bar flex items-end gap-4 p-3 sm:p-4">
+          <div className="chat-input-bar flex items-end gap-3 rounded-2xl border border-white/10 bg-[#13131f]/90 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:gap-4 sm:p-3.5">
             <textarea
               ref={textareaRef}
               autoFocus
@@ -467,7 +491,7 @@ export function ChatInterface({
               placeholder="Message Clotter AI..."
               rows={1}
               disabled={isLoading}
-              className="max-h-52 min-h-[56px] flex-1 resize-none bg-transparent px-3 py-3 text-[1.0625rem] leading-[1.65] tracking-[-0.018em] text-white placeholder:text-white/30 focus:outline-none disabled:opacity-50 sm:min-h-[60px] sm:px-4 sm:py-3.5"
+              className="max-h-52 min-h-[52px] flex-1 resize-none bg-transparent px-3 py-2.5 text-[1rem] leading-[1.65] tracking-[-0.018em] text-white placeholder:text-white/35 focus:outline-none disabled:opacity-50 sm:min-h-[56px] sm:px-4 sm:py-3"
             />
             <button
               type="button"
