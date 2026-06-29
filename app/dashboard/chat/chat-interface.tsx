@@ -20,7 +20,7 @@ const suggestedPrompts = [
 import { ClotterLogo } from "../components/clotter-logo";
 
 function ClotterLogoMark() {
-  return <ClotterLogo size={64} className="chat-logo-glow" />;
+  return <ClotterLogo size={64} />;
 }
 
 function MessageText({ content }: { content: string }) {
