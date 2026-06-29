@@ -28,7 +28,7 @@ function MessageText({ content }: { content: string }) {
 
   if (paragraphs.length <= 1) {
     return (
-      <p className="whitespace-pre-wrap leading-[1.85] tracking-[-0.018em]">
+      <p className="whitespace-pre-wrap text-base leading-relaxed tracking-[-0.018em]">
         {content}
       </p>
     );
@@ -39,7 +39,7 @@ function MessageText({ content }: { content: string }) {
       {paragraphs.map((paragraph, index) => (
         <p
           key={index}
-          className="leading-[1.85] tracking-[-0.018em] last:mb-0"
+          className="text-base leading-relaxed tracking-[-0.018em] last:mb-0"
         >
           {paragraph}
         </p>
@@ -67,7 +67,7 @@ function MessageActions({
 }) {
   return (
     <div
-      className={`flex items-center gap-0.5 pt-1 ${
+      className={`flex flex-wrap items-center gap-2 pt-2.5 ${
         align === "end" ? "justify-end" : "justify-start"
       }`}
     >
@@ -95,35 +95,42 @@ function CopyButton({
     <button
       type="button"
       onClick={() => onCopy(messageIndex, content)}
-      className={`inline-flex h-6 min-w-[1.5rem] shrink-0 items-center justify-center rounded-md border border-transparent bg-transparent px-1.5 text-[10px] font-medium text-white/40 transition hover:border-white/10 hover:bg-white/[0.04] hover:text-white/70 ${
+      className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition hover:bg-white/[0.06] ${
         align === "end" ? "self-end" : ""
-      } ${isCopied ? "text-[#A855F7]" : ""}`}
+      } ${
+        isCopied
+          ? "text-[#A855F7]"
+          : "text-white/40 hover:text-white/65"
+      }`}
       aria-label={isCopied ? "Copied" : "Copy message"}
     >
       {isCopied ? (
         "Copied!"
       ) : (
-        <svg
-          viewBox="0 0 16 16"
-          fill="none"
-          className="h-3 w-3"
-          aria-hidden
-        >
-          <rect
-            x="5"
-            y="5"
-            width="8"
-            height="8"
-            rx="1.5"
-            stroke="currentColor"
-            strokeWidth="1.25"
-          />
-          <path
-            d="M5 11H4a1.5 1.5 0 0 1-1.5-1.5V4A1.5 1.5 0 0 1 4 2.5h5.5A1.5 1.5 0 0 1 11 4v1"
-            stroke="currentColor"
-            strokeWidth="1.25"
-          />
-        </svg>
+        <>
+          <svg
+            viewBox="0 0 16 16"
+            fill="none"
+            className="h-4 w-4"
+            aria-hidden
+          >
+            <rect
+              x="5"
+              y="5"
+              width="8"
+              height="8"
+              rx="1.5"
+              stroke="currentColor"
+              strokeWidth="1.25"
+            />
+            <path
+              d="M5 11H4a1.5 1.5 0 0 1-1.5-1.5V4A1.5 1.5 0 0 1 4 2.5h5.5A1.5 1.5 0 0 1 11 4v1"
+              stroke="currentColor"
+              strokeWidth="1.25"
+            />
+          </svg>
+          Copy
+        </>
       )}
     </button>
   );
@@ -143,17 +150,17 @@ function FeedbackButtons({
       <button
         type="button"
         onClick={() => onFeedback(messageIndex, "like")}
-        className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-transparent bg-transparent transition hover:bg-white/[0.04] ${
+        className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition hover:bg-white/[0.06] ${
           feedback === "like"
-            ? "text-green-400"
-            : "text-white/35 hover:text-white/60"
+            ? "bg-green-500/15 text-green-400"
+            : "text-white/40 hover:text-white/65"
         }`}
-        aria-label="Like response"
+        aria-label="Mark as helpful"
       >
         <svg
           viewBox="0 0 16 16"
-          fill="none"
-          className="h-3 w-3"
+          fill={feedback === "like" ? "currentColor" : "none"}
+          className="h-4 w-4"
           aria-hidden
         >
           <path
@@ -171,21 +178,22 @@ function FeedbackButtons({
             strokeLinejoin="round"
           />
         </svg>
+        Helpful
       </button>
       <button
         type="button"
         onClick={() => onFeedback(messageIndex, "dislike")}
-        className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-transparent bg-transparent transition hover:bg-white/[0.04] ${
+        className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition hover:bg-white/[0.06] ${
           feedback === "dislike"
-            ? "text-red-400"
-            : "text-white/35 hover:text-white/60"
+            ? "bg-red-500/15 text-red-400"
+            : "text-white/40 hover:text-white/65"
         }`}
-        aria-label="Dislike response"
+        aria-label="Mark as not helpful"
       >
         <svg
           viewBox="0 0 16 16"
-          fill="none"
-          className="h-3 w-3"
+          fill={feedback === "dislike" ? "currentColor" : "none"}
+          className="h-4 w-4"
           aria-hidden
         >
           <path
@@ -203,6 +211,7 @@ function FeedbackButtons({
             strokeLinejoin="round"
           />
         </svg>
+        Not helpful
       </button>
     </>
   );
@@ -395,7 +404,7 @@ export function ChatInterface({
             </div>
           </div>
         ) : (
-          <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-8 sm:gap-10 sm:px-6 sm:py-10">
+          <div className="mx-auto flex w-full max-w-3xl flex-col gap-12 px-4 py-8 sm:gap-14 sm:px-6 sm:py-10">
             {messages.map((message, index) => (
               <div
                 key={message.id}
@@ -404,8 +413,8 @@ export function ChatInterface({
                 }`}
               >
                 {message.role === "user" ? (
-                  <div className="flex max-w-[85%] flex-col items-end">
-                    <div className="rounded-2xl rounded-br-md bg-white/[0.08] px-4 py-3 text-[15px] leading-[1.7] tracking-[-0.018em] text-white ring-1 ring-white/10 sm:px-5 sm:py-3.5">
+                  <div className="flex max-w-[90%] flex-col items-end">
+                    <div className="rounded-2xl rounded-br-lg bg-gradient-to-br from-[#A855F7] to-[#7C3AED] px-5 py-4 text-white shadow-[0_8px_32px_-12px_rgba(168,85,247,0.5)] ring-1 ring-white/10">
                       <MessageText content={message.content} />
                     </div>
                     <MessageActions align="end">
@@ -419,10 +428,10 @@ export function ChatInterface({
                     </MessageActions>
                   </div>
                 ) : (
-                  <div className="flex w-full max-w-[92%] gap-3 sm:max-w-[88%] sm:gap-3.5">
+                  <div className="flex w-full gap-3.5">
                     <ChatAiAvatar />
                     <div className="min-w-0 flex-1">
-                      <div className="rounded-2xl rounded-tl-md border border-white/[0.06] bg-white/[0.03] px-4 py-3 text-[15px] leading-[1.7] tracking-[-0.018em] text-white/90 sm:px-5 sm:py-3.5">
+                      <div className="rounded-2xl rounded-tl-lg border border-white/[0.08] bg-[#13131f]/90 px-5 py-4 text-white/95 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.5)]">
                         <MessageText content={message.content} />
                       </div>
                       <MessageActions>
@@ -438,7 +447,7 @@ export function ChatInterface({
                           onCopy={handleCopy}
                         />
                         {feedbackThanksIndex === index && (
-                          <span className="ml-1 text-[10px] font-medium text-white/40">
+                          <span className="text-xs font-medium text-white/40">
                             Thanks for the feedback!
                           </span>
                         )}
@@ -450,9 +459,9 @@ export function ChatInterface({
             ))}
 
             {isLoading && (
-              <div className="chat-msg-enter flex w-full max-w-[92%] gap-3 sm:max-w-[88%] sm:gap-3.5">
+              <div className="chat-msg-enter flex w-full gap-3.5">
                 <ChatAiAvatar thinking />
-                <div className="rounded-2xl rounded-tl-md border border-white/[0.06] bg-white/[0.03] px-5 py-4">
+                <div className="flex-1 rounded-2xl rounded-tl-lg border border-white/[0.08] bg-[#13131f]/90 px-5 py-4">
                   <div className="chat-typing-dots">
                     <span className="chat-typing-dot" />
                     <span className="chat-typing-dot" />
