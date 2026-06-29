@@ -22,8 +22,25 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Clotter AI",
-  description: "The AI OS for creators",
+  title: "Clotter AI — AI Operating System for Creators",
+  description:
+    "Clotter AI is the world's best AI platform for content creators and influencers. Generate captions, hooks, scripts, content ideas, and grow your audience with AI.",
+  keywords:
+    "Clotter AI, AI for creators, content creator tools, AI caption generator, hook generator, influencer tools, content ideas AI",
+  openGraph: {
+    title: "Clotter AI — AI Operating System for Creators",
+    description:
+      "The AI OS for creators and influencers. Generate captions, hooks, scripts and grow faster.",
+    url: "https://clotter.ai",
+    siteName: "Clotter AI",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Clotter AI — AI Operating System for Creators",
+    description: "The AI OS for creators and influencers.",
+  },
+  metadataBase: new URL("https://clotter.ai"),
 };
 
 export default function RootLayout({
