@@ -99,6 +99,7 @@ export async function POST(request: Request) {
             { role: "system", content: systemPrompt },
             ...messages,
           ],
+          stream: true,
         }),
       },
     );
@@ -111,26 +112,75 @@ export async function POST(request: Request) {
       );
     }
 
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
-
-    if (!content) {
+    if (!response.body) {
       return NextResponse.json(
-        { error: "No response content received." },
+        { error: "No response stream received." },
         { status: 502 },
       );
     }
 
-    if (user) {
-      await saveContentHistory(supabase, {
-        userId: user.id,
-        contentType: "chat",
-        topic: lastUserMessage?.content.slice(0, 500) || "Chat conversation",
-        contentText: content,
-      });
-    }
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    const encoder = new TextEncoder();
+    let buffer = "";
+    let fullContent = "";
 
-    return NextResponse.json({ content });
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split("\n");
+            buffer = lines.pop() ?? "";
+
+            for (const line of lines) {
+              const trimmed = line.trim();
+              if (!trimmed.startsWith("data: ")) continue;
+
+              const data = trimmed.slice(6);
+              if (data === "[DONE]") continue;
+
+              try {
+                const parsed = JSON.parse(data) as {
+                  choices?: { delta?: { content?: string } }[];
+                };
+                const delta = parsed.choices?.[0]?.delta?.content;
+                if (typeof delta === "string" && delta.length > 0) {
+                  fullContent += delta;
+                  controller.enqueue(encoder.encode(delta));
+                }
+              } catch {
+                // Skip malformed SSE chunks.
+              }
+            }
+          }
+
+          controller.close();
+
+          if (user && fullContent) {
+            await saveContentHistory(supabase, {
+              userId: user.id,
+              contentType: "chat",
+              topic:
+                lastUserMessage?.content.slice(0, 500) || "Chat conversation",
+              contentText: fullContent,
+            });
+          }
+        } catch {
+          controller.error(new Error("Stream interrupted."));
+        }
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-cache",
+      },
+    });
   } catch {
     return NextResponse.json(
       { error: "Failed to connect to OpenRouter." },

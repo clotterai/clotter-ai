@@ -314,6 +314,12 @@ export function ChatInterface({
 
     try {
       const history = nextMessages.map(({ role, content }) => ({ role, content }));
+      const assistantId = crypto.randomUUID();
+
+      setMessages([
+        ...nextMessages,
+        { id: assistantId, role: "assistant", content: "" },
+      ]);
 
       const response = await fetch("/api/chat", {
         method: "POST",
@@ -321,20 +327,42 @@ export function ChatInterface({
         body: JSON.stringify({ messages: history, selectedModel }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.error || "Something went wrong.");
+        const data = (await response.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        setMessages(nextMessages);
+        throw new Error(data?.error || "Something went wrong.");
       }
 
-      setMessages((current) => [
-        ...current,
-        {
-          id: crypto.randomUUID(),
-          role: "assistant",
-          content: data.content,
-        },
-      ]);
+      if (!response.body) {
+        setMessages(nextMessages);
+        throw new Error("No response stream received.");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let content = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        content += decoder.decode(value, { stream: true });
+        const snapshot = content;
+        setMessages((current) =>
+          current.map((message) =>
+            message.id === assistantId
+              ? { ...message, content: snapshot }
+              : message,
+          ),
+        );
+      }
+
+      if (!content.trim()) {
+        setMessages(nextMessages);
+        throw new Error("No response content received.");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to send message.");
     } finally {
@@ -405,7 +433,13 @@ export function ChatInterface({
           </div>
         ) : (
           <div className="mx-auto flex w-full max-w-3xl flex-col gap-12 px-4 py-8 sm:gap-14 sm:px-6 sm:py-10">
-            {messages.map((message, index) => (
+            {messages.map((message, index) => {
+              const isStreamingMessage =
+                isLoading &&
+                message.role === "assistant" &&
+                index === messages.length - 1;
+
+              return (
               <div
                 key={message.id}
                 className={`chat-msg-enter w-full ${
@@ -429,47 +463,41 @@ export function ChatInterface({
                   </div>
                 ) : (
                   <div className="flex w-full gap-3.5">
-                    <ChatAiAvatar />
+                    <ChatAiAvatar thinking={isStreamingMessage} />
                     <div className="min-w-0 flex-1">
                       <div className="rounded-2xl rounded-tl-lg border border-white/[0.08] bg-[#13131f]/90 px-5 py-4 text-white/95 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.5)]">
-                        <MessageText content={message.content} />
-                      </div>
-                      <MessageActions>
-                        <FeedbackButtons
-                          messageIndex={index}
-                          feedback={feedback[index]}
-                          onFeedback={handleFeedback}
-                        />
-                        <CopyButton
-                          messageIndex={index}
-                          content={message.content}
-                          copiedIndex={copiedIndex}
-                          onCopy={handleCopy}
-                        />
-                        {feedbackThanksIndex === index && (
-                          <span className="text-xs font-medium text-white/40">
-                            Thanks for the feedback!
-                          </span>
+                        {message.content ? (
+                          <MessageText content={message.content} />
+                        ) : (
+                          <span className="inline-block h-4 w-4" aria-hidden />
                         )}
-                      </MessageActions>
+                      </div>
+                      {!isStreamingMessage && (
+                        <MessageActions>
+                          <FeedbackButtons
+                            messageIndex={index}
+                            feedback={feedback[index]}
+                            onFeedback={handleFeedback}
+                          />
+                          <CopyButton
+                            messageIndex={index}
+                            content={message.content}
+                            copiedIndex={copiedIndex}
+                            onCopy={handleCopy}
+                          />
+                          {feedbackThanksIndex === index && (
+                            <span className="text-xs font-medium text-white/40">
+                              Thanks for the feedback!
+                            </span>
+                          )}
+                        </MessageActions>
+                      )}
                     </div>
                   </div>
                 )}
               </div>
-            ))}
-
-            {isLoading && (
-              <div className="chat-msg-enter flex w-full gap-3.5">
-                <ChatAiAvatar thinking />
-                <div className="flex-1 rounded-2xl rounded-tl-lg border border-white/[0.08] bg-[#13131f]/90 px-5 py-4">
-                  <div className="chat-typing-dots">
-                    <span className="chat-typing-dot" />
-                    <span className="chat-typing-dot" />
-                    <span className="chat-typing-dot" />
-                  </div>
-                </div>
-              </div>
-            )}
+            );
+            })}
 
             <div ref={messagesEndRef} />
           </div>
