@@ -48,11 +48,11 @@ function MessageText({ content }: { content: string }) {
   );
 }
 
-function ChatAiAvatar({ animate = true }: { animate?: boolean }) {
+type ChatAiAvatarState = "thinking" | "bounce" | "settled";
+
+function ChatAiAvatar({ state = "settled" }: { state?: ChatAiAvatarState }) {
   return (
-    <div
-      className={`mt-0.5 shrink-0 ${animate ? "chat-msg-enter" : ""}`}
-    >
+    <div className={`chat-ai-logo mt-0.5 shrink-0 chat-ai-logo--${state}`}>
       <ClotterLogo size={28} />
     </div>
   );
@@ -222,6 +222,9 @@ export function ChatInterface({
   const [feedbackThanksIndex, setFeedbackThanksIndex] = useState<number | null>(
     null,
   );
+  const [animatingAvatarId, setAnimatingAvatarId] = useState<string | null>(
+    null,
+  );
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -234,6 +237,16 @@ export function ChatInterface({
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, isLoading, isEmpty]);
+
+  useEffect(() => {
+    if (!animatingAvatarId) return;
+
+    const timeout = setTimeout(() => {
+      setAnimatingAvatarId(null);
+    }, 400);
+
+    return () => clearTimeout(timeout);
+  }, [animatingAvatarId]);
 
   useEffect(() => {
     return () => {
@@ -318,14 +331,17 @@ export function ChatInterface({
         throw new Error(data.error || "Something went wrong.");
       }
 
+      const assistantId = crypto.randomUUID();
+
       setMessages((current) => [
         ...current,
         {
-          id: crypto.randomUUID(),
+          id: assistantId,
           role: "assistant",
           content: data.content,
         },
       ]);
+      setAnimatingAvatarId(assistantId);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to send message.");
     } finally {
@@ -349,6 +365,52 @@ export function ChatInterface({
 
   return (
     <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+      <style>{`
+        @keyframes chat-ai-logo-spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
+        @keyframes chat-ai-logo-bounce {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.15); }
+          100% { transform: scale(1); }
+        }
+
+        @keyframes chat-ai-logo-glow {
+          0%, 100% {
+            box-shadow:
+              0 0 6px rgba(168, 85, 247, 0.22),
+              0 0 14px rgba(124, 58, 237, 0.12);
+          }
+          50% {
+            box-shadow:
+              0 0 14px rgba(168, 85, 247, 0.55),
+              0 0 28px rgba(124, 58, 237, 0.35);
+          }
+        }
+
+        .chat-ai-logo {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 9999px;
+        }
+
+        .chat-ai-logo--thinking {
+          animation: chat-ai-logo-spin 1s linear infinite;
+        }
+
+        .chat-ai-logo--bounce {
+          animation:
+            chat-ai-logo-bounce 400ms ease-out forwards,
+            chat-ai-logo-glow 3s ease-in-out 400ms infinite;
+        }
+
+        .chat-ai-logo--settled {
+          animation: chat-ai-logo-glow 3s ease-in-out infinite;
+        }
+      `}</style>
       {/* Messages or welcome */}
       <div className="flex-1 overflow-y-auto">
         {isEmpty ? (
@@ -402,7 +464,11 @@ export function ChatInterface({
                   </div>
                 ) : (
                   <div className="flex w-full max-w-[92%] gap-3 sm:max-w-[88%] sm:gap-3.5">
-                    <ChatAiAvatar />
+                    <ChatAiAvatar
+                      state={
+                        message.id === animatingAvatarId ? "bounce" : "settled"
+                      }
+                    />
                     <div className="min-w-0 flex-1">
                       <div className="rounded-2xl rounded-tl-md border border-white/[0.06] bg-white/[0.03] px-4 py-3 text-[15px] leading-[1.7] tracking-[-0.018em] text-white/90 sm:px-5 sm:py-3.5">
                         <MessageText content={message.content} />
@@ -433,7 +499,7 @@ export function ChatInterface({
 
             {isLoading && (
               <div className="chat-msg-enter flex w-full max-w-[92%] gap-3 sm:max-w-[88%] sm:gap-3.5">
-                <ChatAiAvatar animate={false} />
+                <ChatAiAvatar state="thinking" />
                 <div className="rounded-2xl rounded-tl-md border border-white/[0.06] bg-white/[0.03] px-5 py-4">
                   <div className="chat-typing-dots">
                     <span className="chat-typing-dot" />
