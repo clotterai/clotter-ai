@@ -203,7 +203,7 @@ export function DashboardSidebar({
       {/* Logo */}
       <div className="relative border-b border-[#7C3AED]/10 px-6 py-7">
         <div className="flex items-center gap-3.5">
-          <ClotterLogo size={32} className="dash-logo-pulse" />
+          <ClotterLogo size={32} />
           <div>
             <p className="font-heading text-base font-bold tracking-[-0.02em] text-white">
               Clotter AI
