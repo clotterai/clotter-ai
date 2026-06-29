@@ -40,6 +40,11 @@ export const metadata: Metadata = {
     title: "Clotter AI — AI Operating System for Creators",
     description: "The AI OS for creators and influencers.",
   },
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
   metadataBase: new URL("https://clotter.ai"),
 };
 
