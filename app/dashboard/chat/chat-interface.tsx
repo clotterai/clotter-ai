@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 type Message = {
   id: string;
@@ -290,6 +291,29 @@ export function ChatInterface({
         current === messageIndex ? null : current,
       );
     }, 2000);
+
+    const messageContent = messages[messageIndex]?.content;
+    if (messageContent) {
+      void (async () => {
+        try {
+          const supabase = createClient();
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
+          if (!user) return;
+
+          await supabase.from("chat_feedback").insert({
+            user_id: user.id,
+            type: "chat_feedback",
+            value: value === "like" ? "liked" : "disliked",
+            content: messageContent,
+            created_at: new Date().toISOString(),
+          });
+        } catch {
+          // Save feedback silently in the background.
+        }
+      })();
+    }
   }
 
   async function sendMessage(text?: string) {
