@@ -44,6 +44,24 @@ const navItems = [
     ),
   },
   {
+    label: "Bubble",
+    href: "/dashboard/bubble",
+    iconClassName: "text-[#EC4899]",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+        <circle
+          cx="12"
+          cy="12"
+          r="8"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
+        <circle cx="9" cy="10" r="1.5" fill="currentColor" opacity="0.5" />
+        <circle cx="14" cy="14" r="1" fill="currentColor" opacity="0.35" />
+      </svg>
+    ),
+  },
+  {
     label: "AI Memory",
     href: "/dashboard/memory",
     icon: (
@@ -246,9 +264,11 @@ export function DashboardSidebar({
               )}
               <span
                 className={`relative z-[1] transition-all duration-300 ${
-                  active
-                    ? "text-[#C084FC] drop-shadow-[0_0_8px_rgba(168,85,247,0.6)]"
-                    : "text-white/30 group-hover:text-[#A855F7]/70"
+                  item.iconClassName
+                    ? item.iconClassName
+                    : active
+                      ? "text-[#C084FC] drop-shadow-[0_0_8px_rgba(168,85,247,0.6)]"
+                      : "text-white/30 group-hover:text-[#A855F7]/70"
                 }`}
               >
                 {item.icon}
