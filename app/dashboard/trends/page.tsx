@@ -3,7 +3,7 @@ import { TrendAnalyzer } from "./trend-analyzer";
 
 export default function TrendsPage() {
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-[#0D0D1A]">
+    <div className="trends-page relative flex min-h-screen flex-col overflow-hidden bg-[#0D0D1A]">
       <PremiumBackground />
 
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
