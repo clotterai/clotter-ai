@@ -87,6 +87,8 @@ Requirements:
 - Do not use emojis
 - viralScore must be lowercase: high, medium, or low
 
+IMPORTANT: Your entire response must be ONLY the JSON object, nothing else. No markdown code blocks, no explanation text, just the raw JSON.
+
 Return ONLY valid JSON in this exact format with no markdown or extra text:
 {"trends":[{"topic":"...","whyTrending":"...","contentAngle":"...","viralScore":"high"}]}`;
 
@@ -108,7 +110,6 @@ Return ONLY valid JSON in this exact format with no markdown or extra text:
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt },
           ],
-          response_format: { type: "json_object" },
         }),
       },
     );
