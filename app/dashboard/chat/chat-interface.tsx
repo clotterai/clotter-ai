@@ -77,6 +77,148 @@ function MessageActions({
   );
 }
 
+const aiActionButtonClass =
+  "inline-flex h-8 shrink-0 items-center gap-1.5 text-xs font-medium transition-colors";
+
+function AssistantMessageActions({
+  messageIndex,
+  content,
+  feedback,
+  copiedIndex,
+  feedbackThanksIndex,
+  onFeedback,
+  onCopy,
+}: {
+  messageIndex: number;
+  content: string;
+  feedback?: MessageFeedback;
+  copiedIndex: number | null;
+  feedbackThanksIndex: number | null;
+  onFeedback: (messageIndex: number, value: MessageFeedback) => void;
+  onCopy: (messageIndex: number, content: string) => void;
+}) {
+  const isCopied = copiedIndex === messageIndex;
+  const isLiked = feedback === "like";
+  const isDisliked = feedback === "dislike";
+
+  return (
+    <div className="mt-1 border-t border-white/10 pt-2.5">
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => onFeedback(messageIndex, "like")}
+          className={`${aiActionButtonClass} ${
+            isLiked
+              ? "text-green-400"
+              : "text-white/30 hover:text-white/60"
+          }`}
+          aria-label="Mark as helpful"
+        >
+          <svg
+            viewBox="0 0 16 16"
+            fill={isLiked ? "currentColor" : "none"}
+            className="h-3.5 w-3.5 shrink-0"
+            aria-hidden
+          >
+            <path
+              d="M5 14V7.5M5 7.5L6.8 3.2a1 1 0 0 1 .95-.7H10a1 1 0 0 1 1 1v2h2.2a1 1 0 0 1 .98 1.2l-.8 4A1 1 0 0 1 12.4 11H8.5"
+              stroke="currentColor"
+              strokeWidth="1.25"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M5 7.5H3.5a1 1 0 0 0-1 1V13a1 1 0 0 0 1 1H5"
+              stroke="currentColor"
+              strokeWidth="1.25"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          Helpful
+        </button>
+        <button
+          type="button"
+          onClick={() => onFeedback(messageIndex, "dislike")}
+          className={`${aiActionButtonClass} ${
+            isDisliked
+              ? "text-red-400"
+              : "text-white/30 hover:text-white/60"
+          }`}
+          aria-label="Mark as not helpful"
+        >
+          <svg
+            viewBox="0 0 16 16"
+            fill={isDisliked ? "currentColor" : "none"}
+            className="h-3.5 w-3.5 shrink-0"
+            aria-hidden
+          >
+            <path
+              d="M5 2v6.5M5 8.5L6.8 12.8a1 1 0 0 0 .95.7H10a1 1 0 0 0 1-1v-2h2.2a1 1 0 0 0 .98-1.2l-.8-4A1 1 0 0 0 12.4 5H8.5"
+              stroke="currentColor"
+              strokeWidth="1.25"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M5 8.5H3.5a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1H5"
+              stroke="currentColor"
+              strokeWidth="1.25"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          Not helpful
+        </button>
+        <button
+          type="button"
+          onClick={() => onCopy(messageIndex, content)}
+          className={`${aiActionButtonClass} ${
+            isCopied
+              ? "text-green-400"
+              : "text-white/30 hover:text-white/60"
+          }`}
+          aria-label={isCopied ? "Copied" : "Copy message"}
+        >
+          {isCopied ? (
+            "Copied!"
+          ) : (
+            <>
+              <svg
+                viewBox="0 0 16 16"
+                fill="none"
+                className="h-3.5 w-3.5 shrink-0"
+                aria-hidden
+              >
+                <rect
+                  x="5"
+                  y="5"
+                  width="8"
+                  height="8"
+                  rx="1.5"
+                  stroke="currentColor"
+                  strokeWidth="1.25"
+                />
+                <path
+                  d="M5 11H4a1.5 1.5 0 0 1-1.5-1.5V4A1.5 1.5 0 0 1 4 2.5h5.5A1.5 1.5 0 0 1 11 4v1"
+                  stroke="currentColor"
+                  strokeWidth="1.25"
+                />
+              </svg>
+              Copy
+            </>
+          )}
+        </button>
+      </div>
+      {feedbackThanksIndex === messageIndex && (
+        <p className="mt-2 text-xs font-medium text-white/40">
+          Thanks for the feedback!
+        </p>
+      )}
+    </div>
+  );
+}
+
 function CopyButton({
   messageIndex,
   content,
@@ -134,87 +276,6 @@ function CopyButton({
         </>
       )}
     </button>
-  );
-}
-
-function FeedbackButtons({
-  messageIndex,
-  feedback,
-  onFeedback,
-}: {
-  messageIndex: number;
-  feedback?: MessageFeedback;
-  onFeedback: (messageIndex: number, value: MessageFeedback) => void;
-}) {
-  return (
-    <>
-      <button
-        type="button"
-        onClick={() => onFeedback(messageIndex, "like")}
-        className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition hover:bg-white/[0.06] ${
-          feedback === "like"
-            ? "bg-green-500/15 text-green-400"
-            : "text-white/40 hover:text-white/65"
-        }`}
-        aria-label="Mark as helpful"
-      >
-        <svg
-          viewBox="0 0 16 16"
-          fill={feedback === "like" ? "currentColor" : "none"}
-          className="h-4 w-4"
-          aria-hidden
-        >
-          <path
-            d="M5 14V7.5M5 7.5L6.8 3.2a1 1 0 0 1 .95-.7H10a1 1 0 0 1 1 1v2h2.2a1 1 0 0 1 .98 1.2l-.8 4A1 1 0 0 1 12.4 11H8.5"
-            stroke="currentColor"
-            strokeWidth="1.25"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M5 7.5H3.5a1 1 0 0 0-1 1V13a1 1 0 0 0 1 1H5"
-            stroke="currentColor"
-            strokeWidth="1.25"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-        Helpful
-      </button>
-      <button
-        type="button"
-        onClick={() => onFeedback(messageIndex, "dislike")}
-        className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition hover:bg-white/[0.06] ${
-          feedback === "dislike"
-            ? "bg-red-500/15 text-red-400"
-            : "text-white/40 hover:text-white/65"
-        }`}
-        aria-label="Mark as not helpful"
-      >
-        <svg
-          viewBox="0 0 16 16"
-          fill={feedback === "dislike" ? "currentColor" : "none"}
-          className="h-4 w-4"
-          aria-hidden
-        >
-          <path
-            d="M5 2v6.5M5 8.5L6.8 12.8a1 1 0 0 0 .95.7H10a1 1 0 0 0 1-1v-2h2.2a1 1 0 0 0 .98-1.2l-.8-4A1 1 0 0 0 12.4 5H8.5"
-            stroke="currentColor"
-            strokeWidth="1.25"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M5 8.5H3.5a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1H5"
-            stroke="currentColor"
-            strokeWidth="1.25"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-        Not helpful
-      </button>
-    </>
   );
 }
 
@@ -497,24 +558,15 @@ export function ChatInterface({
                         )}
                       </div>
                       {!isStreamingMessage && (
-                        <MessageActions>
-                          <FeedbackButtons
-                            messageIndex={index}
-                            feedback={feedback[index]}
-                            onFeedback={handleFeedback}
-                          />
-                          <CopyButton
-                            messageIndex={index}
-                            content={message.content}
-                            copiedIndex={copiedIndex}
-                            onCopy={handleCopy}
-                          />
-                          {feedbackThanksIndex === index && (
-                            <span className="text-xs font-medium text-white/40">
-                              Thanks for the feedback!
-                            </span>
-                          )}
-                        </MessageActions>
+                        <AssistantMessageActions
+                          messageIndex={index}
+                          content={message.content}
+                          feedback={feedback[index]}
+                          copiedIndex={copiedIndex}
+                          feedbackThanksIndex={feedbackThanksIndex}
+                          onFeedback={handleFeedback}
+                          onCopy={handleCopy}
+                        />
                       )}
                     </div>
                   </div>
