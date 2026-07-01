@@ -46,7 +46,6 @@ const navItems = [
   {
     label: "Bubble",
     href: "/dashboard/bubble",
-    iconClassName: "text-[#EC4899]",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
         <circle
@@ -204,22 +203,22 @@ export function DashboardSidebar({
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-50 flex w-[17.5rem] flex-col border-r border-[#7C3AED]/10 bg-[#0D0D1A]/95 backdrop-blur-2xl transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:translate-x-0 ${
+      className={`fixed inset-y-0 left-0 z-50 flex w-[17.5rem] flex-col border-r border-[#EC4899]/10 bg-[#0D0D1A]/95 backdrop-blur-2xl transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:translate-x-0 ${
         isMobileOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >
       {/* Glowing right edge */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-[#A855F7]/40 to-transparent"
+        className="pointer-events-none absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-[#EC4899]/40 to-transparent"
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-y-0 -right-px w-px bg-[#7C3AED]/15"
+        className="pointer-events-none absolute inset-y-0 -right-px w-px bg-[#EC4899]/15"
       />
 
       {/* Logo */}
-      <div className="relative border-b border-[#7C3AED]/10 px-6 py-7">
+      <div className="relative border-b border-[#EC4899]/10 px-6 py-7">
         <div className="flex items-center gap-3.5">
           <ClotterLogo size={32} />
           <div>
@@ -248,7 +247,7 @@ export function DashboardSidebar({
               onClick={onClose}
               className={`dash-nav-item group relative flex items-center gap-3.5 overflow-hidden rounded-xl px-3.5 py-3 text-[15px] font-medium tracking-[-0.02em] ${
                 active
-                  ? "bg-[#7C3AED]/15 text-[#E9D5FF] shadow-[0_0_40px_-8px_#A855F7] ring-1 ring-[#A855F7]/35"
+                  ? "bg-gradient-to-r from-[#EC4899]/15 to-[#F97316]/10 text-[#FECDD3] shadow-[0_0_40px_-8px_#EC4899] ring-1 ring-[#EC4899]/35"
                   : "text-white/45 hover:text-white/90"
               }`}
               aria-current={active ? "page" : undefined}
@@ -257,18 +256,16 @@ export function DashboardSidebar({
                 <>
                   <span
                     aria-hidden
-                    className="absolute inset-0 bg-gradient-to-r from-[#7C3AED]/25 via-[#A855F7]/12 to-transparent"
+                    className="absolute inset-0 bg-gradient-to-r from-[#EC4899]/25 via-[#F97316]/12 to-transparent"
                   />
                   <span aria-hidden className="dash-nav-glow-bar" />
                 </>
               )}
               <span
                 className={`relative z-[1] transition-all duration-300 ${
-                  item.iconClassName
-                    ? item.iconClassName
-                    : active
-                      ? "text-[#C084FC] drop-shadow-[0_0_8px_rgba(168,85,247,0.6)]"
-                      : "text-white/30 group-hover:text-[#A855F7]/70"
+                  active
+                    ? "text-[#FB923C] drop-shadow-[0_0_8px_rgba(236,72,153,0.6)]"
+                    : "text-white/30 group-hover:text-[#EC4899]/70"
                 }`}
               >
                 {item.icon}
@@ -280,7 +277,7 @@ export function DashboardSidebar({
       </nav>
 
       {/* Profile */}
-      <div className="border-t border-[#7C3AED]/10 p-5">
+      <div className="border-t border-[#EC4899]/10 p-5">
         <div className="dash-glass-v2 !rounded-2xl !p-4">
           <div className="flex items-center gap-3.5">
             {user.avatarUrl ? (
@@ -288,14 +285,14 @@ export function DashboardSidebar({
               <img
                 src={user.avatarUrl}
                 alt=""
-                className="h-10 w-10 shrink-0 rounded-full object-cover ring-1 ring-[#A855F7]/30"
+                className="h-10 w-10 shrink-0 rounded-full object-cover ring-1 ring-[#EC4899]/30"
               />
             ) : (
-              <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#A855F7]/40 to-[#7C3AED]/20 text-sm font-semibold text-[#E9D5FF] ring-1 ring-[#A855F7]/30">
+              <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#EC4899]/40 to-[#F97316]/20 text-sm font-semibold text-[#FECDD3] ring-1 ring-[#EC4899]/30">
                 {user.initials}
                 <div
                   aria-hidden
-                  className="absolute inset-0 rounded-full bg-[#A855F7]/20 blur-sm"
+                  className="absolute inset-0 rounded-full bg-[#EC4899]/20 blur-sm"
                 />
               </div>
             )}
@@ -323,17 +320,17 @@ function DashboardMobileHeader({
   onToggle,
 }: DashboardMobileHeaderProps) {
   return (
-    <header className="fixed inset-x-0 top-0 z-40 flex h-14 items-center gap-3 border-b border-[#7C3AED]/10 bg-[#0D0D1A]/85 px-4 backdrop-blur-xl md:hidden">
+    <header className="fixed inset-x-0 top-0 z-40 flex h-14 items-center gap-3 border-b border-[#EC4899]/10 bg-[#0D0D1A]/85 px-4 backdrop-blur-xl md:hidden">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#A855F7]/60 to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#EC4899]/60 to-transparent"
       />
       <button
         type="button"
         onClick={onToggle}
         aria-label={isMobileOpen ? "Close menu" : "Open menu"}
         aria-expanded={isMobileOpen}
-        className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-xl text-white/90 transition-all duration-300 hover:border-[#A855F7]/35 hover:bg-[#7C3AED]/10 active:scale-95"
+        className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-xl text-white/90 transition-all duration-300 hover:border-[#EC4899]/35 hover:bg-[#EC4899]/10 active:scale-95"
       >
         {isMobileOpen ? (
           <span className="text-lg leading-none">✕</span>

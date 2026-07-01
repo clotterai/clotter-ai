@@ -162,10 +162,10 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex min-h-full flex-col">
-      <header className="dash-fade-in relative shrink-0 border-b border-[#7C3AED]/10 bg-[#0D0D1A]/60 px-8 py-7 backdrop-blur-2xl sm:px-10">
+      <header className="dash-fade-in relative shrink-0 border-b border-[#EC4899]/10 bg-[#0D0D1A]/60 px-8 py-7 backdrop-blur-2xl sm:px-10">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#A855F7]/40 to-transparent"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#EC4899]/40 to-transparent"
         />
         <div className="flex items-center justify-between gap-6">
           <h1 className="font-heading text-[2rem] font-bold tracking-[-0.02em] text-white sm:text-[2.375rem]">
@@ -173,7 +173,7 @@ export default async function DashboardPage() {
           </h1>
           <button
             type="button"
-            className="dash-glass-v2 flex h-11 w-11 items-center justify-center !rounded-xl text-white/50 transition-all duration-300 hover:!border-[#A855F7]/40 hover:text-[#C084FC] hover:shadow-[0_0_32px_-8px_#A855F7]"
+            className="dash-glass-v2 flex h-11 w-11 items-center justify-center !rounded-xl text-white/50 transition-all duration-300 hover:!border-[#EC4899]/40 hover:text-[#FB923C] hover:shadow-[0_0_32px_-8px_#EC4899]"
             aria-label="Notifications"
           >
             <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
@@ -208,7 +208,7 @@ export default async function DashboardPage() {
           {stats.map((stat, index) => (
             <div
               key={stat.label}
-              className="dash-fade-in rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-md transition-all duration-300 hover:scale-[1.03] hover:border-[#A855F7]/30 hover:shadow-[0_8px_40px_-12px_rgba(168,85,247,0.45)] sm:p-6"
+              className="dash-fade-in rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-md transition-all duration-300 hover:scale-[1.03] hover:border-[#EC4899]/30 hover:shadow-[0_8px_40px_-12px_rgba(236,72,153,0.45)] sm:p-6"
               style={{ animationDelay: `${0.12 + index * 0.07}s` }}
             >
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/35">
@@ -223,7 +223,7 @@ export default async function DashboardPage() {
 
         {/* AI Suggestions */}
         <section
-          className="dash-fade-in rounded-2xl border border-white/10 border-l-4 border-l-[#A855F7] bg-white/5 p-6 backdrop-blur-md sm:p-8"
+          className="dash-fade-in rounded-2xl border border-white/10 border-l-4 border-l-[#EC4899] bg-white/5 p-6 backdrop-blur-md sm:p-8"
           style={{ animationDelay: "0.28s" }}
         >
           <h3 className="font-heading text-xl font-bold tracking-[-0.02em] text-white sm:text-2xl">
@@ -238,7 +238,7 @@ export default async function DashboardPage() {
               >
                 <span
                   aria-hidden
-                  className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#A855F7]"
+                  className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#EC4899]"
                 />
                 {suggestion}
               </li>
@@ -262,27 +262,27 @@ export default async function DashboardPage() {
               <Link
                 key={action.title}
                 href={action.href}
-                className="dash-fade-in group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#A855F7]/35 hover:bg-white/[0.07] hover:shadow-[0_16px_48px_-16px_rgba(168,85,247,0.55)] sm:p-7"
+                className="dash-fade-in group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#EC4899]/35 hover:bg-white/[0.07] hover:shadow-[0_16px_48px_-16px_rgba(236,72,153,0.55)] sm:p-7"
                 style={{ animationDelay: `${0.46 + index * 0.07}s` }}
               >
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#7C3AED]/20 via-[#A855F7]/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#EC4899]/20 via-[#F97316]/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 <div
                   aria-hidden
-                  className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-[#A855F7]/20 blur-3xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                  className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-[#EC4899]/20 blur-3xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                 />
 
                 <div className="relative flex items-start gap-5">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#A855F7] to-[#7C3AED] text-white shadow-[0_0_32px_-4px_#A855F7] ring-1 ring-white/15 transition-transform duration-300 group-hover:scale-110">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#EC4899] to-[#F97316] text-white shadow-[0_0_32px_-4px_#EC4899] ring-1 ring-white/15 transition-transform duration-300 group-hover:scale-110">
                     {action.icon}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h4 className="text-[17px] font-semibold tracking-[-0.025em] text-white transition-colors duration-300 group-hover:text-[#E9D5FF]">
+                    <h4 className="text-[17px] font-semibold tracking-[-0.025em] text-white transition-colors duration-300 group-hover:text-[#FECDD3]">
                       {action.title}
                     </h4>
                     <p className="mt-2 text-[14px] leading-[1.65] tracking-[-0.01em] text-white/40 transition-colors duration-300 group-hover:text-white/60">
                       {action.description}
                     </p>
-                    <p className="mt-4 translate-y-1 text-[13px] font-medium text-[#C084FC] opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                    <p className="mt-4 translate-y-1 text-[13px] font-medium text-[#FB923C] opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
                       Open →
                     </p>
                   </div>
