@@ -1,14 +1,7 @@
-"use client";
-
-import { useState } from "react";
 import { ChatBackground } from "./chat-background";
 import { ChatInterface } from "./chat-interface";
 
-export type ChatModel = "Clotter Lite" | "Clotter Mini";
-
 export default function ChatPage() {
-  const [selectedModel, setSelectedModel] = useState<ChatModel>("Clotter Lite");
-
   return (
     <div className="relative flex h-screen flex-col overflow-hidden">
       <ChatBackground />
@@ -28,34 +21,15 @@ export default function ChatPage() {
               Creative co-pilot
             </h1>
           </div>
-          <div className="flex shrink-0 gap-2">
-            <button
-              type="button"
-              onClick={() => setSelectedModel("Clotter Lite")}
-              className={`rounded-full border px-4 py-2 text-xs font-semibold tracking-[-0.01em] transition sm:px-5 sm:text-sm ${
-                selectedModel === "Clotter Lite"
-                  ? "border-[#A855F7]/50 bg-gradient-to-r from-[#7C3AED] to-[#A855F7] text-white shadow-[0_0_24px_-6px_#A855F7]"
-                  : "border-[#7C3AED]/20 bg-[#0D0D1A] text-white/55 hover:border-[#7C3AED]/35 hover:text-white/75"
-              }`}
-            >
+          <div className="flex shrink-0">
+            <span className="rounded-full border border-[#A855F7]/50 bg-gradient-to-r from-[#7C3AED] to-[#A855F7] px-4 py-2 text-xs font-semibold tracking-[-0.01em] text-white shadow-[0_0_24px_-6px_#A855F7] sm:px-5 sm:text-sm">
               ⚡ Clotter Lite
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedModel("Clotter Mini")}
-              className={`rounded-full border px-4 py-2 text-xs font-semibold tracking-[-0.01em] transition sm:px-5 sm:text-sm ${
-                selectedModel === "Clotter Mini"
-                  ? "border-[#A855F7]/50 bg-gradient-to-r from-[#7C3AED] to-[#A855F7] text-white shadow-[0_0_24px_-6px_#A855F7]"
-                  : "border-[#7C3AED]/20 bg-[#0D0D1A] text-white/55 hover:border-[#7C3AED]/35 hover:text-white/75"
-              }`}
-            >
-              🧠 Clotter Mini
-            </button>
+            </span>
           </div>
         </div>
       </header>
 
-      <ChatInterface selectedModel={selectedModel} />
+      <ChatInterface selectedModel="Clotter Lite" />
     </div>
   );
 }
