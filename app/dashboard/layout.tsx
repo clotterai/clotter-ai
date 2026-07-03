@@ -1,4 +1,6 @@
+import { hasCreatorProfile } from "@/lib/memory/getCreatorContext";
 import { createClient } from "@/lib/supabase/server";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { DashboardParticles } from "./components/particles";
 import {
@@ -7,6 +9,24 @@ import {
 } from "./components/sidebar";
 
 export const dynamic = "force-dynamic";
+
+const ONBOARDING_PATH = "/dashboard/onboarding";
+
+function getPathname(headerList: Headers): string {
+  const pathname = headerList.get("x-pathname");
+  if (pathname) return pathname;
+
+  const nextUrl = headerList.get("next-url");
+  if (nextUrl) {
+    try {
+      return new URL(nextUrl).pathname;
+    } catch {
+      return "";
+    }
+  }
+
+  return "";
+}
 
 function getInitials(name: string, email: string): string {
   const source = name.trim() || email.split("@")[0] || "U";
@@ -55,6 +75,20 @@ export default async function DashboardLayout({
 
   if (!user) {
     redirect("/login");
+  }
+
+  const headerList = await headers();
+  const pathname = getPathname(headerList);
+  const isOnboarding = pathname === ONBOARDING_PATH;
+
+  const profileExists = await hasCreatorProfile(supabase, user.id);
+
+  if (!profileExists && pathname && !isOnboarding) {
+    redirect(ONBOARDING_PATH);
+  }
+
+  if (profileExists && isOnboarding) {
+    redirect("/dashboard");
   }
 
   const sidebarUser = toSidebarUser(user);
