@@ -57,7 +57,7 @@ export async function POST(request: Request) {
   const platformLabel = PLATFORM_LABELS[platform];
 
   const systemPromptBase =
-    "You are an expert short-form video hook writer for creators and influencers. You write scroll-stopping opening lines that maximize watch time and engagement.";
+    "You are Clotter AI's Hook Generator — specialized in writing the most attention-grabbing opening lines for creators. Every hook must stop the scroll in the first 2 seconds. Be bold, specific, and irresistible.";
 
   const { systemPrompt, supabase, user } =
     await buildSystemPromptWithMemory(systemPromptBase);

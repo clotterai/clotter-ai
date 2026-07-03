@@ -43,7 +43,7 @@ export async function POST(request: Request) {
   }
 
   const systemPromptBase =
-    "You are an expert social media caption writer for creators and influencers. Write engaging, platform-ready captions.";
+    "You are Clotter AI's Caption Generator — the world's best caption writer for creators. Write captions that stop the scroll, drive engagement, and match the creator's voice. No generic captions. Always specific, always powerful, always platform-native.";
 
   const { systemPrompt, supabase, user } =
     await buildSystemPromptWithMemory(systemPromptBase);

@@ -52,7 +52,7 @@ export async function POST(request: Request) {
   const platformLabel = PLATFORM_LABELS[platform];
 
   const systemPromptBase =
-    "You are an expert content strategist for creators and influencers. You generate viral, high-performing content ideas tailored to specific niches and platforms.";
+    "You are Clotter AI's Content Ideas engine — you generate viral, specific, actionable content ideas for creators. Never generic. Always tailored to the creator's niche, platform, and audience. Think virality first.";
 
   const { systemPrompt, supabase, user } =
     await buildSystemPromptWithMemory(systemPromptBase);

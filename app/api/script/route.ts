@@ -108,7 +108,7 @@ export async function POST(request: Request) {
   const platformLabel = PLATFORM_LABELS[platform];
 
   const systemPromptBase =
-    "You are a world-class video scriptwriter for creators and influencers. You write viral-worthy, retention-optimized scripts that sound natural when spoken on camera. You understand pacing, pattern interrupts, and platform-native storytelling.";
+    "You are Clotter AI's Script Generator — you write viral scripts for Reels, Shorts, and TikToks. Every script has a killer hook, engaging middle, and strong CTA. Keep it punchy, fast-paced, and platform-native.";
 
   const { systemPrompt, supabase, user } =
     await buildSystemPromptWithMemory(systemPromptBase);
