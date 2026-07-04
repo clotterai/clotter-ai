@@ -643,7 +643,7 @@ export function ChatInterface({
             </button>
           </div>
           <p className="mt-4 text-center text-[13px] tracking-[-0.01em] text-white/30">
-            Enter to send · Shift+Enter for new line
+            Clotter AI may make mistakes. Verify important information before using.
           </p>
         </div>
       </div>
