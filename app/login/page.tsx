@@ -97,73 +97,199 @@ function LogoOrb({ size }: { size: 32 | 80 }) {
   );
 }
 
-const platformLogos = [
-  {
-    name: "Instagram",
-    path: "M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z",
-  },
-  {
-    name: "YouTube",
-    path: "M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z",
-  },
-  {
-    name: "LinkedIn",
-    path: "M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z",
-  },
-  {
-    name: "X",
-    path: "M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z",
-  },
-  {
-    name: "Facebook",
-    path: "M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z",
-  },
+function InstagramLogo() {
+  return (
+    <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden>
+      <defs>
+        <linearGradient
+          id="login-ig-grad"
+          x1="0"
+          y1="48"
+          x2="48"
+          y2="0"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#833AB4" />
+          <stop offset="0.5" stopColor="#E1306C" />
+          <stop offset="1" stopColor="#F56040" />
+        </linearGradient>
+      </defs>
+      <circle cx="24" cy="24" r="24" fill="url(#login-ig-grad)" />
+      <rect
+        x="13"
+        y="13"
+        width="22"
+        height="22"
+        rx="6"
+        fill="none"
+        stroke="white"
+        strokeWidth="2"
+      />
+      <circle cx="24" cy="24" r="5.5" fill="none" stroke="white" strokeWidth="2" />
+      <circle cx="32" cy="16" r="1.75" fill="white" />
+    </svg>
+  );
+}
+
+function YouTubeLogo() {
+  return (
+    <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden>
+      <rect x="4" y="11" width="40" height="26" rx="7" fill="#FF0000" />
+      <path d="M20 18.5v11l11-5.5-11-5.5z" fill="white" />
+    </svg>
+  );
+}
+
+function LinkedInLogo() {
+  return (
+    <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden>
+      <rect x="4" y="4" width="40" height="40" rx="5" fill="#0A66C2" />
+      <path
+        fill="white"
+        d="M14.5 20.2h4.2v15.1h-4.2V20.2zm2.1-6.8a2.4 2.4 0 1 1 0 4.8 2.4 2.4 0 0 1 0-4.8zm6.4 6.8h4v2.1h.1c.6-1.1 2-2.2 4.1-2.2 4.4 0 5.2 2.9 5.2 6.7v8.5h-4.2v-7.5c0-1.8 0-4.1-2.5-4.1-2.5 0-2.9 2-2.9 4v7.6h-4.2V20.2z"
+      />
+    </svg>
+  );
+}
+
+function XLogo() {
+  return (
+    <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden>
+      <circle cx="24" cy="24" r="24" fill="#000000" />
+      <g transform="translate(12 12)">
+        <path
+          fill="white"
+          d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+        />
+      </g>
+    </svg>
+  );
+}
+
+function FacebookLogo() {
+  return (
+    <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden>
+      <circle cx="24" cy="24" r="24" fill="#1877F2" />
+      <path
+        fill="white"
+        d="M27.8 24.5h-2.6v11.5h-4.7V24.5h-1.8v-3.8h1.8v-2.5c0-2.9 1.7-4.5 4.4-4.5 1.2 0 2.5.2 2.5.2v2.8h-1.4c-1.4 0-1.8.9-1.8 1.8v2.2h3.1l-.5 3.8z"
+      />
+    </svg>
+  );
+}
+
+function GoogleLogo() {
+  return (
+    <svg width="40" height="40" viewBox="0 0 24 24" aria-hidden>
+      <path
+        fill="#4285F4"
+        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+      />
+    </svg>
+  );
+}
+
+function AnthropicLogo() {
+  return (
+    <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden>
+      <circle cx="20" cy="20" r="20" fill="#1A1A1A" />
+      <path
+        fill="white"
+        d="M22.8 9.5h-3.1L12.5 30.5h3.1l1.2-3.1h4.1l1.2 3.1h3.1L22.8 9.5zm-4 12.2 1.5-4 1.5 4h-3z"
+      />
+    </svg>
+  );
+}
+
+function PerplexityLogo() {
+  return (
+    <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden>
+      <circle cx="20" cy="20" r="20" fill="#1B3139" />
+      <path
+        fill="#20B8CD"
+        d="M20.5 8.5 10.5 14.2v11.6l10 5.7 10-5.7V14.2l-10-5.7zm0 3.9 6.6 3.8L20 19.9l-6.6-3.8 6.6-3.7zm-7.2 6.3 6.6 3.8v7.6l-6.6-3.8v-7.6zm14.4 0v7.6l-6.6 3.8v-7.6l6.6-3.8z"
+      />
+    </svg>
+  );
+}
+
+function VercelLogo() {
+  return (
+    <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden>
+      <rect width="40" height="40" rx="8" fill="white" />
+      <path d="M20 9 33 31H7L20 9z" fill="#000000" />
+    </svg>
+  );
+}
+
+function SupabaseLogo() {
+  return (
+    <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden>
+      <path
+        fill="#3ECF8E"
+        d="M35.6 15.6H20V1.3a.66.66 0 0 0-1.2-.39L3.7 17.4l-.67.94a1.73 1.73 0 0 0 1.39 2.76H20v14.9a.66.66 0 0 0 1.2.39l15.1-17.1.67-.94a1.73 1.73 0 0 0-1.39-2.76z"
+      />
+    </svg>
+  );
+}
+
+function NextJsLogo() {
+  return (
+    <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden>
+      <circle cx="20" cy="20" r="20" fill="#000000" />
+      <path
+        fill="white"
+        d="M13.5 12.5h3.2l8.1 12.4V12.5h2.8v15h-3.2l-8.1-12.4V27.5h-2.8v-15z"
+      />
+    </svg>
+  );
+}
+
+function MetaLogo() {
+  return (
+    <svg width="40" height="40" viewBox="0 0 24 24" aria-hidden>
+      <defs>
+        <linearGradient id="login-meta-grad" x1="0" y1="12" x2="24" y2="12">
+          <stop stopColor="#0082FB" />
+          <stop offset="1" stopColor="#0064E0" />
+        </linearGradient>
+      </defs>
+      <path
+        fill="url(#login-meta-grad)"
+        d="M6.915 4.03c-1.968 0-3.683 1.28-4.871 3.113C.704 9.28 0 11.758 0 14.494c0 2.65 1.305 5.005 3.33 6.453C5.357 22.394 8.058 24 11.015 24c1.968 0 3.683-1.28 4.871-3.113C17.296 19.714 18 17.236 18 14.5c0-2.65-1.305-5.005-3.33-6.453C12.643 6.606 9.942 5 7.085 5c-.057 0-.113.002-.17.004v-.004H6.915zm4.1 14.44c-1.456 0-2.75-.78-3.45-2.05-.7-1.27-.7-2.83 0-4.1.7-1.27 1.994-2.05 3.45-2.05s2.75.78 3.45 2.05c.7 1.27.7 2.83 0 4.1-.7 1.27-1.994 2.05-3.45 2.05zm5.985-14.44c-1.968 0-3.683 1.28-4.871 3.113C10.704 9.28 10 11.758 10 14.494c0 2.65 1.305 5.005 3.33 6.453 1.027.947 2.328 1.553 3.685 1.553 1.968 0 3.683-1.28 4.871-3.113C22.296 19.714 23 17.236 23 14.5c0-2.65-1.305-5.005-3.33-6.453C18.643 6.606 15.942 5 13.085 5c-.057 0-.113.002-.17.004v-.004h-.005z"
+      />
+    </svg>
+  );
+}
+
+const platformLogoItems = [
+  { name: "Instagram", Logo: InstagramLogo },
+  { name: "YouTube", Logo: YouTubeLogo },
+  { name: "LinkedIn", Logo: LinkedInLogo },
+  { name: "X", Logo: XLogo },
+  { name: "Facebook", Logo: FacebookLogo },
 ];
 
-const infraLogos = [
-  {
-    name: "Google",
-    paths: [
-      "M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z",
-      "M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z",
-      "M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z",
-      "M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z",
-    ],
-  },
-  {
-    name: "Anthropic",
-    paths: [
-      "M17.304 3.541h-3.671l-6.696 16.918h3.736l1.38-3.719h4.818l1.378 3.719h3.736L17.304 3.541zm-4.694 10.278 1.756-4.733 1.756 4.733h-3.512z",
-    ],
-  },
-  {
-    name: "Perplexity",
-    paths: [
-      "M12.288 1.296c-.282 0-.56.07-.805.203L1.955 6.944a1.708 1.708 0 0 0-.87 1.49v7.132a1.708 1.708 0 0 0 .87 1.49l9.528 5.445a1.708 1.708 0 0 0 1.61 0l9.528-5.445a1.708 1.708 0 0 0 .87-1.49V8.434a1.708 1.708 0 0 0-.87-1.49L13.093 1.499a1.708 1.708 0 0 0-.805-.203zM12 4.666l7.884 4.506L12 13.678 4.116 9.172 12 4.666zm-8.648 6.29L11.12 15.36v8.063l-7.768-4.445V10.956zm9.296 11.518V15.36l7.768-4.403v8.063L12.648 22.764z",
-    ],
-  },
-  {
-    name: "Vercel",
-    paths: ["M24 22.525H0l12-21.05 12 21.05z"],
-  },
-  {
-    name: "Supabase",
-    paths: [
-      "M21.362 9.354H12V.396a.396.396 0 0 0-.716-.233L2.203 10.424l-.401.562a1.04 1.04 0 0 0 .836 1.659H12v8.959a.396.396 0 0 0 .716.233l9.081-10.261.401-.562a1.04 1.04 0 0 0-.836-1.66z",
-    ],
-  },
-  {
-    name: "Next.js",
-    paths: [
-      "M11.572 0c-.176 0-.31.001-.358.007a.535.535 0 0 0-.192.063.35.35 0 0 0-.13.128.677.677 0 0 0-.093.335v11.495l-9.528 5.484V.62a.677.677 0 0 0-.093-.335A.348.348 0 0 0 1.05.07.537.537 0 0 0 .858.007C.81.001.676 0 .5 0H0v24h11.572V12.674L21.428 18V6.326L11.572 0z",
-    ],
-  },
-  {
-    name: "Meta",
-    paths: [
-      "M6.915 4.03c-1.968 0-3.683 1.28-4.871 3.113C.704 9.28 0 11.758 0 14.494c0 2.65 1.305 5.005 3.33 6.453C5.357 22.394 8.058 24 11.015 24c1.968 0 3.683-1.28 4.871-3.113C17.296 19.714 18 17.236 18 14.5c0-2.65-1.305-5.005-3.33-6.453C12.643 6.606 9.942 5 7.085 5c-.057 0-.113.002-.17.004v-.004H6.915zm4.1 14.44c-1.456 0-2.75-.78-3.45-2.05-.7-1.27-.7-2.83 0-4.1.7-1.27 1.994-2.05 3.45-2.05s2.75.78 3.45 2.05c.7 1.27.7 2.83 0 4.1-.7 1.27-1.994 2.05-3.45 2.05zm5.985-14.44c-1.968 0-3.683 1.28-4.871 3.113C10.704 9.28 10 11.758 10 14.494c0 2.65 1.305 5.005 3.33 6.453 1.027.947 2.328 1.553 3.685 1.553 1.968 0 3.683-1.28 4.871-3.113C22.296 19.714 23 17.236 23 14.5c0-2.65-1.305-5.005-3.33-6.453C18.643 6.606 15.942 5 13.085 5c-.057 0-.113.002-.17.004v-.004h-.005z",
-    ],
-  },
+const infraLogoItems = [
+  { name: "Google", Logo: GoogleLogo },
+  { name: "Anthropic", Logo: AnthropicLogo },
+  { name: "Perplexity", Logo: PerplexityLogo },
+  { name: "Vercel", Logo: VercelLogo },
+  { name: "Supabase", Logo: SupabaseLogo },
+  { name: "Next.js", Logo: NextJsLogo },
+  { name: "Meta", Logo: MetaLogo },
 ];
 
 export default async function LoginPage({
@@ -341,6 +467,38 @@ export default async function LoginPage({
             linear-gradient(135deg, #ec4899, #f97316) border-box;
           border: 1px solid transparent;
         }
+
+        @keyframes loginLogoSectionIn {
+          from {
+            opacity: 0;
+            transform: translateY(24px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .login-logo-section {
+          animation: loginLogoSectionIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .login-logo-section--platforms {
+          animation-delay: 0.55s;
+        }
+
+        .login-logo-section--infra {
+          animation-delay: 0.2s;
+        }
+
+        .login-logo-item {
+          animation: loginLogoSectionIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+          transition: transform 200ms ease;
+        }
+
+        .login-logo-item:hover {
+          transform: scale(1.1);
+        }
       `}</style>
 
       {/* Bubble-style background */}
@@ -469,23 +627,21 @@ export default async function LoginPage({
       </section>
 
       {/* Platforms */}
-      <section className="relative z-10 px-6 pb-12 sm:px-10">
+      <section className="login-logo-section login-logo-section--platforms relative z-10 px-6 pb-12 sm:px-10">
         <p className="text-center text-sm text-white/50">
           Built for creators on
         </p>
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-8">
-          {platformLogos.map((platform) => (
-            <svg
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-8">
+          {platformLogoItems.map((platform, index) => (
+            <div
               key={platform.name}
-              viewBox="0 0 24 24"
-              height={28}
-              fill="currentColor"
+              className="login-logo-item"
+              style={{ animationDelay: `${0.65 + index * 0.1}s` }}
               role="img"
               aria-label={platform.name}
-              className="text-white/40 transition-colors duration-300 hover:text-white/80"
             >
-              <path d={platform.path} />
-            </svg>
+              <platform.Logo />
+            </div>
           ))}
         </div>
       </section>
@@ -532,30 +688,19 @@ export default async function LoginPage({
       </section>
 
       {/* Powered by */}
-      <section className="relative z-10 px-6 py-16 sm:px-10">
+      <section className="login-logo-section login-logo-section--infra relative z-10 px-6 py-16 sm:px-10">
         <p className="text-center text-sm text-white/50">
           Powered by world-class infrastructure
         </p>
-        <div className="mt-8 flex flex-wrap items-start justify-center gap-8">
-          {infraLogos.map((brand) => (
+        <div className="mt-10 flex flex-wrap items-start justify-center gap-8">
+          {infraLogoItems.map((brand, index) => (
             <div
               key={brand.name}
-              className="group flex w-20 flex-col items-center gap-2"
+              className="login-logo-item flex w-24 flex-col items-center gap-2.5"
+              style={{ animationDelay: `${0.3 + index * 0.1}s` }}
             >
-              <svg
-                viewBox="0 0 24 24"
-                width={24}
-                height={24}
-                fill="currentColor"
-                role="img"
-                aria-label={brand.name}
-                className="text-white/30 transition-colors duration-300 group-hover:text-white/70"
-              >
-                {brand.paths.map((path) => (
-                  <path key={path} d={path} />
-                ))}
-              </svg>
-              <span className="text-xs text-white/30">{brand.name}</span>
+              <brand.Logo />
+              <span className="text-xs text-white/60">{brand.name}</span>
             </div>
           ))}
         </div>
