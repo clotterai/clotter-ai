@@ -48,6 +48,23 @@ const navGroups = [
         ),
       },
       {
+        label: "Bubble",
+        href: "/dashboard/bubble",
+        icon: (
+          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+            <circle
+              cx="12"
+              cy="12"
+              r="8"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            />
+            <circle cx="9" cy="10" r="1.5" fill="currentColor" opacity="0.5" />
+            <circle cx="14" cy="14" r="1" fill="currentColor" opacity="0.35" />
+          </svg>
+        ),
+      },
+      {
         label: "Caption Generator",
         href: "/dashboard/captions",
         icon: (
@@ -188,23 +205,6 @@ const navGroups = [
           </svg>
         ),
       },
-      {
-        label: "Bubble",
-        href: "/dashboard/bubble",
-        icon: (
-          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
-            <circle
-              cx="12"
-              cy="12"
-              r="8"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            />
-            <circle cx="9" cy="10" r="1.5" fill="currentColor" opacity="0.5" />
-            <circle cx="14" cy="14" r="1" fill="currentColor" opacity="0.35" />
-          </svg>
-        ),
-      },
     ],
   },
 ];
@@ -278,7 +278,7 @@ export function DashboardSidebar({
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-50 flex w-[17.5rem] flex-col border-r border-[#EC4899]/10 bg-[#0D0D1A]/95 backdrop-blur-2xl transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:translate-x-0 ${
+      className={`fixed inset-y-0 left-0 z-50 flex h-full w-[17.5rem] flex-col border-r border-[#EC4899]/10 bg-[#0D0D1A]/95 backdrop-blur-2xl transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:translate-x-0 ${
         isMobileOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >
@@ -293,7 +293,7 @@ export function DashboardSidebar({
       />
 
       {/* Logo */}
-      <div className="relative border-b border-[#EC4899]/10 px-6 py-7">
+      <div className="relative shrink-0 border-b border-[#EC4899]/10 px-6 py-7">
         <div className="flex items-center gap-3.5">
           <ClotterLogo size={32} />
           <div>
@@ -305,7 +305,10 @@ export function DashboardSidebar({
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto px-4 py-6">
+      <nav
+        className="min-h-0 flex-1 overflow-y-auto px-4 py-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
         <SidebarNavLink
           item={dashboardNavItem}
           pathname={pathname}
@@ -332,7 +335,7 @@ export function DashboardSidebar({
       </nav>
 
       {/* Profile */}
-      <div className="border-t border-[#EC4899]/10 p-5">
+      <div className="shrink-0 border-t border-[#EC4899]/10 p-5">
         <div className="dash-glass-v2 !rounded-2xl !p-4">
           <div className="flex items-center gap-3.5">
             {user.avatarUrl ? (
