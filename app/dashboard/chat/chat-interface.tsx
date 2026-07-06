@@ -11,12 +11,21 @@ type Message = {
 
 type MessageFeedback = "like" | "dislike";
 
-const suggestedPrompts = [
+const promptPool = [
   "Give me reel ideas",
   "Write a caption",
   "Find trending topics",
   "Write a hook",
+  "Give me script ideas",
+  "What's viral right now?",
+  "Help me grow on Instagram",
+  "Give me 5 content ideas",
 ];
+
+function pickRandomPrompts(count: number) {
+  const shuffled = [...promptPool].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
+}
 
 import { ClotterLogo } from "@/app/dashboard/components/clotter-logo";
 
@@ -285,6 +294,7 @@ export function ChatInterface({
   selectedModel?: string;
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [suggestedPrompts] = useState(() => pickRandomPrompts(4));
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -591,25 +601,6 @@ export function ChatInterface({
             <p className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-3 text-[15px] leading-relaxed text-red-300">
               {error}
             </p>
-          )}
-
-          {!isEmpty && (
-            <div className="mb-4 flex flex-wrap gap-2">
-              {suggestedPrompts.map((prompt) => (
-                <button
-                  key={prompt}
-                  type="button"
-                  onClick={() => {
-                    setInput(prompt);
-                    textareaRef.current?.focus();
-                  }}
-                  disabled={isLoading}
-                  className="chat-prompt-chip !py-2 !text-[13px]"
-                >
-                  {prompt}
-                </button>
-              ))}
-            </div>
           )}
 
           <div className="chat-input-bar flex items-end gap-3 rounded-2xl border border-white/10 bg-[#13131f]/90 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:gap-4 sm:p-3.5">

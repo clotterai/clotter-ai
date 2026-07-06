@@ -17,20 +17,13 @@ export default function ChatPage() {
             <p className="hidden text-xs font-semibold uppercase tracking-[0.12em] text-[#A855F7]/70 md:block">
               AI Chat
             </p>
-            <div className="flex items-center gap-2.5 md:mt-1.5 md:block">
-              <h1 className="font-heading truncate text-xl font-bold tracking-[-0.02em] text-white md:text-4xl lg:text-[3rem]">
-                Creative co-pilot
-              </h1>
-              <span className="shrink-0 rounded-full border border-[#A855F7]/50 bg-gradient-to-r from-[#7C3AED] to-[#A855F7] px-3 py-1 text-[10px] font-semibold tracking-[-0.01em] text-white shadow-[0_0_24px_-6px_#A855F7] md:hidden">
-                ⚡ Clotter Lite
-              </span>
-            </div>
+            <h1 className="font-heading truncate text-xl font-bold tracking-[-0.02em] text-white md:mt-1.5 md:text-4xl lg:text-[3rem]">
+              Creative co-pilot
+            </h1>
           </div>
-          <div className="hidden shrink-0 md:flex">
-            <span className="rounded-full border border-[#A855F7]/50 bg-gradient-to-r from-[#7C3AED] to-[#A855F7] px-4 py-2 text-xs font-semibold tracking-[-0.01em] text-white shadow-[0_0_24px_-6px_#A855F7] sm:px-5 sm:text-sm">
-              ⚡ Clotter Lite
-            </span>
-          </div>
+          <span className="shrink-0 rounded-full border border-[#A855F7]/50 bg-gradient-to-r from-[#7C3AED] to-[#A855F7] px-3 py-1 text-[10px] font-semibold tracking-[-0.01em] text-white shadow-[0_0_24px_-6px_#A855F7] md:px-4 md:py-2 md:text-xs sm:px-5 sm:text-sm">
+            ⚡ Clotter Lite
+          </span>
         </div>
       </header>
 
