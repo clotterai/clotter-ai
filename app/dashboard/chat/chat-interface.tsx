@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { dispatchChatSessionsUpdated } from "@/lib/chat-sessions-events";
 
 type Message = {
   id: string;
@@ -301,14 +303,11 @@ function CopyButton({
 export function ChatInterface({
   selectedModel = "Clotter Lite",
   sessionId = null,
-  onSessionCreate,
-  onMessagesUpdate,
 }: {
   selectedModel?: string;
   sessionId?: string | null;
-  onSessionCreate?: (id: string, title: string) => void;
-  onMessagesUpdate?: (messages: Message[]) => void;
 }) {
+  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
   const [suggestedPrompts] = useState(() => pickRandomPrompts(4));
   const [input, setInput] = useState("");
@@ -403,7 +402,7 @@ export function ChatInterface({
     });
 
     if (response.ok) {
-      onMessagesUpdate?.(updatedMessages);
+      dispatchChatSessionsUpdated();
     }
   }
 
@@ -531,7 +530,10 @@ export function ChatInterface({
 
         activeSessionId = createData.session.id;
         locallyActiveSessionRef.current = activeSessionId;
-        onSessionCreate?.(activeSessionId, title);
+        router.push(`/dashboard/chat?session=${activeSessionId}`, {
+          scroll: false,
+        });
+        dispatchChatSessionsUpdated();
       }
 
       const history = nextMessages.map(({ role, content }) => ({ role, content }));

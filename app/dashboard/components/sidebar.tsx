@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useEffect, useState, type ReactNode } from "react";
+import {
+  CHAT_SESSIONS_UPDATED_EVENT,
+} from "@/lib/chat-sessions-events";
 import { LogoutButton } from "./logout-button";
 import { ClotterLogo } from "./clotter-logo";
 
@@ -215,6 +218,19 @@ type NavItem = {
   icon: ReactNode;
 };
 
+type ChatSessionSummary = {
+  id: string;
+  title: string;
+  updated_at: string;
+};
+
+const CHAT_HREF = "/dashboard/chat";
+
+function truncateTitle(title: string, maxLength = 25) {
+  if (title.length <= maxLength) return title;
+  return `${title.slice(0, maxLength - 3)}...`;
+}
+
 function SidebarNavLink({
   item,
   pathname,
@@ -260,6 +276,191 @@ function SidebarNavLink({
       </span>
       <span className="relative z-[1]">{item.label}</span>
     </Link>
+  );
+}
+
+function ChatNavSection({
+  item,
+  pathname,
+  onClose,
+}: {
+  item: NavItem;
+  pathname: string;
+  onClose: () => void;
+}) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const activeSessionId = searchParams.get("session");
+  const isChatPage = pathname.startsWith(CHAT_HREF);
+  const isParentActive = isChatPage;
+
+  const [sessions, setSessions] = useState<ChatSessionSummary[]>([]);
+
+  const loadSessions = useCallback(async () => {
+    try {
+      const response = await fetch("/api/chat-sessions");
+      if (!response.ok) return;
+
+      const data = (await response.json()) as {
+        sessions?: ChatSessionSummary[];
+      };
+
+      setSessions((data.sessions ?? []).slice(0, 10));
+    } catch {
+      // Sessions load silently in the background.
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadSessions();
+  }, [loadSessions]);
+
+  useEffect(() => {
+    if (isChatPage) {
+      void loadSessions();
+    }
+  }, [isChatPage, activeSessionId, loadSessions]);
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      void loadSessions();
+    };
+
+    window.addEventListener(CHAT_SESSIONS_UPDATED_EVENT, handleUpdate);
+    return () => {
+      window.removeEventListener(CHAT_SESSIONS_UPDATED_EVENT, handleUpdate);
+    };
+  }, [loadSessions]);
+
+  async function handleDeleteSession(
+    event: React.MouseEvent,
+    sessionId: string,
+  ) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const response = await fetch(`/api/chat-sessions/${sessionId}`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) return;
+
+    setSessions((current) =>
+      current.filter((session) => session.id !== sessionId),
+    );
+
+    if (activeSessionId === sessionId) {
+      router.push(CHAT_HREF);
+    }
+  }
+
+  return (
+    <div>
+      <Link
+        href={CHAT_HREF}
+        onClick={onClose}
+        className={`dash-nav-item group relative flex items-center gap-3.5 overflow-hidden rounded-xl px-3.5 py-3 text-[15px] font-medium tracking-[-0.02em] ${
+          isParentActive
+            ? "bg-gradient-to-r from-[#EC4899]/15 to-[#F97316]/10 text-[#FECDD3] shadow-[0_0_40px_-8px_#EC4899] ring-1 ring-[#EC4899]/35"
+            : "text-white/45 hover:text-white/90"
+        }`}
+        aria-current={isParentActive ? "page" : undefined}
+      >
+        {isParentActive && (
+          <>
+            <span
+              aria-hidden
+              className="absolute inset-0 bg-gradient-to-r from-[#EC4899]/25 via-[#F97316]/12 to-transparent"
+            />
+            <span aria-hidden className="dash-nav-glow-bar" />
+          </>
+        )}
+        <span
+          className={`relative z-[1] transition-all duration-300 ${
+            isParentActive
+              ? "text-[#FB923C] drop-shadow-[0_0_8px_rgba(236,72,153,0.6)]"
+              : "text-white/30 group-hover:text-[#EC4899]/70"
+          }`}
+        >
+          {item.icon}
+        </span>
+        <span className="relative z-[1]">{item.label}</span>
+      </Link>
+
+      {isChatPage && (
+        <ul className="mt-1 space-y-0.5">
+          <li>
+            <Link
+              href={CHAT_HREF}
+              onClick={onClose}
+              className={`flex items-center gap-2 rounded-lg py-1.5 pl-8 pr-3 text-xs transition ${
+                !activeSessionId
+                  ? "bg-white/5 text-white/80"
+                  : "text-white/50 hover:text-white/80"
+              }`}
+            >
+              <svg
+                viewBox="0 0 16 16"
+                fill="none"
+                className="h-3 w-3 shrink-0 text-[#EC4899]"
+                aria-hidden
+              >
+                <path
+                  d="M8 3v10M3 8h10"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <span>New Chat</span>
+            </Link>
+          </li>
+
+          {sessions.map((session) => {
+            const isActive = activeSessionId === session.id;
+
+            return (
+              <li key={session.id} className="group relative">
+                <Link
+                  href={`${CHAT_HREF}?session=${session.id}`}
+                  onClick={onClose}
+                  className={`flex items-center rounded-lg py-1.5 pl-8 pr-8 text-xs transition ${
+                    isActive
+                      ? "bg-white/5 text-white/80"
+                      : "text-white/50 hover:text-white/80"
+                  }`}
+                >
+                  <span className="truncate">
+                    {truncateTitle(session.title)}
+                  </span>
+                </Link>
+                <button
+                  type="button"
+                  onClick={(event) => void handleDeleteSession(event, session.id)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-white/40 opacity-0 transition hover:text-red-400 group-hover:opacity-100"
+                  aria-label={`Delete ${session.title}`}
+                >
+                  <svg
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    className="h-3 w-3"
+                    aria-hidden
+                  >
+                    <path
+                      d="M3.5 5.5h9M6 5.5V4.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1m1.5 0v7a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-7"
+                      stroke="currentColor"
+                      strokeWidth="1.25"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
   );
 }
 
@@ -321,14 +522,23 @@ export function DashboardSidebar({
               {group.label}
             </p>
             <div className="space-y-1">
-              {group.items.map((item) => (
-                <SidebarNavLink
-                  key={item.label}
-                  item={item}
-                  pathname={pathname}
-                  onClose={onClose}
-                />
-              ))}
+              {group.items.map((item) =>
+                item.href === CHAT_HREF ? (
+                  <ChatNavSection
+                    key={item.label}
+                    item={item}
+                    pathname={pathname}
+                    onClose={onClose}
+                  />
+                ) : (
+                  <SidebarNavLink
+                    key={item.label}
+                    item={item}
+                    pathname={pathname}
+                    onClose={onClose}
+                  />
+                ),
+              )}
             </div>
           </div>
         ))}
@@ -469,11 +679,13 @@ export function DashboardNavigation({
         isMobileOpen={isMobileOpen}
         onClose={closeSidebar}
       />
-      <DashboardSidebar
-        user={user}
-        isMobileOpen={isMobileOpen}
-        onClose={closeSidebar}
-      />
+      <Suspense fallback={null}>
+        <DashboardSidebar
+          user={user}
+          isMobileOpen={isMobileOpen}
+          onClose={closeSidebar}
+        />
+      </Suspense>
       <DashboardMobileHeader
         isMobileOpen={isMobileOpen}
         onToggle={toggleSidebar}
