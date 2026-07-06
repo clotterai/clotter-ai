@@ -7,21 +7,26 @@ export default function ChatPage() {
       <ChatBackground />
 
       {/* Header */}
-      <header className="relative z-10 shrink-0 border-b border-[#7C3AED]/10 bg-[#05050f]/40 px-8 py-6 backdrop-blur-xl sm:px-10">
+      <header className="relative z-10 max-h-[60px] shrink-0 overflow-hidden border-b border-[#7C3AED]/10 bg-[#05050f]/40 px-4 py-3 backdrop-blur-xl md:max-h-none md:px-8 md:py-6 sm:px-10">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#A855F7]/35 to-transparent"
         />
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+        <div className="flex items-center justify-between gap-3 md:gap-6">
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#A855F7]/70">
+            <p className="hidden text-xs font-semibold uppercase tracking-[0.12em] text-[#A855F7]/70 md:block">
               AI Chat
             </p>
-            <h1 className="font-heading mt-1.5 text-[2rem] font-bold tracking-[-0.02em] text-white sm:text-[2.75rem] lg:text-[3rem]">
-              Creative co-pilot
-            </h1>
+            <div className="flex items-center gap-2.5 md:mt-1.5 md:block">
+              <h1 className="font-heading truncate text-xl font-bold tracking-[-0.02em] text-white md:text-4xl lg:text-[3rem]">
+                Creative co-pilot
+              </h1>
+              <span className="shrink-0 rounded-full border border-[#A855F7]/50 bg-gradient-to-r from-[#7C3AED] to-[#A855F7] px-3 py-1 text-[10px] font-semibold tracking-[-0.01em] text-white shadow-[0_0_24px_-6px_#A855F7] md:hidden">
+                ⚡ Clotter Lite
+              </span>
+            </div>
           </div>
-          <div className="flex shrink-0">
+          <div className="hidden shrink-0 md:flex">
             <span className="rounded-full border border-[#A855F7]/50 bg-gradient-to-r from-[#7C3AED] to-[#A855F7] px-4 py-2 text-xs font-semibold tracking-[-0.01em] text-white shadow-[0_0_24px_-6px_#A855F7] sm:px-5 sm:text-sm">
               ⚡ Clotter Lite
             </span>
