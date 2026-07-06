@@ -378,7 +378,7 @@ function DashboardMobileHeader({
   onToggle,
 }: DashboardMobileHeaderProps) {
   return (
-    <header className="fixed inset-x-0 top-0 z-40 flex h-14 items-center gap-3 border-b border-[#EC4899]/10 bg-[#0D0D1A]/85 px-4 backdrop-blur-xl md:hidden">
+    <header className="fixed inset-x-0 top-0 z-50 flex h-14 items-center border-b border-[#EC4899]/10 bg-[#0D0D1A]/85 px-4 backdrop-blur-xl md:hidden">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#EC4899]/60 to-transparent"
@@ -388,7 +388,7 @@ function DashboardMobileHeader({
         onClick={onToggle}
         aria-label={isMobileOpen ? "Close menu" : "Open menu"}
         aria-expanded={isMobileOpen}
-        className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-xl text-white/90 transition-all duration-300 hover:border-[#EC4899]/35 hover:bg-[#EC4899]/10 active:scale-95"
+        className="relative z-50 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-xl text-white/90 transition-all duration-300 hover:border-[#EC4899]/35 hover:bg-[#EC4899]/10 active:scale-95"
       >
         {isMobileOpen ? (
           <span className="text-lg leading-none">✕</span>
@@ -396,11 +396,13 @@ function DashboardMobileHeader({
           <span className="leading-none">☰</span>
         )}
       </button>
-      <div className="flex min-w-0 flex-1 items-center gap-2.5">
-        <ClotterLogo size={32} />
-        <p className="truncate font-heading text-[15px] font-bold tracking-[-0.02em] text-white">
-          Clotter AI
-        </p>
+      <div className="pointer-events-none absolute inset-x-0 flex items-center justify-center">
+        <div className="flex items-center gap-2.5">
+          <ClotterLogo size={32} />
+          <p className="truncate font-heading text-[15px] font-bold tracking-[-0.02em] text-white">
+            Clotter AI
+          </p>
+        </div>
       </div>
     </header>
   );
@@ -420,7 +422,7 @@ function DashboardSidebarBackdrop({
       type="button"
       aria-label="Close menu"
       onClick={onClose}
-      className={`fixed inset-0 z-40 bg-[#05050f]/70 backdrop-blur-[2px] transition-opacity duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:hidden ${
+      className={`fixed inset-0 z-[45] bg-[#05050f]/70 backdrop-blur-[2px] transition-opacity duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:hidden ${
         isMobileOpen
           ? "pointer-events-auto opacity-100"
           : "pointer-events-none opacity-0"

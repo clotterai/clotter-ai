@@ -112,9 +112,9 @@ export default async function DashboardLayout({
       <div aria-hidden className="dash-grid" />
 
       <DashboardNavigation user={sidebarUser}>
-        <div className="relative z-[60] flex min-h-full w-full min-w-0 flex-1 flex-col pt-14 md:pt-0 md:pl-[17.5rem]">
+        <div className="relative z-[1] flex min-h-full w-full min-w-0 flex-1 flex-col pt-14 md:pt-0 md:pl-[17.5rem]">
           <div aria-hidden className="dash-grid-main" />
-          <div className="relative z-[60] flex min-h-full w-full flex-col bg-[#0D0D1A]">
+          <div className="relative z-[1] flex min-h-full w-full flex-col bg-[#0D0D1A]">
             {children}
           </div>
         </div>
