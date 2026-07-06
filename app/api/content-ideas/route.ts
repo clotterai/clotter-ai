@@ -92,6 +92,7 @@ Return ONLY valid JSON in this exact format with no markdown or extra text:
             { role: "user", content: userPrompt },
           ],
           response_format: { type: "json_object" },
+          max_tokens: 800,
         }),
       },
     );

@@ -110,6 +110,7 @@ Return ONLY valid JSON in this exact format with no markdown or extra text:
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt },
           ],
+          max_tokens: 1200,
         }),
       },
     );

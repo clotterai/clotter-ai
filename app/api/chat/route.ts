@@ -149,6 +149,7 @@ export async function POST(request: Request) {
             ...messages,
           ],
           stream: true,
+          max_tokens: 800,
         }),
       },
     );
