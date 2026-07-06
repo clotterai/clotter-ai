@@ -27,6 +27,16 @@ function pickRandomPrompts(count: number) {
   return shuffled.slice(0, count);
 }
 
+function generateTitle(firstMessage: string) {
+  const trimmed = firstMessage.trim();
+  if (trimmed.length <= 35) return trimmed;
+
+  const truncated = trimmed.slice(0, 35);
+  const lastSpace = truncated.lastIndexOf(" ");
+  const cut = lastSpace > 0 ? truncated.slice(0, lastSpace) : truncated;
+  return `${cut}...`;
+}
+
 import { ClotterLogo } from "@/app/dashboard/components/clotter-logo";
 
 function ClotterLogoMark() {
@@ -290,13 +300,20 @@ function CopyButton({
 
 export function ChatInterface({
   selectedModel = "Clotter Lite",
+  sessionId = null,
+  onSessionCreate,
+  onMessagesUpdate,
 }: {
   selectedModel?: string;
+  sessionId?: string | null;
+  onSessionCreate?: (id: string, title: string) => void;
+  onMessagesUpdate?: (messages: Message[]) => void;
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [suggestedPrompts] = useState(() => pickRandomPrompts(4));
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingSession, setIsLoadingSession] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<Record<number, MessageFeedback>>({});
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
@@ -307,8 +324,88 @@ export function ChatInterface({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const locallyActiveSessionRef = useRef<string | null>(null);
+  const loadGenerationRef = useRef(0);
 
   const isEmpty = messages.length === 0;
+
+  useEffect(() => {
+    if (sessionId === null) {
+      locallyActiveSessionRef.current = null;
+      setMessages([]);
+      setFeedback({});
+      setCopiedIndex(null);
+      setFeedbackThanksIndex(null);
+      setError(null);
+      return;
+    }
+
+    if (sessionId === locallyActiveSessionRef.current) {
+      return;
+    }
+
+    const generation = ++loadGenerationRef.current;
+    locallyActiveSessionRef.current = null;
+
+    async function loadSession() {
+      setIsLoadingSession(true);
+      setError(null);
+
+      try {
+        const response = await fetch(`/api/chat-sessions/${sessionId}`);
+        if (!response.ok) {
+          throw new Error("Failed to load chat.");
+        }
+
+        const data = (await response.json()) as {
+          session?: { messages?: Message[] };
+        };
+
+        if (generation !== loadGenerationRef.current) return;
+
+        const loadedMessages = Array.isArray(data.session?.messages)
+          ? data.session.messages.filter(
+              (message): message is Message =>
+                typeof message === "object" &&
+                message !== null &&
+                typeof message.id === "string" &&
+                (message.role === "user" || message.role === "assistant") &&
+                typeof message.content === "string",
+            )
+          : [];
+
+        setMessages(loadedMessages);
+        setFeedback({});
+        setCopiedIndex(null);
+        setFeedbackThanksIndex(null);
+      } catch (err) {
+        if (generation !== loadGenerationRef.current) return;
+        setError(err instanceof Error ? err.message : "Failed to load chat.");
+        setMessages([]);
+      } finally {
+        if (generation === loadGenerationRef.current) {
+          setIsLoadingSession(false);
+        }
+      }
+    }
+
+    void loadSession();
+  }, [sessionId]);
+
+  async function persistMessages(
+    activeSessionId: string,
+    updatedMessages: Message[],
+  ) {
+    const response = await fetch(`/api/chat-sessions/${activeSessionId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages: updatedMessages }),
+    });
+
+    if (response.ok) {
+      onMessagesUpdate?.(updatedMessages);
+    }
+  }
 
   useEffect(() => {
     if (!isEmpty) {
@@ -389,7 +486,9 @@ export function ChatInterface({
 
   async function sendMessage(text?: string) {
     const trimmed = (text ?? input).trim();
-    if (!trimmed || isLoading) return;
+    if (!trimmed || isLoading || isLoadingSession) return;
+
+    let activeSessionId = sessionId;
 
     const userMessage: Message = {
       id: crypto.randomUUID(),
@@ -408,6 +507,33 @@ export function ChatInterface({
     }
 
     try {
+      if (!activeSessionId) {
+        const title = generateTitle(trimmed);
+        const createResponse = await fetch("/api/chat-sessions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title }),
+        });
+
+        if (!createResponse.ok) {
+          setMessages(messages);
+          throw new Error("Failed to create chat session.");
+        }
+
+        const createData = (await createResponse.json()) as {
+          session?: { id: string };
+        };
+
+        if (!createData.session?.id) {
+          setMessages(messages);
+          throw new Error("Failed to create chat session.");
+        }
+
+        activeSessionId = createData.session.id;
+        locallyActiveSessionRef.current = activeSessionId;
+        onSessionCreate?.(activeSessionId, title);
+      }
+
       const history = nextMessages.map(({ role, content }) => ({ role, content }));
       const assistantId = crypto.randomUUID();
 
@@ -458,6 +584,15 @@ export function ChatInterface({
         setMessages(nextMessages);
         throw new Error("No response content received.");
       }
+
+      const finalMessages: Message[] = [
+        ...nextMessages,
+        { id: assistantId, role: "assistant", content },
+      ];
+
+      if (activeSessionId) {
+        await persistMessages(activeSessionId, finalMessages);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to send message.");
     } finally {
@@ -501,7 +636,11 @@ export function ChatInterface({
       `}</style>
       {/* Messages or welcome */}
       <div className="flex-1 overflow-y-auto">
-        {isEmpty ? (
+        {isLoadingSession ? (
+          <div className="flex h-full items-center justify-center px-6 py-12">
+            <p className="text-sm text-white/40">Loading chat...</p>
+          </div>
+        ) : isEmpty ? (
           <div className="chat-welcome flex h-full flex-col items-center justify-center px-6 py-12">
             <ClotterLogoMark />
             <h2 className="font-heading chat-welcome-title mt-8 text-center text-[2rem] font-bold leading-[1.12] tracking-[-0.02em] text-white sm:text-[2.75rem]">
