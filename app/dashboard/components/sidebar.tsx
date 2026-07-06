@@ -13,180 +13,255 @@ export type SidebarUser = {
   initials: string;
 };
 
-const navItems = [
+const dashboardNavItem = {
+  label: "Dashboard",
+  href: "/dashboard",
+  icon: (
+    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+      <path
+        d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+    </svg>
+  ),
+};
+
+const navGroups = [
   {
-    label: "Dashboard",
-    href: "/dashboard",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
-        <path
-          d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5Z"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
+    label: "CREATE",
+    items: [
+      {
+        label: "AI Chat",
+        href: "/dashboard/chat",
+        icon: (
+          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+            <path
+              d="M8 10h8M8 14h5M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 0 1-4-.8L3 21l1.8-4.2A8.8 8.8 0 0 1 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8Z"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        ),
+      },
+      {
+        label: "Caption Generator",
+        href: "/dashboard/captions",
+        icon: (
+          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+            <path
+              d="M4 6h16M4 12h12M4 18h8M20 18l-2 2-4-4"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        ),
+      },
+      {
+        label: "Hook Generator",
+        href: "/dashboard/hooks",
+        icon: (
+          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+            <path
+              d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        ),
+      },
+      {
+        label: "Script Generator",
+        href: "/dashboard/script",
+        icon: (
+          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+            <path
+              d="M8 4h8a2 2 0 0 1 2 2v14l-3-2-3 2-3-2-3 2V6a2 2 0 0 1 2-2Z"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M10 8h4M10 12h4M10 16h2"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
+          </svg>
+        ),
+      },
+    ],
   },
   {
-    label: "AI Chat",
-    href: "/dashboard/chat",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
-        <path
-          d="M8 10h8M8 14h5M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 0 1-4-.8L3 21l1.8-4.2A8.8 8.8 0 0 1 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8Z"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
+    label: "PLAN",
+    items: [
+      {
+        label: "Content Ideas",
+        href: "/dashboard/content-ideas",
+        icon: (
+          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+            <path
+              d="M9.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            />
+            <path
+              d="M12 6v6l3 2"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
+          </svg>
+        ),
+      },
+      {
+        label: "Content Planner",
+        href: "/dashboard/planner",
+        icon: (
+          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+            <path
+              d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        ),
+      },
+    ],
   },
   {
-    label: "Bubble",
-    href: "/dashboard/bubble",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
-        <circle
-          cx="12"
-          cy="12"
-          r="8"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        />
-        <circle cx="9" cy="10" r="1.5" fill="currentColor" opacity="0.5" />
-        <circle cx="14" cy="14" r="1" fill="currentColor" opacity="0.35" />
-      </svg>
-    ),
+    label: "GROW",
+    items: [
+      {
+        label: "Trend Analyzer",
+        href: "/dashboard/trends",
+        icon: (
+          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+            <path
+              d="M3 17l6-6 4 4 8-10"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M14 5h7v7"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        ),
+      },
+    ],
   },
   {
-    label: "AI Memory",
-    href: "/dashboard/memory",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
-        <path
-          d="M9.5 2A2.5 2.5 0 0 0 7 4.5v.5A2.5 2.5 0 0 0 5 7.5 2.5 2.5 0 0 0 2.5 10v1A2.5 2.5 0 0 0 5 13.5 2.5 2.5 0 0 0 7 15.5v.5A2.5 2.5 0 0 0 9.5 18h1A2.5 2.5 0 0 0 13 15.5v-.5a2.5 2.5 0 0 0 2-2.45V12a2.5 2.5 0 0 0-2-2.45V9A2.5 2.5 0 0 0 13 6.5V6A2.5 2.5 0 0 0 10.5 3.5h-1Z"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M12 6v12M9 9.5c.5-.5 1.5-.75 3-.75s2.5.25 3 .75M9 14.5c.5.5 1.5.75 3 .75s2.5-.25 3-.75"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    label: "Content Ideas",
-    href: "/dashboard/content-ideas",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
-        <path
-          d="M9.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        />
-        <path
-          d="M12 6v6l3 2"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    label: "Caption Generator",
-    href: "/dashboard/captions",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
-        <path
-          d="M4 6h16M4 12h12M4 18h8M20 18l-2 2-4-4"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    label: "Hook Generator",
-    href: "/dashboard/hooks",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
-        <path
-          d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    label: "Script Generator",
-    href: "/dashboard/script",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
-        <path
-          d="M8 4h8a2 2 0 0 1 2 2v14l-3-2-3 2-3-2-3 2V6a2 2 0 0 1 2-2Z"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M10 8h4M10 12h4M10 16h2"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    label: "Content Planner",
-    href: "/dashboard/planner",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
-        <path
-          d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    label: "Trend Analyzer",
-    href: "/dashboard/trends",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
-        <path
-          d="M3 17l6-6 4 4 8-10"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M14 5h7v7"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
+    label: "ME",
+    items: [
+      {
+        label: "AI Memory",
+        href: "/dashboard/memory",
+        icon: (
+          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+            <path
+              d="M9.5 2A2.5 2.5 0 0 0 7 4.5v.5A2.5 2.5 0 0 0 5 7.5 2.5 2.5 0 0 0 2.5 10v1A2.5 2.5 0 0 0 5 13.5 2.5 2.5 0 0 0 7 15.5v.5A2.5 2.5 0 0 0 9.5 18h1A2.5 2.5 0 0 0 13 15.5v-.5a2.5 2.5 0 0 0 2-2.45V12a2.5 2.5 0 0 0-2-2.45V9A2.5 2.5 0 0 0 13 6.5V6A2.5 2.5 0 0 0 10.5 3.5h-1Z"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M12 6v12M9 9.5c.5-.5 1.5-.75 3-.75s2.5.25 3 .75M9 14.5c.5.5 1.5.75 3 .75s2.5-.25 3-.75"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
+          </svg>
+        ),
+      },
+      {
+        label: "Bubble",
+        href: "/dashboard/bubble",
+        icon: (
+          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+            <circle
+              cx="12"
+              cy="12"
+              r="8"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            />
+            <circle cx="9" cy="10" r="1.5" fill="currentColor" opacity="0.5" />
+            <circle cx="14" cy="14" r="1" fill="currentColor" opacity="0.35" />
+          </svg>
+        ),
+      },
+    ],
   },
 ];
+
+type NavItem = {
+  label: string;
+  href: string;
+  icon: ReactNode;
+};
+
+function SidebarNavLink({
+  item,
+  pathname,
+  onClose,
+}: {
+  item: NavItem;
+  pathname: string;
+  onClose: () => void;
+}) {
+  const active =
+    item.href === "/dashboard"
+      ? pathname === "/dashboard"
+      : pathname.startsWith(item.href) && item.href !== "#";
+
+  return (
+    <Link
+      href={item.href}
+      onClick={onClose}
+      className={`dash-nav-item group relative flex items-center gap-3.5 overflow-hidden rounded-xl px-3.5 py-3 text-[15px] font-medium tracking-[-0.02em] ${
+        active
+          ? "bg-gradient-to-r from-[#EC4899]/15 to-[#F97316]/10 text-[#FECDD3] shadow-[0_0_40px_-8px_#EC4899] ring-1 ring-[#EC4899]/35"
+          : "text-white/45 hover:text-white/90"
+      }`}
+      aria-current={active ? "page" : undefined}
+    >
+      {active && (
+        <>
+          <span
+            aria-hidden
+            className="absolute inset-0 bg-gradient-to-r from-[#EC4899]/25 via-[#F97316]/12 to-transparent"
+          />
+          <span aria-hidden className="dash-nav-glow-bar" />
+        </>
+      )}
+      <span
+        className={`relative z-[1] transition-all duration-300 ${
+          active
+            ? "text-[#FB923C] drop-shadow-[0_0_8px_rgba(236,72,153,0.6)]"
+            : "text-white/30 group-hover:text-[#EC4899]/70"
+        }`}
+      >
+        {item.icon}
+      </span>
+      <span className="relative z-[1]">{item.label}</span>
+    </Link>
+  );
+}
 
 type DashboardSidebarProps = {
   user: SidebarUser;
@@ -230,50 +305,30 @@ export function DashboardSidebar({
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-6">
-        <p className="mb-4 px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/25">
-          Workspace
-        </p>
-        {navItems.map((item) => {
-          const active =
-            item.href === "/dashboard"
-              ? pathname === "/dashboard"
-              : pathname.startsWith(item.href) && item.href !== "#";
+      <nav className="flex-1 overflow-y-auto px-4 py-6">
+        <SidebarNavLink
+          item={dashboardNavItem}
+          pathname={pathname}
+          onClose={onClose}
+        />
 
-          return (
-            <Link
-              key={item.label}
-              href={item.href}
-              onClick={onClose}
-              className={`dash-nav-item group relative flex items-center gap-3.5 overflow-hidden rounded-xl px-3.5 py-3 text-[15px] font-medium tracking-[-0.02em] ${
-                active
-                  ? "bg-gradient-to-r from-[#EC4899]/15 to-[#F97316]/10 text-[#FECDD3] shadow-[0_0_40px_-8px_#EC4899] ring-1 ring-[#EC4899]/35"
-                  : "text-white/45 hover:text-white/90"
-              }`}
-              aria-current={active ? "page" : undefined}
-            >
-              {active && (
-                <>
-                  <span
-                    aria-hidden
-                    className="absolute inset-0 bg-gradient-to-r from-[#EC4899]/25 via-[#F97316]/12 to-transparent"
-                  />
-                  <span aria-hidden className="dash-nav-glow-bar" />
-                </>
-              )}
-              <span
-                className={`relative z-[1] transition-all duration-300 ${
-                  active
-                    ? "text-[#FB923C] drop-shadow-[0_0_8px_rgba(236,72,153,0.6)]"
-                    : "text-white/30 group-hover:text-[#EC4899]/70"
-                }`}
-              >
-                {item.icon}
-              </span>
-              <span className="relative z-[1]">{item.label}</span>
-            </Link>
-          );
-        })}
+        {navGroups.map((group) => (
+          <div key={group.label} className="mt-6">
+            <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-[0.15em] text-white/25">
+              {group.label}
+            </p>
+            <div className="space-y-1">
+              {group.items.map((item) => (
+                <SidebarNavLink
+                  key={item.label}
+                  item={item}
+                  pathname={pathname}
+                  onClose={onClose}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
       </nav>
 
       {/* Profile */}
