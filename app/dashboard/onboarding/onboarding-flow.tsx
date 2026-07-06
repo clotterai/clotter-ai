@@ -51,6 +51,11 @@ const goals = [
 
 const frequencies = ["Daily", "3-4x week", "1-2x week", "Monthly"];
 
+const optionGridClass = "grid grid-cols-2 md:grid-cols-3 gap-3 w-full";
+const optionButtonClass =
+  "memory-onboarding-card text-sm md:text-base py-3 px-4";
+const pillButtonClass = "captions-tone-pill text-sm md:text-base py-3 px-4";
+
 function Confetti() {
   return (
     <div aria-hidden className="memory-confetti pointer-events-none fixed inset-0 z-[200]">
@@ -186,7 +191,7 @@ export function OnboardingFlow() {
 
   return (
     <div
-      className="onboarding-flow fixed inset-0 z-[120] overflow-y-auto bg-[#0D0D1A] text-white"
+      className="onboarding-flow fixed inset-0 z-[200] min-h-screen overflow-y-auto bg-[#0D0D1A] text-white"
       style={{ backgroundColor: "#0D0D1A", color: "#ffffff" }}
     >
       {showConfetti && <Confetti />}
@@ -197,20 +202,20 @@ export function OnboardingFlow() {
         style={{ backgroundColor: "#0D0D1A" }}
       />
 
-      <div className="relative z-20 flex min-h-screen flex-col">
-        <div className="memory-onboarding-progress">
+      <div className="relative z-10 flex min-h-screen flex-col">
+        <div className="memory-onboarding-progress relative z-10">
           <div
             className="memory-onboarding-progress-fill"
             style={{ width: `${progress}%` }}
           />
         </div>
 
-        <div className="relative z-20 flex flex-1 flex-col items-center justify-center px-4 py-6 sm:px-10 sm:py-12">
-          <div className="relative z-20 mb-10 text-center">
+        <div className="relative z-10 flex min-h-screen w-full flex-col items-center justify-start px-4 py-8 md:py-16">
+          <div className="relative z-10 mb-8 w-full max-w-2xl text-center md:mb-10">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6366F1]">
               Step {step + 1} of {TOTAL_STEPS}
             </p>
-            <h1 className="font-heading mt-3 text-2xl font-bold tracking-[-0.02em] text-white sm:text-[2.5rem]">
+            <h1 className="font-heading mt-3 text-2xl font-bold tracking-[-0.02em] text-white md:text-4xl">
               Let&apos;s build your Creator DNA
             </h1>
             <p className="mt-3 max-w-lg text-base text-white/45">
@@ -221,24 +226,24 @@ export function OnboardingFlow() {
 
           <div
             key={step}
-            className={`memory-onboarding-step relative z-20 w-full max-w-2xl ${
+            className={`memory-onboarding-step relative z-10 w-full max-w-2xl ${
               direction === "next"
                 ? "memory-onboarding-step--next"
                 : "memory-onboarding-step--back"
             }`}
           >
             {step === 0 && (
-              <section className="relative z-20">
-                <h2 className="font-heading text-base font-bold tracking-[-0.02em] text-white sm:text-xl">
+              <section className="relative z-10">
+                <h2 className="font-heading text-2xl font-bold tracking-[-0.02em] text-white md:text-4xl">
                   What&apos;s your creator niche?
                 </h2>
-                <div className="mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+                <div className={`mt-6 ${optionGridClass}`}>
                   {niches.map((option) => (
                     <button
                       key={option}
                       type="button"
                       onClick={() => setNiche(option)}
-                      className={`memory-onboarding-card text-base${
+                      className={`${optionButtonClass}${
                         niche === option ? " memory-onboarding-card--active" : ""
                       }`}
                     >
@@ -252,25 +257,25 @@ export function OnboardingFlow() {
                     value={subNiche}
                     onChange={(e) => setSubNiche(e.target.value)}
                     placeholder="Describe your niche..."
-                    className="captions-textarea onboarding-input mt-4 !min-h-0 !py-3.5 text-base"
+                    className="captions-textarea onboarding-input relative z-10 mt-4 !min-h-0 !py-3.5 text-base"
                   />
                 )}
               </section>
             )}
 
             {step === 1 && (
-              <section className="relative z-20">
-                <h2 className="font-heading text-base font-bold tracking-[-0.02em] text-white sm:text-xl">
+              <section className="relative z-10">
+                <h2 className="font-heading text-2xl font-bold tracking-[-0.02em] text-white md:text-4xl">
                   What platforms do you create for?
                 </h2>
                 <p className="mt-2 text-base text-white/40">Select all that apply</p>
-                <div className="mt-6 grid grid-cols-2 gap-3">
+                <div className={`mt-6 ${optionGridClass}`}>
                   {platforms.map((platform) => (
                     <button
                       key={platform}
                       type="button"
                       onClick={() => togglePlatform(platform)}
-                      className={`memory-onboarding-card memory-onboarding-card--platform text-base${
+                      className={`${optionButtonClass} memory-onboarding-card--platform${
                         selectedPlatforms.includes(platform)
                           ? " memory-onboarding-card--active"
                           : ""
@@ -284,12 +289,12 @@ export function OnboardingFlow() {
             )}
 
             {step === 2 && (
-              <section className="relative z-20 space-y-6">
+              <section className="relative z-10 space-y-6">
                 <div>
-                  <h2 className="font-heading text-base font-bold tracking-[-0.02em] text-white sm:text-xl">
+                  <h2 className="font-heading text-2xl font-bold tracking-[-0.02em] text-white md:text-4xl">
                     Who is your audience?
                   </h2>
-                  <p className="mt-2 text-base font-semibold uppercase tracking-[0.1em] text-white/35">
+                  <p className="mt-2 text-sm font-semibold uppercase tracking-[0.1em] text-white/35 md:text-base">
                     Age range
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
@@ -298,7 +303,7 @@ export function OnboardingFlow() {
                         key={option}
                         type="button"
                         onClick={() => setAudienceAge(option)}
-                        className={`captions-tone-pill text-base${
+                        className={`${pillButtonClass}${
                           audienceAge === option ? " captions-tone-pill--active" : ""
                         }`}
                       >
@@ -308,7 +313,7 @@ export function OnboardingFlow() {
                   </div>
                 </div>
                 <div>
-                  <p className="text-base font-semibold uppercase tracking-[0.1em] text-white/35">
+                  <p className="text-sm font-semibold uppercase tracking-[0.1em] text-white/35 md:text-base">
                     Location
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
@@ -317,7 +322,7 @@ export function OnboardingFlow() {
                         key={option}
                         type="button"
                         onClick={() => setAudienceLocation(option)}
-                        className={`captions-tone-pill text-base${
+                        className={`${pillButtonClass}${
                           audienceLocation === option
                             ? " captions-tone-pill--active"
                             : ""
@@ -329,7 +334,7 @@ export function OnboardingFlow() {
                   </div>
                 </div>
                 <div>
-                  <p className="text-base font-semibold uppercase tracking-[0.1em] text-white/35">
+                  <p className="text-sm font-semibold uppercase tracking-[0.1em] text-white/35 md:text-base">
                     Gender
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
@@ -338,7 +343,7 @@ export function OnboardingFlow() {
                         key={option}
                         type="button"
                         onClick={() => setAudienceGender(option)}
-                        className={`captions-tone-pill text-base${
+                        className={`${pillButtonClass}${
                           audienceGender === option
                             ? " captions-tone-pill--active"
                             : ""
@@ -353,17 +358,17 @@ export function OnboardingFlow() {
             )}
 
             {step === 3 && (
-              <section className="relative z-20">
-                <h2 className="font-heading text-base font-bold tracking-[-0.02em] text-white sm:text-xl">
+              <section className="relative z-10">
+                <h2 className="font-heading text-2xl font-bold tracking-[-0.02em] text-white md:text-4xl">
                   What&apos;s your content style?
                 </h2>
-                <div className="mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+                <div className={`mt-6 ${optionGridClass}`}>
                   {contentStyles.map((option) => (
                     <button
                       key={option}
                       type="button"
                       onClick={() => setContentStyle(option)}
-                      className={`memory-onboarding-card text-base${
+                      className={`${optionButtonClass}${
                         contentStyle === option
                           ? " memory-onboarding-card--active"
                           : ""
@@ -377,17 +382,17 @@ export function OnboardingFlow() {
             )}
 
             {step === 4 && (
-              <section className="relative z-20">
-                <h2 className="font-heading text-base font-bold tracking-[-0.02em] text-white sm:text-xl">
+              <section className="relative z-10">
+                <h2 className="font-heading text-2xl font-bold tracking-[-0.02em] text-white md:text-4xl">
                   What&apos;s your biggest goal right now?
                 </h2>
-                <div className="mt-6 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                <div className={`mt-6 ${optionGridClass}`}>
                   {goals.map((option) => (
                     <button
                       key={option}
                       type="button"
                       onClick={() => setBiggestGoal(option)}
-                      className={`memory-onboarding-card text-base${
+                      className={`${optionButtonClass}${
                         biggestGoal === option
                           ? " memory-onboarding-card--active"
                           : ""
@@ -401,8 +406,8 @@ export function OnboardingFlow() {
             )}
 
             {step === 5 && (
-              <section className="relative z-20">
-                <h2 className="font-heading text-base font-bold tracking-[-0.02em] text-white sm:text-xl">
+              <section className="relative z-10">
+                <h2 className="font-heading text-2xl font-bold tracking-[-0.02em] text-white md:text-4xl">
                   How often do you post?
                 </h2>
                 <div className="mt-6 flex flex-wrap gap-2">
@@ -411,7 +416,7 @@ export function OnboardingFlow() {
                       key={option}
                       type="button"
                       onClick={() => setPostingFrequency(option)}
-                      className={`captions-tone-pill text-base${
+                      className={`${pillButtonClass}${
                         postingFrequency === option
                           ? " captions-tone-pill--active"
                           : ""
@@ -425,8 +430,8 @@ export function OnboardingFlow() {
             )}
 
             {step === 6 && (
-              <section className="relative z-20">
-                <h2 className="font-heading text-base font-bold tracking-[-0.02em] text-white sm:text-xl">
+              <section className="relative z-10">
+                <h2 className="font-heading text-2xl font-bold tracking-[-0.02em] text-white md:text-4xl">
                   What makes your content unique?
                 </h2>
                 <p className="mt-2 text-base text-white/40">
@@ -437,24 +442,24 @@ export function OnboardingFlow() {
                   onChange={(e) => setUniqueAngle(e.target.value)}
                   rows={5}
                   placeholder="e.g. I break down complex AI tools for non-technical creators in under 60 seconds..."
-                  className="captions-textarea onboarding-input mt-6 w-full resize-none text-base"
+                  className="captions-textarea onboarding-input relative z-10 mt-6 w-full resize-none text-base"
                 />
               </section>
             )}
           </div>
 
           {error && (
-            <p className="relative z-20 mt-6 max-w-2xl rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-4 text-base text-red-300">
+            <p className="relative z-10 mt-6 w-full max-w-2xl rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-4 text-base text-red-300">
               {error}
             </p>
           )}
 
-          <div className="relative z-20 mt-10 flex w-full max-w-2xl flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <div className="relative z-10 mt-auto flex w-full max-w-2xl flex-col-reverse gap-3 pt-10 md:flex-row md:items-center md:justify-between md:gap-4">
             <button
               type="button"
               onClick={goBack}
               disabled={step === 0 || isSubmitting}
-              className="script-action-btn w-full text-base sm:w-auto disabled:opacity-40"
+              className="script-action-btn w-full text-base md:w-auto disabled:opacity-40"
             >
               Back
             </button>
@@ -464,7 +469,7 @@ export function OnboardingFlow() {
                 type="button"
                 onClick={goNext}
                 disabled={!canContinue}
-                className="script-action-btn script-action-btn--primary w-full text-base sm:w-auto disabled:opacity-40"
+                className="script-action-btn script-action-btn--primary w-full text-base md:w-auto disabled:opacity-40"
               >
                 Continue
               </button>
@@ -473,7 +478,7 @@ export function OnboardingFlow() {
                 type="button"
                 onClick={() => void completeOnboarding()}
                 disabled={!canContinue || isSubmitting}
-                className="script-action-btn script-action-btn--primary w-full text-base sm:w-auto disabled:opacity-40"
+                className="script-action-btn script-action-btn--primary w-full text-base md:w-auto disabled:opacity-40"
               >
                 {isSubmitting ? "Building your DNA..." : "Complete setup"}
               </button>
