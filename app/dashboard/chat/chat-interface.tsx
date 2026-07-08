@@ -7,12 +7,172 @@ import { createClient } from "@/lib/supabase/client";
 import { dispatchChatSessionsUpdated } from "@/lib/chat-sessions-events";
 import { generateSmartChatTitle } from "@/lib/generate-chat-title";
 
+type BrowserSpeechRecognition = {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onstart: (() => void) | null;
+  onresult: ((event: BrowserSpeechRecognitionEvent) => void) | null;
+  onerror: (() => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+};
+
+type BrowserSpeechRecognitionEvent = {
+  results: ArrayLike<{ 0?: { transcript?: string } }>;
+};
+
+type BrowserSpeechRecognitionConstructor = new () => BrowserSpeechRecognition;
+
+declare global {
+  interface Window {
+    SpeechRecognition?: BrowserSpeechRecognitionConstructor;
+    webkitSpeechRecognition?: BrowserSpeechRecognitionConstructor;
+  }
+}
+
+type MessageAttachment = {
+  type: "image" | "pdf";
+  name: string;
+  mimeType: string;
+  dataUrl: string;
+};
+
 type Message = {
   id: string;
   role: "user" | "assistant";
   content: string;
   createdAt?: string;
+  attachment?: MessageAttachment;
 };
+
+type ApiContentPart =
+  | { type: "text"; text: string }
+  | { type: "image_url"; image_url: { url: string } }
+  | { type: "file"; file: { filename: string; file_data: string } };
+
+type ApiChatMessage = {
+  role: "user" | "assistant";
+  content: string | ApiContentPart[];
+};
+
+const ACCEPTED_FILE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "application/pdf",
+];
+const MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024;
+
+function isMessageAttachment(value: unknown): value is MessageAttachment {
+  if (!value || typeof value !== "object") return false;
+  const attachment = value as MessageAttachment;
+  return (
+    (attachment.type === "image" || attachment.type === "pdf") &&
+    typeof attachment.name === "string" &&
+    typeof attachment.mimeType === "string" &&
+    typeof attachment.dataUrl === "string"
+  );
+}
+
+function readFileAsDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result);
+      } else {
+        reject(new Error("Failed to read file."));
+      }
+    };
+    reader.onerror = () => reject(new Error("Failed to read file."));
+    reader.readAsDataURL(file);
+  });
+}
+
+function toApiMessage(message: Message): ApiChatMessage {
+  if (!message.attachment) {
+    return { role: message.role, content: message.content };
+  }
+
+  const parts: ApiContentPart[] = [];
+
+  if (message.content.trim()) {
+    parts.push({ type: "text", text: message.content });
+  }
+
+  if (message.attachment.type === "image") {
+    parts.push({
+      type: "image_url",
+      image_url: { url: message.attachment.dataUrl },
+    });
+  } else {
+    parts.push({
+      type: "file",
+      file: {
+        filename: message.attachment.name,
+        file_data: message.attachment.dataUrl,
+      },
+    });
+  }
+
+  return { role: message.role, content: parts };
+}
+
+function PaperclipIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+      <path
+        d="M8 12.5V7.5a3.5 3.5 0 0 1 7 0v8a5.5 5.5 0 0 1-11 0V9"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function MicIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+      <path
+        d="M12 15a3 3 0 0 0 3-3V7a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M6 11v1a6 6 0 0 0 12 0v-1M12 18v3"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function PdfIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+      <path
+        d="M8 4h6l4 4v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M14 4v4h4M8 13h8M8 17h5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+const inputUtilityButtonClass =
+  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-white/50 transition-all duration-150 hover:border-white/20 hover:bg-white/[0.08] hover:text-white/80 disabled:cursor-not-allowed disabled:opacity-40 sm:h-12 sm:w-12";
 
 type MessageFeedback = "like" | "dislike";
 
@@ -335,8 +495,15 @@ export function ChatInterface({
   const [feedbackThanksIndex, setFeedbackThanksIndex] = useState<number | null>(
     null,
   );
+  const [selectedAttachment, setSelectedAttachment] =
+    useState<MessageAttachment | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const recognitionRef = useRef<BrowserSpeechRecognition | null>(null);
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const locallyActiveSessionRef = useRef<string | null>(null);
@@ -379,14 +546,24 @@ export function ChatInterface({
         if (generation !== loadGenerationRef.current) return;
 
         const loadedMessages = Array.isArray(data.session?.messages)
-          ? data.session.messages.filter(
-              (message): message is Message =>
-                typeof message === "object" &&
-                message !== null &&
-                typeof message.id === "string" &&
-                (message.role === "user" || message.role === "assistant") &&
-                typeof message.content === "string",
-            )
+          ? data.session.messages
+              .filter(
+                (message): message is Message =>
+                  typeof message === "object" &&
+                  message !== null &&
+                  typeof message.id === "string" &&
+                  (message.role === "user" || message.role === "assistant") &&
+                  typeof message.content === "string" &&
+                  (message.attachment === undefined ||
+                    isMessageAttachment(message.attachment)),
+              )
+              .map((message) => ({
+                ...message,
+                createdAt:
+                  typeof message.createdAt === "string"
+                    ? message.createdAt
+                    : undefined,
+              }))
           : [];
 
         setMessages(loadedMessages);
@@ -438,8 +615,110 @@ export function ChatInterface({
       if (feedbackTimeoutRef.current) {
         clearTimeout(feedbackTimeoutRef.current);
       }
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
+      recognitionRef.current?.stop();
     };
   }, []);
+
+  function showToast(message: string) {
+    setToast(message);
+
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+
+    toastTimeoutRef.current = setTimeout(() => {
+      setToast(null);
+    }, 3000);
+  }
+
+  async function handleFileSelect(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) return;
+
+    if (!ACCEPTED_FILE_TYPES.includes(file.type)) {
+      setError("Please select a JPG, PNG, WebP image, or PDF file.");
+      return;
+    }
+
+    if (file.size > MAX_ATTACHMENT_SIZE) {
+      setError("File must be 10MB or smaller.");
+      return;
+    }
+
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      setSelectedAttachment({
+        type: file.type === "application/pdf" ? "pdf" : "image",
+        name: file.name,
+        mimeType: file.type,
+        dataUrl,
+      });
+      setError(null);
+    } catch {
+      setError("Failed to read the selected file.");
+    }
+  }
+
+  function handleRemoveAttachment() {
+    setSelectedAttachment(null);
+  }
+
+  function toggleVoiceInput() {
+    const SpeechRecognitionConstructor =
+      window.SpeechRecognition ?? window.webkitSpeechRecognition;
+
+    if (!SpeechRecognitionConstructor) {
+      showToast("Voice not supported on this browser");
+      return;
+    }
+
+    if (isRecording) {
+      recognitionRef.current?.stop();
+      return;
+    }
+
+    const recognition = new SpeechRecognitionConstructor();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = "en-US";
+
+    recognition.onstart = () => {
+      setIsRecording(true);
+    };
+
+    recognition.onresult = (event: BrowserSpeechRecognitionEvent) => {
+      const transcript = Array.from(event.results)
+        .map((result) => result[0]?.transcript ?? "")
+        .join("")
+        .trim();
+
+      if (transcript) {
+        setInput((current) => {
+          const nextValue = current ? `${current} ${transcript}` : transcript;
+          return nextValue.trim();
+        });
+      }
+    };
+
+    recognition.onerror = () => {
+      setIsRecording(false);
+      recognitionRef.current = null;
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+      recognitionRef.current = null;
+      textareaRef.current?.focus();
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+  }
 
   async function handleCopy(messageIndex: number, content: string) {
     try {
@@ -503,7 +782,9 @@ export function ChatInterface({
 
   async function sendMessage(text?: string) {
     const trimmed = (text ?? input).trim();
-    if (!trimmed || isLoading || isLoadingSession) return;
+    const attachment = selectedAttachment;
+
+    if ((!trimmed && !attachment) || isLoading || isLoadingSession) return;
 
     let activeSessionId = sessionId;
 
@@ -512,11 +793,13 @@ export function ChatInterface({
       role: "user",
       content: trimmed,
       createdAt: new Date().toISOString(),
+      attachment: attachment ?? undefined,
     };
 
     const nextMessages = [...messages, userMessage];
     setMessages(nextMessages);
     setInput("");
+    setSelectedAttachment(null);
     setError(null);
     setIsLoading(true);
 
@@ -526,7 +809,7 @@ export function ChatInterface({
 
     try {
       if (!activeSessionId) {
-        const title = generateTitle(trimmed);
+        const title = generateTitle(trimmed || attachment?.name || "New Chat");
         const createResponse = await fetch("/api/chat-sessions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -555,7 +838,7 @@ export function ChatInterface({
         dispatchChatSessionsUpdated();
       }
 
-      const history = nextMessages.map(({ role, content }) => ({ role, content }));
+      const history = nextMessages.map(toApiMessage);
       const assistantId = crypto.randomUUID();
 
       setMessages([
@@ -645,6 +928,16 @@ export function ChatInterface({
     event.target.style.height = `${Math.min(event.target.scrollHeight, 200)}px`;
   }
 
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    textarea.style.height = "auto";
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
+  }, [input]);
+
+  const canSend = Boolean(input.trim() || selectedAttachment);
+
   return (
     <div className="relative z-10 flex min-h-0 flex-1 flex-col">
       <style>{`
@@ -663,6 +956,19 @@ export function ChatInterface({
 
         .chat-ai-logo--thinking {
           animation: chat-ai-logo-spin 1s linear infinite;
+        }
+
+        @keyframes chat-mic-pulse {
+          0%, 100% {
+            box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.45);
+          }
+          50% {
+            box-shadow: 0 0 0 8px rgba(236, 72, 153, 0);
+          }
+        }
+
+        .chat-mic-pulse {
+          animation: chat-mic-pulse 1.2s ease-in-out infinite;
         }
       `}</style>
       {/* Messages or welcome */}
@@ -714,7 +1020,23 @@ export function ChatInterface({
                   <div className="flex justify-end">
                     <div className="flex max-w-[85%] flex-col items-end">
                       <div className="rounded-2xl bg-gradient-to-br from-pink-500 to-orange-500 px-4 py-3 text-white shadow-[0_8px_32px_-12px_rgba(236,72,153,0.45)]">
-                        <MessageText content={message.content} />
+                        {message.attachment?.type === "image" && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={message.attachment.dataUrl}
+                            alt={message.attachment.name}
+                            className="mb-2 max-h-32 max-w-full rounded-lg object-cover ring-1 ring-white/20"
+                          />
+                        )}
+                        {message.attachment?.type === "pdf" && (
+                          <div className="mb-2 flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-sm">
+                            <PdfIcon className="h-4 w-4 shrink-0" />
+                            <span className="truncate">{message.attachment.name}</span>
+                          </div>
+                        )}
+                        {message.content ? (
+                          <MessageText content={message.content} />
+                        ) : null}
                       </div>
                       <UserMessageActions
                         messageIndex={index}
@@ -783,7 +1105,66 @@ export function ChatInterface({
             </p>
           )}
 
-          <div className="chat-input-bar flex items-end gap-3 rounded-2xl border border-white/10 bg-[#13131f]/90 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:gap-4 sm:p-3.5">
+          {toast && (
+            <p className="mb-3 rounded-xl border border-white/10 bg-[#13131f]/95 px-4 py-2.5 text-center text-sm text-white/70">
+              {toast}
+            </p>
+          )}
+
+          {selectedAttachment && (
+            <div className="mb-3 flex items-center gap-3 rounded-xl border border-white/10 bg-[#13131f]/90 px-3 py-2.5">
+              {selectedAttachment.type === "image" ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={selectedAttachment.dataUrl}
+                  alt={selectedAttachment.name}
+                  className="h-14 w-14 shrink-0 rounded-lg object-cover ring-1 ring-white/10"
+                />
+              ) : (
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-white/5 text-white/60 ring-1 ring-white/10">
+                  <PdfIcon className="h-6 w-6" />
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-white/85">
+                  {selectedAttachment.name}
+                </p>
+                <p className="text-xs text-white/35">
+                  {selectedAttachment.type === "image" ? "Image" : "PDF"} attached
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleRemoveAttachment}
+                disabled={isLoading}
+                className="inline-flex h-9 shrink-0 items-center rounded-lg px-3 text-xs font-medium text-white/45 transition-colors duration-150 hover:bg-white/5 hover:text-white/75 disabled:opacity-40"
+              >
+                Remove
+              </button>
+            </div>
+          )}
+
+          <div className="chat-input-bar flex items-end gap-2 rounded-2xl border border-white/10 bg-[#13131f]/90 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:gap-3 sm:p-3.5">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,application/pdf,.pdf"
+              onChange={(event) => void handleFileSelect(event)}
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isLoading}
+              className={`${inputUtilityButtonClass} ${
+                selectedAttachment
+                  ? "border-pink-500/30 bg-pink-500/10 text-pink-400"
+                  : ""
+              }`}
+              aria-label="Attach image or PDF"
+            >
+              <PaperclipIcon className="h-5 w-5" />
+            </button>
             <textarea
               ref={textareaRef}
               autoFocus
@@ -793,12 +1174,25 @@ export function ChatInterface({
               placeholder="Message Clotter AI..."
               rows={1}
               disabled={isLoading}
-              className="max-h-52 min-h-[52px] flex-1 resize-none bg-transparent px-3 py-2.5 text-[1rem] leading-[1.65] tracking-[-0.018em] text-white placeholder:text-white/35 focus:outline-none disabled:opacity-50 sm:min-h-[56px] sm:px-4 sm:py-3"
+              className="max-h-52 min-h-[52px] flex-1 resize-none bg-transparent px-2 py-2.5 text-[1rem] leading-[1.65] tracking-[-0.018em] text-white placeholder:text-white/35 focus:outline-none disabled:opacity-50 sm:min-h-[56px] sm:px-3 sm:py-3"
             />
             <button
               type="button"
+              onClick={toggleVoiceInput}
+              disabled={isLoading}
+              className={`${inputUtilityButtonClass} ${
+                isRecording
+                  ? "chat-mic-pulse border-pink-500/40 bg-gradient-to-br from-pink-500/20 to-orange-500/10 text-pink-400"
+                  : ""
+              }`}
+              aria-label={isRecording ? "Stop voice input" : "Start voice input"}
+            >
+              <MicIcon className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
               onClick={() => void sendMessage()}
-              disabled={!input.trim() || isLoading}
+              disabled={!canSend || isLoading}
               className="chat-send-btn inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-orange-500 text-white shadow-[0_0_40px_-6px_rgba(236,72,153,0.6)] ring-1 ring-white/10 transition-transform duration-150 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:scale-100"
               aria-label="Send message"
             >

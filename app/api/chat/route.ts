@@ -98,10 +98,59 @@ function getApiKey() {
   return process.env.OPENROUTER_API_KEY?.trim() || "";
 }
 
+type ChatContentPart =
+  | { type: "text"; text: string }
+  | { type: "image_url"; image_url: { url: string } }
+  | { type: "file"; file: { filename: string; file_data: string } };
+
 type ChatMessage = {
   role: "user" | "assistant";
-  content: string;
+  content: string | ChatContentPart[];
 };
+
+function getMessageText(content: string | ChatContentPart[]) {
+  if (typeof content === "string") {
+    return content;
+  }
+
+  return content
+    .filter((part): part is { type: "text"; text: string } => part.type === "text")
+    .map((part) => part.text)
+    .join("\n")
+    .trim();
+}
+
+function normalizeChatMessages(messages: ChatMessage[]) {
+  return messages.map((message) => {
+    if (typeof message.content === "string") {
+      return message;
+    }
+
+    return {
+      role: message.role,
+      content: message.content.map((part) => {
+        if (part.type === "text") {
+          return { type: "text", text: part.text };
+        }
+
+        if (part.type === "image_url") {
+          return {
+            type: "image_url",
+            image_url: { url: part.image_url.url },
+          };
+        }
+
+        return {
+          type: "file",
+          file: {
+            filename: part.file.filename,
+            file_data: part.file.file_data,
+          },
+        };
+      }),
+    };
+  });
+}
 
 export async function POST(request: Request) {
   const apiKey = getApiKey();
@@ -129,6 +178,7 @@ export async function POST(request: Request) {
   const { systemPrompt, supabase, user } =
     await buildSystemPromptWithMemory(SYSTEM_PROMPT);
   const lastUserMessage = [...messages].reverse().find((m) => m.role === "user");
+  const normalizedMessages = normalizeChatMessages(messages);
 
   try {
     const response = await fetch(
@@ -146,7 +196,7 @@ export async function POST(request: Request) {
           model: MODEL,
           messages: [
             { role: "system", content: systemPrompt },
-            ...messages,
+            ...normalizedMessages,
           ],
           stream: true,
           max_tokens: 800,
@@ -215,7 +265,10 @@ export async function POST(request: Request) {
               userId: user.id,
               contentType: "chat",
               topic:
-                lastUserMessage?.content.slice(0, 500) || "Chat conversation",
+                (lastUserMessage
+                  ? getMessageText(lastUserMessage.content)
+                  : ""
+                ).slice(0, 500) || "Chat conversation",
               contentText: fullContent,
             });
           }
