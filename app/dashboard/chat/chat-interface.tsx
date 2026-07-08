@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ClotterLogo } from "@/app/dashboard/components/clotter-logo";
 import { createClient } from "@/lib/supabase/client";
@@ -44,11 +44,112 @@ function formatMessageTime(createdAt?: string) {
   });
 }
 
-function MessageTimestamp({ createdAt }: { createdAt?: string }) {
+function CopyIcon({ className }: { className?: string }) {
   return (
-    <p className="chat-msg-timestamp mt-1 text-right text-[10px] text-white/25">
-      {formatMessageTime(createdAt)}
-    </p>
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      className={className}
+      aria-hidden
+    >
+      <rect
+        x="5"
+        y="5"
+        width="8"
+        height="8"
+        rx="1.5"
+        stroke="currentColor"
+        strokeWidth="1.25"
+      />
+      <path
+        d="M5 11H4a1.5 1.5 0 0 1-1.5-1.5V4A1.5 1.5 0 0 1 4 2.5h5.5A1.5 1.5 0 0 1 11 4v1"
+        stroke="currentColor"
+        strokeWidth="1.25"
+      />
+    </svg>
+  );
+}
+
+function CheckIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      className={className}
+      aria-hidden
+    >
+      <path
+        d="m4 8.5 2.5 2.5L12 5.5"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ThumbsUpIcon({
+  filled,
+  className,
+}: {
+  filled?: boolean;
+  className?: string;
+}) {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      fill={filled ? "currentColor" : "none"}
+      className={className}
+      aria-hidden
+    >
+      <path
+        d="M5 14V7.5M5 7.5L6.8 3.2a1 1 0 0 1 .95-.7H10a1 1 0 0 1 1 1v2h2.2a1 1 0 0 1 .98 1.2l-.8 4A1 1 0 0 1 12.4 11H8.5"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M5 7.5H3.5a1 1 0 0 0-1 1V13a1 1 0 0 0 1 1H5"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ThumbsDownIcon({
+  filled,
+  className,
+}: {
+  filled?: boolean;
+  className?: string;
+}) {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      fill={filled ? "currentColor" : "none"}
+      className={className}
+      aria-hidden
+    >
+      <path
+        d="M5 2v6.5M5 8.5L6.8 12.8a1 1 0 0 0 .95.7H10a1 1 0 0 0 1-1v-2h2.2a1 1 0 0 0 .98-1.2l-.8-4A1 1 0 0 0 12.4 5H8.5"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M5 8.5H3.5a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1H5"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 
@@ -95,29 +196,10 @@ function ChatAiAvatar({ thinking = false }: { thinking?: boolean }) {
   );
 }
 
-function MessageActions({
-  children,
-  align = "start",
-}: {
-  children: ReactNode;
-  align?: "start" | "end";
-}) {
-  return (
-    <div
-      className={`flex flex-wrap items-center gap-2 pt-2.5 ${
-        align === "end" ? "justify-end" : "justify-start"
-      }`}
-    >
-      {children}
-    </div>
-  );
-}
-
-const pillButtonClass =
-  "inline-flex h-7 shrink-0 items-center gap-1 rounded-full border border-white/8 bg-white/[0.04] px-2.5 text-[11px] font-medium transition-all duration-150 hover:scale-[1.02] hover:border-white/15 hover:bg-white/[0.08]";
-
 const iconActionButtonClass =
-  "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-white/6 bg-white/[0.02] text-[13px] leading-none transition-all duration-150 hover:border-white/10 hover:bg-white/[0.06]";
+  "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-white/6 bg-white/[0.02] transition-all duration-150 hover:border-white/10 hover:bg-white/[0.06]";
+
+const actionIconClass = "h-4 w-4 shrink-0";
 
 function AssistantMessageActions({
   messageIndex,
@@ -143,84 +225,45 @@ function AssistantMessageActions({
   const isDisliked = feedback === "dislike";
 
   return (
-    <div className="chat-actions-fade-in mt-2">
-      <div className="flex items-center justify-between gap-2">
+    <div className="chat-actions-fade-in">
+      <div className="flex items-center justify-between gap-2 py-2">
         <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={() => onFeedback(messageIndex, "like")}
             className={`${iconActionButtonClass} ${
-              isLiked
-                ? "border-green-500/25 bg-green-500/10 opacity-100"
-                : "opacity-50 hover:opacity-80"
+              isLiked ? "text-[#EC4899]" : "text-white/40 hover:text-white/60"
             }`}
             aria-label="Mark as helpful"
           >
-            👍
+            <ThumbsUpIcon filled={isLiked} className={actionIconClass} />
           </button>
           <button
             type="button"
             onClick={() => onFeedback(messageIndex, "dislike")}
             className={`${iconActionButtonClass} ${
-              isDisliked
-                ? "border-red-500/25 bg-red-500/10 opacity-100"
-                : "opacity-50 hover:opacity-80"
+              isDisliked ? "text-[#F97316]" : "text-white/40 hover:text-white/60"
             }`}
             aria-label="Mark as not helpful"
           >
-            👎
+            <ThumbsDownIcon filled={isDisliked} className={actionIconClass} />
           </button>
           <button
             type="button"
             onClick={() => onCopy(messageIndex, content)}
             className={`${iconActionButtonClass} ${
-              isCopied
-                ? "border-green-500/25 text-green-400 opacity-100"
-                : "text-white/40 opacity-50 hover:opacity-80"
+              isCopied ? "text-green-400" : "text-white/40 hover:text-white/70"
             }`}
             aria-label={isCopied ? "Copied" : "Copy message"}
           >
             {isCopied ? (
-              <svg
-                viewBox="0 0 16 16"
-                fill="none"
-                className="h-3 w-3 shrink-0"
-                aria-hidden
-              >
-                <path
-                  d="m4 8.5 2.5 2.5L12 5.5"
-                  stroke="currentColor"
-                  strokeWidth="1.25"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <CheckIcon className={actionIconClass} />
             ) : (
-              <svg
-                viewBox="0 0 16 16"
-                fill="none"
-                className="h-3 w-3 shrink-0"
-                aria-hidden
-              >
-                <rect
-                  x="5"
-                  y="5"
-                  width="8"
-                  height="8"
-                  rx="1.5"
-                  stroke="currentColor"
-                  strokeWidth="1.25"
-                />
-                <path
-                  d="M5 11H4a1.5 1.5 0 0 1-1.5-1.5V4A1.5 1.5 0 0 1 4 2.5h5.5A1.5 1.5 0 0 1 11 4v1"
-                  stroke="currentColor"
-                  strokeWidth="1.25"
-                />
-              </svg>
+              <CopyIcon className={actionIconClass} />
             )}
           </button>
         </div>
-        <span className="ml-auto shrink-0 text-[10px] text-white/25">
+        <span className="ml-auto shrink-0 text-xs text-white/25">
           {formatMessageTime(createdAt)}
         </span>
       </div>
@@ -233,63 +276,43 @@ function AssistantMessageActions({
   );
 }
 
-function CopyButton({
+function UserMessageActions({
   messageIndex,
   content,
+  createdAt,
   copiedIndex,
   onCopy,
-  align = "start",
 }: {
   messageIndex: number;
   content: string;
+  createdAt?: string;
   copiedIndex: number | null;
   onCopy: (messageIndex: number, content: string) => void;
-  align?: "start" | "end";
 }) {
   const isCopied = copiedIndex === messageIndex;
 
   return (
-    <button
-      type="button"
-      onClick={() => onCopy(messageIndex, content)}
-      className={`${pillButtonClass} ${
-        align === "end" ? "self-end" : ""
-      } ${
-        isCopied
-          ? "border-pink-500/30 text-pink-400"
-          : "text-white/40 hover:text-white/65"
-      }`}
-      aria-label={isCopied ? "Copied" : "Copy message"}
-    >
-      {isCopied ? (
-        "Copied!"
-      ) : (
-        <>
-          <svg
-            viewBox="0 0 16 16"
-            fill="none"
-            className="h-4 w-4"
-            aria-hidden
-          >
-            <rect
-              x="5"
-              y="5"
-              width="8"
-              height="8"
-              rx="1.5"
-              stroke="currentColor"
-              strokeWidth="1.25"
-            />
-            <path
-              d="M5 11H4a1.5 1.5 0 0 1-1.5-1.5V4A1.5 1.5 0 0 1 4 2.5h5.5A1.5 1.5 0 0 1 11 4v1"
-              stroke="currentColor"
-              strokeWidth="1.25"
-            />
-          </svg>
-          Copy
-        </>
-      )}
-    </button>
+    <div className="flex w-full items-center justify-between gap-2 py-2">
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          onClick={() => onCopy(messageIndex, content)}
+          className={`${iconActionButtonClass} ${
+            isCopied ? "text-green-400" : "text-white/40 hover:text-white/70"
+          }`}
+          aria-label={isCopied ? "Copied" : "Copy message"}
+        >
+          {isCopied ? (
+            <CheckIcon className={actionIconClass} />
+          ) : (
+            <CopyIcon className={actionIconClass} />
+          )}
+        </button>
+      </div>
+      <span className="ml-auto shrink-0 text-xs text-white/25">
+        {formatMessageTime(createdAt)}
+      </span>
+    </div>
   );
 }
 
@@ -692,17 +715,14 @@ export function ChatInterface({
                     <div className="flex max-w-[85%] flex-col items-end">
                       <div className="rounded-2xl bg-gradient-to-br from-pink-500 to-orange-500 px-4 py-3 text-white shadow-[0_8px_32px_-12px_rgba(236,72,153,0.45)]">
                         <MessageText content={message.content} />
-                        <MessageTimestamp createdAt={message.createdAt} />
                       </div>
-                      <MessageActions align="end">
-                        <CopyButton
-                          messageIndex={index}
-                          content={message.content}
-                          copiedIndex={copiedIndex}
-                          onCopy={handleCopy}
-                          align="end"
-                        />
-                      </MessageActions>
+                      <UserMessageActions
+                        messageIndex={index}
+                        content={message.content}
+                        createdAt={message.createdAt}
+                        copiedIndex={copiedIndex}
+                        onCopy={handleCopy}
+                      />
                     </div>
                   </div>
                 ) : (
@@ -794,7 +814,7 @@ export function ChatInterface({
             </button>
           </div>
           <p className="mt-4 text-center text-[13px] tracking-[-0.01em] text-white/30">
-            Clotter AI may make mistakes. Verify important information before using.
+            Clotter AI may make mistakes. Please double-check important information.
           </p>
         </div>
       </div>
