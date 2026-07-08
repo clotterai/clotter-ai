@@ -42,7 +42,11 @@ function generateTitle(firstMessage: string) {
 import { ClotterLogo } from "@/app/dashboard/components/clotter-logo";
 
 function ClotterLogoMark() {
-  return <ClotterLogo size={64} />;
+  return (
+    <div className="chat-logo-glow">
+      <ClotterLogo size={64} />
+    </div>
+  );
 }
 
 function MessageText({ content }: { content: string }) {
@@ -98,8 +102,8 @@ function MessageActions({
   );
 }
 
-const aiActionButtonClass =
-  "inline-flex h-8 shrink-0 items-center gap-1.5 text-xs font-medium transition-colors";
+const pillButtonClass =
+  "inline-flex h-7 shrink-0 items-center gap-1 rounded-full border border-white/8 bg-white/[0.04] px-2.5 text-[11px] font-medium transition-all duration-150 hover:scale-[1.02] hover:border-white/15 hover:bg-white/[0.08]";
 
 function AssistantMessageActions({
   messageIndex,
@@ -123,22 +127,22 @@ function AssistantMessageActions({
   const isDisliked = feedback === "dislike";
 
   return (
-    <div className="mt-1 border-t border-white/10 pt-2.5">
-      <div className="flex items-center gap-3">
+    <div className="chat-actions-fade-in mt-2">
+      <div className="flex flex-wrap items-center gap-1.5">
         <button
           type="button"
           onClick={() => onFeedback(messageIndex, "like")}
-          className={`${aiActionButtonClass} ${
+          className={`${pillButtonClass} ${
             isLiked
-              ? "text-green-400"
-              : "text-white/30 hover:text-white/60"
+              ? "border-green-500/30 text-green-400"
+              : "text-white/40 hover:text-white/65"
           }`}
           aria-label="Mark as helpful"
         >
           <svg
             viewBox="0 0 16 16"
             fill={isLiked ? "currentColor" : "none"}
-            className="h-3.5 w-3.5 shrink-0"
+            className="h-3 w-3 shrink-0"
             aria-hidden
           >
             <path
@@ -161,17 +165,17 @@ function AssistantMessageActions({
         <button
           type="button"
           onClick={() => onFeedback(messageIndex, "dislike")}
-          className={`${aiActionButtonClass} ${
+          className={`${pillButtonClass} ${
             isDisliked
-              ? "text-red-400"
-              : "text-white/30 hover:text-white/60"
+              ? "border-red-500/30 text-red-400"
+              : "text-white/40 hover:text-white/65"
           }`}
           aria-label="Mark as not helpful"
         >
           <svg
             viewBox="0 0 16 16"
             fill={isDisliked ? "currentColor" : "none"}
-            className="h-3.5 w-3.5 shrink-0"
+            className="h-3 w-3 shrink-0"
             aria-hidden
           >
             <path
@@ -194,10 +198,10 @@ function AssistantMessageActions({
         <button
           type="button"
           onClick={() => onCopy(messageIndex, content)}
-          className={`${aiActionButtonClass} ${
+          className={`${pillButtonClass} ${
             isCopied
-              ? "text-green-400"
-              : "text-white/30 hover:text-white/60"
+              ? "border-green-500/30 text-green-400"
+              : "text-white/40 hover:text-white/65"
           }`}
           aria-label={isCopied ? "Copied" : "Copy message"}
         >
@@ -208,7 +212,7 @@ function AssistantMessageActions({
               <svg
                 viewBox="0 0 16 16"
                 fill="none"
-                className="h-3.5 w-3.5 shrink-0"
+                className="h-3 w-3 shrink-0"
                 aria-hidden
               >
                 <rect
@@ -232,7 +236,7 @@ function AssistantMessageActions({
         </button>
       </div>
       {feedbackThanksIndex === messageIndex && (
-        <p className="mt-2 text-xs font-medium text-white/40">
+        <p className="mt-2 text-[11px] font-medium text-white/35">
           Thanks for the feedback!
         </p>
       )}
@@ -259,11 +263,11 @@ function CopyButton({
     <button
       type="button"
       onClick={() => onCopy(messageIndex, content)}
-      className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition hover:bg-white/[0.06] ${
+      className={`${pillButtonClass} ${
         align === "end" ? "self-end" : ""
       } ${
         isCopied
-          ? "text-[#A855F7]"
+          ? "border-pink-500/30 text-pink-400"
           : "text-white/40 hover:text-white/65"
       }`}
       aria-label={isCopied ? "Copied" : "Copy message"}
@@ -408,7 +412,9 @@ export function ChatInterface({
 
   useEffect(() => {
     if (!isEmpty) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      requestAnimationFrame(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      });
     }
   }, [messages, isLoading, isEmpty]);
 
@@ -639,13 +645,13 @@ export function ChatInterface({
       {/* Messages or welcome */}
       <div className="flex-1 overflow-y-auto">
         {isLoadingSession ? (
-          <div className="flex h-full items-center justify-center px-6 py-12">
+          <div className="chat-session-loading flex h-full items-center justify-center px-6 py-12">
             <p className="text-sm text-white/40">Loading chat...</p>
           </div>
         ) : isEmpty ? (
           <div className="chat-welcome flex h-full flex-col items-center justify-center px-6 py-12">
             <ClotterLogoMark />
-            <h2 className="font-heading chat-welcome-title mt-8 text-center text-[2rem] font-bold leading-[1.12] tracking-[-0.02em] text-white sm:text-[2.75rem]">
+            <h2 className="font-heading chat-welcome-title-shimmer mt-8 text-center text-[2rem] font-bold leading-[1.12] tracking-[-0.02em] sm:text-[2.75rem]">
               What are we creating today?
             </h2>
             <p className="chat-welcome-subtitle mt-4 max-w-md text-center text-[1.0625rem] leading-relaxed tracking-[-0.018em] text-white/45">
@@ -659,7 +665,7 @@ export function ChatInterface({
                   type="button"
                   onClick={() => void sendMessage(prompt)}
                   disabled={isLoading}
-                  className="chat-prompt-chip"
+                  className="chat-prompt-chip transition-transform duration-150 hover:scale-105"
                   style={{ "--chip-delay": `${0.55 + index * 0.1}s` } as React.CSSProperties}
                 >
                   {prompt}
@@ -668,7 +674,7 @@ export function ChatInterface({
             </div>
           </div>
         ) : (
-          <div className="mx-auto flex w-full max-w-3xl flex-col gap-12 px-4 py-8 sm:gap-14 sm:px-6 sm:py-10">
+          <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
             {messages.map((message, index) => {
               const isStreamingMessage =
                 isLoading &&
@@ -678,32 +684,43 @@ export function ChatInterface({
               return (
               <div
                 key={message.id}
-                className={`chat-msg-enter w-full ${
-                  message.role === "user" ? "flex justify-end" : "flex justify-start"
-                }`}
+                className="chat-msg-enter w-full"
+                style={{ animationDelay: `${Math.min(index * 40, 200)}ms` }}
               >
                 {message.role === "user" ? (
-                  <div className="flex max-w-[90%] flex-col items-end">
-                    <div className="rounded-2xl rounded-br-lg bg-gradient-to-br from-[#A855F7] to-[#7C3AED] px-5 py-4 text-white shadow-[0_8px_32px_-12px_rgba(168,85,247,0.5)] ring-1 ring-white/10">
-                      <MessageText content={message.content} />
+                  <div className="flex justify-end">
+                    <div className="flex max-w-[85%] flex-col items-end">
+                      <div className="rounded-2xl bg-gradient-to-br from-pink-500 to-orange-500 px-4 py-3 text-white shadow-[0_8px_32px_-12px_rgba(236,72,153,0.45)]">
+                        <MessageText content={message.content} />
+                      </div>
+                      <MessageActions align="end">
+                        <CopyButton
+                          messageIndex={index}
+                          content={message.content}
+                          copiedIndex={copiedIndex}
+                          onCopy={handleCopy}
+                          align="end"
+                        />
+                      </MessageActions>
                     </div>
-                    <MessageActions align="end">
-                      <CopyButton
-                        messageIndex={index}
-                        content={message.content}
-                        copiedIndex={copiedIndex}
-                        onCopy={handleCopy}
-                        align="end"
-                      />
-                    </MessageActions>
                   </div>
                 ) : (
-                  <div className="flex w-full gap-3.5">
+                  <div className="flex w-full gap-3">
                     <ChatAiAvatar thinking={isStreamingMessage} />
                     <div className="min-w-0 flex-1">
-                      <div className="rounded-2xl rounded-tl-lg border border-white/[0.08] bg-[#13131f]/90 px-5 py-4 text-white/95 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.5)]">
+                      <div
+                        className={`rounded-2xl border border-white/8 bg-white/5 px-4 py-3 text-white/95 backdrop-blur-md ${
+                          isStreamingMessage ? "chat-streaming-bubble" : ""
+                        }`}
+                      >
                         {message.content ? (
-                          <MessageText content={message.content} />
+                          <div
+                            className={
+                              isStreamingMessage ? "chat-streaming-content" : ""
+                            }
+                          >
+                            <MessageText content={message.content} />
+                          </div>
                         ) : (
                           <span className="inline-block h-4 w-4" aria-hidden />
                         )}
@@ -760,7 +777,7 @@ export function ChatInterface({
               type="button"
               onClick={() => void sendMessage()}
               disabled={!input.trim() || isLoading}
-              className="chat-send-btn inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#A855F7] to-[#7C3AED] text-white shadow-[0_0_40px_-6px_#A855F7] ring-1 ring-white/10 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:scale-100"
+              className="chat-send-btn inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-orange-500 text-white shadow-[0_0_40px_-6px_rgba(236,72,153,0.6)] ring-1 ring-white/10 transition-transform duration-150 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:scale-100"
               aria-label="Send message"
             >
               <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useCallback, useEffect, useState, type ReactNode } from "react";
+import { Suspense, memo, useCallback, useEffect, useState, type ReactNode } from "react";
 import {
   CHAT_SESSIONS_UPDATED_EVENT,
 } from "@/lib/chat-sessions-events";
@@ -226,9 +226,52 @@ type ChatSessionSummary = {
 
 const CHAT_HREF = "/dashboard/chat";
 
-function truncateTitle(title: string, maxLength = 25) {
-  if (title.length <= maxLength) return title;
-  return `${title.slice(0, maxLength - 3)}...`;
+const navLinkBase =
+  "dash-nav-item group relative flex items-center gap-3.5 overflow-hidden rounded-xl border-l-2 px-3.5 py-3 text-[15px] font-medium tracking-[-0.02em] transition-all duration-200";
+
+function navLinkClass(active: boolean) {
+  return active
+    ? `${navLinkBase} border-pink-500 bg-gradient-to-r from-pink-500/10 to-orange-500/5 text-white`
+    : `${navLinkBase} border-transparent text-white/50 hover:bg-white/5 hover:text-white/80`;
+}
+
+function capitalizeTitle(title: string) {
+  const trimmed = title.trim();
+  if (!trimmed) return "New Chat";
+  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+}
+
+function truncateTitle(title: string, maxLength = 28) {
+  const formatted = capitalizeTitle(title);
+  if (formatted.length <= maxLength) return formatted;
+  return `${formatted.slice(0, maxLength - 3)}...`;
+}
+
+function formatTimeAgo(dateString: string) {
+  const date = new Date(dateString);
+  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+
+  if (seconds < 60) return "Just now";
+
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+
+  const days = Math.floor(hours / 24);
+  if (days === 1) return "Yesterday";
+  if (days < 7) return `${days} days ago`;
+
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function chatSubLinkClass(active: boolean) {
+  return `dash-chat-history-item flex items-center rounded-lg py-1.5 pl-8 pr-3 text-xs transition-all duration-200 ${
+    active
+      ? "border-l-2 border-pink-500 bg-pink-500/10 text-white/80 shadow-[0_0_20px_-10px_rgba(236,72,153,0.5)]"
+      : "border-l-2 border-transparent text-white/50 hover:bg-white/5 hover:text-white/80"
+  }`;
 }
 
 function SidebarNavLink({
@@ -249,27 +292,14 @@ function SidebarNavLink({
     <Link
       href={item.href}
       onClick={onClose}
-      className={`dash-nav-item group relative flex items-center gap-3.5 overflow-hidden rounded-xl px-3.5 py-3 text-[15px] font-medium tracking-[-0.02em] ${
-        active
-          ? "bg-gradient-to-r from-[#EC4899]/15 to-[#F97316]/10 text-[#FECDD3] shadow-[0_0_40px_-8px_#EC4899] ring-1 ring-[#EC4899]/35"
-          : "text-white/45 hover:text-white/90"
-      }`}
+      className={navLinkClass(active)}
       aria-current={active ? "page" : undefined}
     >
-      {active && (
-        <>
-          <span
-            aria-hidden
-            className="absolute inset-0 bg-gradient-to-r from-[#EC4899]/25 via-[#F97316]/12 to-transparent"
-          />
-          <span aria-hidden className="dash-nav-glow-bar" />
-        </>
-      )}
       <span
-        className={`relative z-[1] transition-all duration-300 ${
+        className={`relative z-[1] transition-all duration-200 ${
           active
-            ? "text-[#FB923C] drop-shadow-[0_0_8px_rgba(236,72,153,0.6)]"
-            : "text-white/30 group-hover:text-[#EC4899]/70"
+            ? "text-pink-400"
+            : "text-white/40 group-hover:text-pink-400/80"
         }`}
       >
         {item.icon}
@@ -279,7 +309,7 @@ function SidebarNavLink({
   );
 }
 
-function ChatNavSection({
+const ChatNavSection = memo(function ChatNavSection({
   item,
   pathname,
   onClose,
@@ -359,27 +389,14 @@ function ChatNavSection({
       <Link
         href={CHAT_HREF}
         onClick={onClose}
-        className={`dash-nav-item group relative flex items-center gap-3.5 overflow-hidden rounded-xl px-3.5 py-3 text-[15px] font-medium tracking-[-0.02em] ${
-          isParentActive
-            ? "bg-gradient-to-r from-[#EC4899]/15 to-[#F97316]/10 text-[#FECDD3] shadow-[0_0_40px_-8px_#EC4899] ring-1 ring-[#EC4899]/35"
-            : "text-white/45 hover:text-white/90"
-        }`}
+        className={navLinkClass(isParentActive)}
         aria-current={isParentActive ? "page" : undefined}
       >
-        {isParentActive && (
-          <>
-            <span
-              aria-hidden
-              className="absolute inset-0 bg-gradient-to-r from-[#EC4899]/25 via-[#F97316]/12 to-transparent"
-            />
-            <span aria-hidden className="dash-nav-glow-bar" />
-          </>
-        )}
         <span
-          className={`relative z-[1] transition-all duration-300 ${
+          className={`relative z-[1] transition-all duration-200 ${
             isParentActive
-              ? "text-[#FB923C] drop-shadow-[0_0_8px_rgba(236,72,153,0.6)]"
-              : "text-white/30 group-hover:text-[#EC4899]/70"
+              ? "text-pink-400"
+              : "text-white/40 group-hover:text-pink-400/80"
           }`}
         >
           {item.icon}
@@ -389,20 +406,19 @@ function ChatNavSection({
 
       {isChatPage && (
         <ul className="mt-1 space-y-0.5">
-          <li>
+          <li
+            className="dash-chat-history-item"
+            style={{ "--history-index": 0 } as React.CSSProperties}
+          >
             <Link
               href={CHAT_HREF}
               onClick={onClose}
-              className={`flex items-center gap-2 rounded-lg py-1.5 pl-8 pr-3 text-xs transition ${
-                !activeSessionId
-                  ? "bg-white/5 text-white/80"
-                  : "text-white/50 hover:text-white/80"
-              }`}
+              className={`${chatSubLinkClass(!activeSessionId)} gap-2`}
             >
               <svg
                 viewBox="0 0 16 16"
                 fill="none"
-                className="h-3 w-3 shrink-0 text-[#EC4899]"
+                className="h-3 w-3 shrink-0 text-pink-500"
                 aria-hidden
               >
                 <path
@@ -416,53 +432,64 @@ function ChatNavSection({
             </Link>
           </li>
 
-          {sessions.map((session) => {
-            const isActive = activeSessionId === session.id;
+          {sessions.length === 0 ? (
+            <li className="px-8 py-2 text-xs text-white/30">No chats yet</li>
+          ) : (
+            sessions.map((session, index) => {
+              const isActive = activeSessionId === session.id;
 
-            return (
-              <li key={session.id} className="group relative">
-                <Link
-                  href={`${CHAT_HREF}?session=${session.id}`}
-                  onClick={onClose}
-                  className={`flex items-center rounded-lg py-1.5 pl-8 pr-8 text-xs transition ${
-                    isActive
-                      ? "bg-white/5 text-white/80"
-                      : "text-white/50 hover:text-white/80"
-                  }`}
+              return (
+                <li
+                  key={session.id}
+                  className="group relative dash-chat-history-item"
+                  style={
+                    { "--history-index": index + 1 } as React.CSSProperties
+                  }
                 >
-                  <span className="truncate">
-                    {truncateTitle(session.title)}
-                  </span>
-                </Link>
-                <button
-                  type="button"
-                  onClick={(event) => void handleDeleteSession(event, session.id)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-white/40 opacity-0 transition hover:text-red-400 group-hover:opacity-100"
-                  aria-label={`Delete ${session.title}`}
-                >
-                  <svg
-                    viewBox="0 0 16 16"
-                    fill="none"
-                    className="h-3 w-3"
-                    aria-hidden
+                  <Link
+                    href={`${CHAT_HREF}?session=${session.id}`}
+                    onClick={onClose}
+                    className={`${chatSubLinkClass(isActive)} flex-col items-start gap-0.5 pr-8`}
                   >
-                    <path
-                      d="M3.5 5.5h9M6 5.5V4.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1m1.5 0v7a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-7"
-                      stroke="currentColor"
-                      strokeWidth="1.25"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-              </li>
-            );
-          })}
+                    <span className="w-full truncate">
+                      {truncateTitle(session.title)}
+                    </span>
+                    <span className="text-[10px] text-white/30">
+                      {formatTimeAgo(session.updated_at)}
+                    </span>
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={(event) =>
+                      void handleDeleteSession(event, session.id)
+                    }
+                    className="dash-chat-history-delete absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-white/40 opacity-0 group-hover:opacity-100 hover:text-red-400"
+                    aria-label={`Delete ${session.title}`}
+                  >
+                    <svg
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      className="h-3 w-3"
+                      aria-hidden
+                    >
+                      <path
+                        d="M3.5 5.5h9M6 5.5V4.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1m1.5 0v7a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-7"
+                        stroke="currentColor"
+                        strokeWidth="1.25"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                </li>
+              );
+            })
+          )}
         </ul>
       )}
     </div>
   );
-}
+});
 
 type DashboardSidebarProps = {
   user: SidebarUser;
@@ -479,7 +506,7 @@ export function DashboardSidebar({
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-50 flex h-full w-[17.5rem] flex-col border-r border-[#EC4899]/10 bg-[#0D0D1A]/95 backdrop-blur-2xl transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:translate-x-0 ${
+      className={`dash-sidebar-enter fixed inset-y-0 left-0 z-50 flex h-full w-[17.5rem] flex-col border-r border-[#EC4899]/10 bg-[#0D0D1A]/95 backdrop-blur-2xl transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-transform md:translate-x-0 ${
         isMobileOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >
@@ -516,9 +543,12 @@ export function DashboardSidebar({
           onClose={onClose}
         />
 
-        {navGroups.map((group) => (
+        {navGroups.map((group, groupIndex) => (
           <div key={group.label} className="mt-6">
-            <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-[0.15em] text-white/25">
+            <p
+              className="dash-nav-group-label mb-1 px-3 text-[10px] font-semibold uppercase tracking-[0.15em] text-white/25"
+              style={{ "--group-index": groupIndex } as React.CSSProperties}
+            >
               {group.label}
             </p>
             <div className="space-y-1">
@@ -545,14 +575,15 @@ export function DashboardSidebar({
       </nav>
 
       {/* Profile */}
-      <div className="shrink-0 border-t border-[#EC4899]/10 p-5">
-        <div className="dash-glass-v2 !rounded-2xl !p-4">
+      <div className="shrink-0 border-t border-white/10 p-5">
+        <div className="dash-glass-v2 !rounded-2xl !p-4 transition-transform duration-200 hover:-translate-y-0.5">
           <div className="flex items-center gap-3.5">
             {user.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={user.avatarUrl}
                 alt=""
+                loading="lazy"
                 className="h-10 w-10 shrink-0 rounded-full object-cover ring-1 ring-[#EC4899]/30"
               />
             ) : (
@@ -598,7 +629,7 @@ function DashboardMobileHeader({
         onClick={onToggle}
         aria-label={isMobileOpen ? "Close menu" : "Open menu"}
         aria-expanded={isMobileOpen}
-        className="relative z-50 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-xl text-white/90 transition-all duration-300 hover:border-[#EC4899]/35 hover:bg-[#EC4899]/10 active:scale-95"
+        className="relative z-50 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-xl text-white/90 transition-all duration-150 hover:scale-[1.02] hover:border-[#EC4899]/35 hover:bg-[#EC4899]/10 active:scale-95"
       >
         {isMobileOpen ? (
           <span className="text-lg leading-none">✕</span>
