@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { BubbleIcon } from "@/app/dashboard/bubble/bubble-icon";
 import { ClotterLogo } from "@/app/dashboard/components/clotter-logo";
 import { createClient } from "@/lib/supabase/client";
 import { dispatchChatSessionsUpdated } from "@/lib/chat-sessions-events";
@@ -16,19 +17,48 @@ type Message = {
 
 type MessageFeedback = "like" | "dislike";
 
-const promptPool = [
-  "Give me reel ideas",
-  "Write a caption",
-  "Find trending topics",
-  "Write a hook",
-  "Give me script ideas",
-  "What's viral right now?",
-  "Help me grow on Instagram",
-  "Give me 5 content ideas",
+const quickActionPool = [
+  { icon: "🎬", prompt: "Give me reel ideas" },
+  { icon: "✍️", prompt: "Write a caption" },
+  { icon: "📈", prompt: "Find trending topics" },
+  { icon: "🎣", prompt: "Write a hook" },
+  { icon: "📝", prompt: "Give me script ideas" },
+  { icon: "🔥", prompt: "What's viral right now?" },
+  { icon: "📱", prompt: "Help me grow on Instagram" },
+  { icon: "💡", prompt: "Give me 5 content ideas" },
+];
+
+const featurePills = [
+  "⚡ Instant Ideas",
+  "✍️ Viral Captions",
+  "🎣 Scroll-Stopping Hooks",
+  "📈 Live Trends",
+  "🎬 Scripts",
+];
+
+const inspirationTexts = [
+  "Try: Give me 5 viral hooks for a fitness reel",
+  "Try: Write a caption for my morning routine post",
+  "Try: What's trending on Instagram this week?",
+  "Try: Write a 60-second script for a travel reel",
+  "Try: Give me content ideas for a food creator",
+];
+
+const emptyStateStars = [
+  { top: "8%", left: "12%", size: 2, delay: "0.1s", duration: "3.4s", bright: false },
+  { top: "18%", left: "78%", size: 1, delay: "1.2s", duration: "2.8s", bright: true },
+  { top: "32%", left: "24%", size: 2, delay: "0.6s", duration: "4.1s", bright: false },
+  { top: "45%", left: "88%", size: 1, delay: "2.1s", duration: "3.2s", bright: false },
+  { top: "58%", left: "8%", size: 2, delay: "0.9s", duration: "3.8s", bright: true },
+  { top: "72%", left: "62%", size: 1, delay: "1.8s", duration: "2.6s", bright: false },
+  { top: "84%", left: "35%", size: 2, delay: "3.2s", duration: "4.4s", bright: false },
+  { top: "22%", left: "48%", size: 1, delay: "0.4s", duration: "3.6s", bright: true },
+  { top: "66%", left: "92%", size: 1, delay: "2.5s", duration: "2.9s", bright: false },
+  { top: "40%", left: "6%", size: 2, delay: "1.5s", duration: "5.1s", bright: true },
 ];
 
 function pickRandomPrompts(count: number) {
-  const shuffled = [...promptPool].sort(() => Math.random() - 0.5);
+  const shuffled = [...quickActionPool].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, count);
 }
 
@@ -52,10 +82,107 @@ function MessageTimestamp({ createdAt }: { createdAt?: string }) {
   );
 }
 
-function ClotterLogoMark() {
+function ChatEmptyBackground() {
   return (
-    <div className="chat-logo-glow">
-      <ClotterLogo size={64} />
+    <div aria-hidden className="chat-empty-bg">
+      <div className="chat-empty-orb chat-empty-orb--tl" />
+      <div className="chat-empty-orb chat-empty-orb--br" />
+      <div className="chat-nebula-stars">
+        {emptyStateStars.map((star, index) => (
+          <span
+            key={index}
+            className={`chat-nebula-star${star.bright ? " chat-nebula-star--bright" : ""}`}
+            style={{
+              top: star.top,
+              left: star.left,
+              width: star.size,
+              height: star.size,
+              animationDelay: star.delay,
+              animationDuration: star.duration,
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ChatHeroOrb() {
+  return (
+    <div className="chat-welcome-rise chat-hero-orb-wrap">
+      <div className="chat-hero-orb-ring" aria-hidden />
+      <div className="chat-hero-orb-pulse">
+        <BubbleIcon size={96} />
+      </div>
+    </div>
+  );
+}
+
+function ChatEmptyState({
+  suggestedPrompts,
+  isLoading,
+  onSend,
+}: {
+  suggestedPrompts: { icon: string; prompt: string }[];
+  isLoading: boolean;
+  onSend: (text: string) => void;
+}) {
+  return (
+    <div className="relative flex h-full flex-col items-center justify-center overflow-hidden px-4 py-10 sm:px-6 sm:py-12">
+      <ChatEmptyBackground />
+
+      <div className="relative z-[1] flex w-full max-w-2xl flex-col items-center">
+        <ChatHeroOrb />
+
+        <h2
+          className="chat-welcome-rise font-heading mt-8 text-center text-[2rem] font-bold leading-[1.12] tracking-[-0.02em] sm:text-[2.75rem]"
+          style={{ animationDelay: "0.12s" }}
+        >
+          <span className="chat-welcome-gradient-text">
+            What are we creating today?
+          </span>
+        </h2>
+
+        <p
+          className="chat-welcome-rise mt-4 max-w-md text-center text-[1.0625rem] leading-relaxed tracking-[-0.018em] text-white/40"
+          style={{ animationDelay: "0.2s" }}
+        >
+          Your AI creative partner — built to make you go viral.
+        </p>
+
+        <div
+          className="chat-welcome-rise mt-8 w-full max-w-xl overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          style={{ animationDelay: "0.28s" }}
+        >
+          <div className="flex w-max gap-2 px-1 pb-1">
+            {featurePills.map((pill, index) => (
+              <span
+                key={pill}
+                className="chat-feature-pill"
+                style={{ "--pill-delay": `${0.35 + index * 0.06}s` } as React.CSSProperties}
+              >
+                {pill}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-8 flex w-full max-w-2xl flex-wrap items-center justify-center gap-3">
+          {suggestedPrompts.map((action, index) => (
+            <button
+              key={action.prompt}
+              type="button"
+              onClick={() => onSend(action.prompt)}
+              disabled={isLoading}
+              className="chat-action-chip"
+              style={{ "--chip-delay": `${0.5 + index * 0.08}s` } as React.CSSProperties}
+            >
+              <span aria-hidden>{action.icon}</span>
+              <span>{action.prompt}</span>
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -325,6 +452,8 @@ export function ChatInterface({
   const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
   const [suggestedPrompts] = useState(() => pickRandomPrompts(4));
+  const [inspirationIndex, setInspirationIndex] = useState(0);
+  const [inspirationVisible, setInspirationVisible] = useState(true);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingSession, setIsLoadingSession] = useState(false);
@@ -342,6 +471,20 @@ export function ChatInterface({
   const loadGenerationRef = useRef(0);
 
   const isEmpty = messages.length === 0;
+
+  useEffect(() => {
+    if (!isEmpty) return;
+
+    const interval = window.setInterval(() => {
+      setInspirationVisible(false);
+      window.setTimeout(() => {
+        setInspirationIndex((current) => (current + 1) % inspirationTexts.length);
+        setInspirationVisible(true);
+      }, 280);
+    }, 4000);
+
+    return () => window.clearInterval(interval);
+  }, [isEmpty]);
 
   useEffect(() => {
     if (sessionId === null) {
@@ -671,30 +814,11 @@ export function ChatInterface({
             <p className="text-sm text-white/40">Loading chat...</p>
           </div>
         ) : isEmpty ? (
-          <div className="chat-welcome flex h-full flex-col items-center justify-center px-6 py-12">
-            <ClotterLogoMark />
-            <h2 className="font-heading chat-welcome-title-shimmer mt-8 text-center text-[2rem] font-bold leading-[1.12] tracking-[-0.02em] sm:text-[2.75rem]">
-              What are we creating today?
-            </h2>
-            <p className="chat-welcome-subtitle mt-4 max-w-md text-center text-[1.0625rem] leading-relaxed tracking-[-0.018em] text-white/45">
-              Your AI creative partner for content ideas, captions, hooks, and
-              growth strategy.
-            </p>
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-              {suggestedPrompts.map((prompt, index) => (
-                <button
-                  key={prompt}
-                  type="button"
-                  onClick={() => void sendMessage(prompt)}
-                  disabled={isLoading}
-                  className="chat-prompt-chip transition-transform duration-150 hover:scale-105"
-                  style={{ "--chip-delay": `${0.55 + index * 0.1}s` } as React.CSSProperties}
-                >
-                  {prompt}
-                </button>
-              ))}
-            </div>
-          </div>
+          <ChatEmptyState
+            suggestedPrompts={suggestedPrompts}
+            isLoading={isLoading}
+            onSend={(text) => void sendMessage(text)}
+          />
         ) : (
           <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
             {messages.map((message, index) => {
@@ -712,7 +836,7 @@ export function ChatInterface({
                 {message.role === "user" ? (
                   <div className="flex justify-end">
                     <div className="flex max-w-[85%] flex-col items-end">
-                      <div className="rounded-2xl bg-gradient-to-br from-pink-500 to-orange-500 px-4 py-3 text-white shadow-[0_8px_32px_-12px_rgba(236,72,153,0.45)]">
+                      <div className="rounded-2xl bg-gradient-to-br from-[#EC4899] to-[#F97316] px-4 py-3 text-white shadow-[0_8px_32px_-12px_rgba(236,72,153,0.45)]">
                         <MessageText content={message.content} />
                         <MessageTimestamp createdAt={message.createdAt} />
                       </div>
@@ -775,10 +899,10 @@ export function ChatInterface({
       </div>
 
       {/* Input area */}
-      <div className="relative shrink-0 border-t border-[#7C3AED]/10 bg-[#05050f]/35 px-6 py-6 backdrop-blur-xl sm:px-10 sm:py-8">
+      <div className="relative shrink-0 border-t border-[#EC4899]/10 bg-[#05050f]/35 px-4 py-5 backdrop-blur-xl sm:px-10 sm:py-8">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#A855F7]/30 to-transparent"
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#EC4899]/30 to-transparent"
         />
         <div className="mx-auto w-full max-w-3xl">
           {error && (
@@ -787,35 +911,47 @@ export function ChatInterface({
             </p>
           )}
 
-          <div className="chat-input-bar flex items-end gap-3 rounded-2xl border border-white/10 bg-[#13131f]/90 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:gap-4 sm:p-3.5">
-            <textarea
-              ref={textareaRef}
-              autoFocus
-              value={input}
-              onChange={handleInput}
-              onKeyDown={handleKeyDown}
-              placeholder="Message Clotter AI..."
-              rows={1}
-              disabled={isLoading}
-              className="max-h-52 min-h-[52px] flex-1 resize-none bg-transparent px-3 py-2.5 text-[1rem] leading-[1.65] tracking-[-0.018em] text-white placeholder:text-white/35 focus:outline-none disabled:opacity-50 sm:min-h-[56px] sm:px-4 sm:py-3"
-            />
-            <button
-              type="button"
-              onClick={() => void sendMessage()}
-              disabled={!input.trim() || isLoading}
-              className="chat-send-btn inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-orange-500 text-white shadow-[0_0_40px_-6px_rgba(236,72,153,0.6)] ring-1 ring-white/10 transition-transform duration-150 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:scale-100"
-              aria-label="Send message"
+          {isEmpty && (
+            <p
+              className={`chat-inspiration-text mb-3 text-center text-xs italic text-white/25 transition-opacity duration-300 ${
+                inspirationVisible ? "opacity-100" : "opacity-0"
+              }`}
             >
-              <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
-                <path
-                  d="M12 19V5M7 10l5-5 5 5"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
+              {inspirationTexts[inspirationIndex]}
+            </p>
+          )}
+
+          <div className="chat-bubble-input-shell">
+            <div className="chat-bubble-input-inner flex items-end gap-3 p-3 sm:gap-4 sm:p-3.5">
+              <textarea
+                ref={textareaRef}
+                autoFocus
+                value={input}
+                onChange={handleInput}
+                onKeyDown={handleKeyDown}
+                placeholder="Message Clotter AI..."
+                rows={1}
+                disabled={isLoading}
+                className="max-h-52 min-h-[52px] flex-1 resize-none bg-transparent px-3 py-2.5 text-[1rem] leading-[1.65] tracking-[-0.018em] text-white placeholder:text-white/35 focus:outline-none disabled:opacity-50 sm:min-h-[56px] sm:px-4 sm:py-3"
+              />
+              <button
+                type="button"
+                onClick={() => void sendMessage()}
+                disabled={!input.trim() || isLoading}
+                className="chat-send-btn inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#EC4899] to-[#F97316] text-white shadow-[0_0_40px_-6px_rgba(236,72,153,0.6)] ring-1 ring-white/10 transition-transform duration-150 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:scale-100"
+                aria-label="Send message"
+              >
+                <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+                  <path
+                    d="M12 19V5M7 10l5-5 5 5"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
           <p className="mt-4 text-center text-[13px] tracking-[-0.01em] text-white/30">
             Clotter AI may make mistakes. Verify important information before using.
