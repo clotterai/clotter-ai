@@ -1,9 +1,8 @@
-type BubbleIconSize = 28 | 64 | 96;
+type BubbleIconSize = 28 | 64;
 
 const sizeMap: Record<BubbleIconSize, number> = {
   28: 28,
   64: 64,
-  96: 96,
 };
 
 export function BubbleIcon({ size = 28 }: { size?: BubbleIconSize }) {
