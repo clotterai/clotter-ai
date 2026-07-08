@@ -38,7 +38,7 @@ const navGroups = [
     label: "CREATE",
     items: [
       {
-        label: "AI Chat",
+        label: "New Chat",
         href: "/dashboard/chat",
         icon: (
           <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
