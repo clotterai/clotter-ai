@@ -381,7 +381,7 @@ h6,
 }
 
 .dash-nav-item:not([aria-current="page"]):hover {
-  transform: translateX(2px);
+  transform: translate3d(4px, 0, 0);
 }
 
 .dash-nav-item[aria-current="page"] {
@@ -392,17 +392,103 @@ h6,
 @keyframes dash-sidebar-slide-in {
   from {
     opacity: 0;
-    transform: translateX(-16px);
+    transform: translate3d(-20px, 0, 0);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 .dash-sidebar-enter {
-  animation: dash-sidebar-slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
-  will-change: transform;
+  animation: dash-sidebar-slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform: translateZ(0);
+  will-change: transform, opacity;
+}
+
+@keyframes dash-logo-glow-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(236, 72, 153, 0.35));
+  }
+  50% {
+    filter: drop-shadow(0 0 18px rgba(249, 115, 22, 0.55));
+  }
+}
+
+.sidebar-logo-glow {
+  animation: dash-logo-glow-pulse 3.5s ease-in-out infinite;
+  transform: translateZ(0);
+}
+
+@keyframes dash-logo-line-shimmer {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+.sidebar-logo-line {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(236, 72, 153, 0.15) 20%,
+    rgba(249, 115, 22, 0.5) 50%,
+    rgba(236, 72, 153, 0.15) 80%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: dash-logo-line-shimmer 4s linear infinite;
+}
+
+@keyframes dash-nav-stagger-in {
+  from {
+    opacity: 0;
+    transform: translate3d(-6px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.dash-nav-stagger {
+  animation: dash-nav-stagger-in 0.25s ease-out both;
+  transform: translateZ(0);
+}
+
+@keyframes dash-chat-rise-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.dash-chat-rise-in {
+  animation: dash-chat-rise-in 0.3s ease-out both;
+  animation-delay: calc(var(--history-index, 0) * 40ms + 40ms);
+  transform: translateZ(0);
+}
+
+.dash-new-chat-btn {
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  transform: translateZ(0);
+}
+
+.dash-new-chat-btn:hover {
+  transform: translateZ(0) scale(1.01);
+  box-shadow: 0 0 28px -6px rgba(236, 72, 153, 0.55);
+}
+
+@keyframes chat-msg-timestamp-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.chat-msg-timestamp {
+  animation: chat-msg-timestamp-in 0.3s ease 0.3s both;
 }
 
 @keyframes dash-label-fade-in {

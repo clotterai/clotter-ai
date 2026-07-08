@@ -2,13 +2,16 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { ClotterLogo } from "@/app/dashboard/components/clotter-logo";
 import { createClient } from "@/lib/supabase/client";
 import { dispatchChatSessionsUpdated } from "@/lib/chat-sessions-events";
+import { generateSmartChatTitle } from "@/lib/generate-chat-title";
 
 type Message = {
   id: string;
   role: "user" | "assistant";
   content: string;
+  createdAt?: string;
 };
 
 type MessageFeedback = "like" | "dislike";
@@ -30,16 +33,24 @@ function pickRandomPrompts(count: number) {
 }
 
 function generateTitle(firstMessage: string) {
-  const trimmed = firstMessage.trim();
-  if (trimmed.length <= 35) return trimmed;
-
-  const truncated = trimmed.slice(0, 35);
-  const lastSpace = truncated.lastIndexOf(" ");
-  const cut = lastSpace > 0 ? truncated.slice(0, lastSpace) : truncated;
-  return `${cut}...`;
+  return generateSmartChatTitle(firstMessage);
 }
 
-import { ClotterLogo } from "@/app/dashboard/components/clotter-logo";
+function formatMessageTime(createdAt?: string) {
+  const date = createdAt ? new Date(createdAt) : new Date();
+  return date.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function MessageTimestamp({ createdAt }: { createdAt?: string }) {
+  return (
+    <p className="chat-msg-timestamp mt-1 text-right text-[10px] text-white/25">
+      {formatMessageTime(createdAt)}
+    </p>
+  );
+}
 
 function ClotterLogoMark() {
   return (
@@ -499,6 +510,7 @@ export function ChatInterface({
       id: crypto.randomUUID(),
       role: "user",
       content: trimmed,
+      createdAt: new Date().toISOString(),
     };
 
     const nextMessages = [...messages, userMessage];
@@ -547,7 +559,11 @@ export function ChatInterface({
 
       setMessages([
         ...nextMessages,
-        { id: assistantId, role: "assistant", content: "" },
+        {
+          id: assistantId,
+          role: "assistant",
+          content: "",
+        },
       ]);
 
       const response = await fetch("/api/chat", {
@@ -593,9 +609,15 @@ export function ChatInterface({
         throw new Error("No response content received.");
       }
 
+      const assistantCreatedAt = new Date().toISOString();
       const finalMessages: Message[] = [
         ...nextMessages,
-        { id: assistantId, role: "assistant", content },
+        {
+          id: assistantId,
+          role: "assistant",
+          content,
+          createdAt: assistantCreatedAt,
+        },
       ];
 
       if (activeSessionId) {
@@ -692,6 +714,7 @@ export function ChatInterface({
                     <div className="flex max-w-[85%] flex-col items-end">
                       <div className="rounded-2xl bg-gradient-to-br from-pink-500 to-orange-500 px-4 py-3 text-white shadow-[0_8px_32px_-12px_rgba(236,72,153,0.45)]">
                         <MessageText content={message.content} />
+                        <MessageTimestamp createdAt={message.createdAt} />
                       </div>
                       <MessageActions align="end">
                         <CopyButton
@@ -720,6 +743,9 @@ export function ChatInterface({
                             }
                           >
                             <MessageText content={message.content} />
+                            {!isStreamingMessage && (
+                              <MessageTimestamp createdAt={message.createdAt} />
+                            )}
                           </div>
                         ) : (
                           <span className="inline-block h-4 w-4" aria-hidden />

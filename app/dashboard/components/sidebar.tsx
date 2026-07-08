@@ -7,6 +7,7 @@ import {
   CHAT_SESSIONS_UPDATED_EVENT,
   dispatchChatSessionsUpdated,
 } from "@/lib/chat-sessions-events";
+import { displaySessionTitle } from "@/lib/generate-chat-title";
 import { LogoutButton } from "./logout-button";
 import { ClotterLogo } from "./clotter-logo";
 
@@ -228,25 +229,30 @@ type ChatSessionSummary = {
 const CHAT_HREF = "/dashboard/chat";
 
 const navLinkBase =
-  "dash-nav-item group relative flex items-center gap-3.5 overflow-hidden rounded-xl border-l-2 px-3.5 py-3 text-[15px] font-medium tracking-[-0.02em] transition-all duration-200";
+  "dash-nav-item dash-nav-stagger group relative flex min-h-[44px] items-center gap-3 overflow-hidden rounded-xl border-l-2 px-3 py-2.5 text-[13px] font-medium transition-all duration-200 ease-out";
 
 function navLinkClass(active: boolean) {
   return active
-    ? `${navLinkBase} border-pink-500 bg-gradient-to-r from-pink-500/10 to-orange-500/5 text-white`
-    : `${navLinkBase} border-transparent text-white/50 hover:bg-white/5 hover:text-white/80`;
+    ? `${navLinkBase} border-pink-400 bg-gradient-to-r from-pink-500/15 to-orange-500/5 text-white`
+    : `${navLinkBase} border-transparent text-white/45 hover:translate-x-1 hover:bg-white/5 hover:text-white/85`;
 }
 
-function capitalizeTitle(title: string) {
-  const trimmed = title.trim();
-  if (!trimmed) return "New Chat";
-  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+function chatItemClass(active: boolean) {
+  return `dash-chat-rise-in group/history relative flex min-h-[44px] flex-col justify-center rounded-xl border-l-2 px-3 py-2.5 text-[13px] font-medium transition-all duration-200 ease-out ${
+    active
+      ? "border-pink-400 bg-white/[0.08] text-white"
+      : "border-transparent text-white/45 hover:bg-white/5 hover:text-white/85"
+  }`;
 }
 
-function truncateTitle(title: string, maxLength = 28) {
-  const formatted = capitalizeTitle(title);
-  if (formatted.length <= maxLength) return formatted;
-  return `${formatted.slice(0, maxLength - 3)}...`;
-}
+const historyActionIconClass =
+  "flex h-7 w-7 items-center justify-center rounded-lg text-white/30 transition-opacity duration-150 hover:text-white/70 disabled:opacity-40";
+
+type DeletedSessionSnapshot = {
+  title: string;
+  messages: unknown[];
+  wasActive: boolean;
+};
 
 function formatTimeAgo(dateString: string, now = Date.now()) {
   const date = new Date(dateString);
@@ -267,17 +273,6 @@ function formatTimeAgo(dateString: string, now = Date.now()) {
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
-function chatSubLinkClass(active: boolean) {
-  return `dash-chat-history-item flex items-center rounded-lg py-1.5 pl-8 pr-16 text-xs transition-all duration-200 ${
-    active
-      ? "border-l-2 border-pink-500 bg-pink-500/10 text-white/80 shadow-[0_0_20px_-10px_rgba(236,72,153,0.5)]"
-      : "border-l-2 border-transparent text-white/50 hover:bg-white/5 hover:text-white/80"
-  }`;
-}
-
-const historyActionIconClass =
-  "rounded p-1 text-white/40 transition-all duration-150 hover:scale-[1.05] hover:text-white/80 disabled:opacity-40";
-
 const ChatHistoryItem = memo(function ChatHistoryItem({
   session,
   index,
@@ -285,7 +280,6 @@ const ChatHistoryItem = memo(function ChatHistoryItem({
   timeLabel,
   onClose,
   onRename,
-  onDuplicate,
   onDelete,
 }: {
   session: ChatSessionSummary;
@@ -294,16 +288,12 @@ const ChatHistoryItem = memo(function ChatHistoryItem({
   timeLabel: string;
   onClose: () => void;
   onRename: (id: string, title: string) => Promise<boolean>;
-  onDuplicate: (id: string) => Promise<ChatSessionSummary | null>;
   onDelete: (id: string) => Promise<boolean>;
 }) {
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(session.title);
   const [isSavingRename, setIsSavingRename] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [isFadingOut, setIsFadingOut] = useState(false);
-  const [isDuplicating, setIsDuplicating] = useState(false);
   const renameInputRef = useRef<HTMLInputElement>(null);
   const escapingRenameRef = useRef(false);
 
@@ -352,34 +342,21 @@ const ChatHistoryItem = memo(function ChatHistoryItem({
     void saveRename();
   }
 
-  async function confirmDeleteSession() {
-    setIsDeleting(true);
-    setIsFadingOut(true);
-    setConfirmDelete(false);
-
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    await onDelete(session.id);
-    setIsDeleting(false);
-  }
-
-  async function handleDuplicate(event: React.MouseEvent) {
+  async function handleDelete(event: React.MouseEvent) {
     event.preventDefault();
     event.stopPropagation();
-    setConfirmDelete(false);
-    setIsDuplicating(true);
-    await onDuplicate(session.id);
-    setIsDuplicating(false);
+    setIsFadingOut(true);
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    await onDelete(session.id);
   }
 
   return (
     <li
-      className={`group relative dash-chat-history-item ${
-        isFadingOut ? "dash-chat-history-fade-out" : ""
-      }`}
-      style={{ "--history-index": index + 1 } as React.CSSProperties}
+      className={`relative ${isFadingOut ? "dash-chat-history-fade-out" : ""}`}
+      style={{ "--history-index": index } as React.CSSProperties}
     >
       {isRenaming ? (
-        <div className={`${chatSubLinkClass(isActive)} flex-col items-start gap-1`}>
+        <div className={`${chatItemClass(isActive)} pr-3`}>
           <input
             ref={renameInputRef}
             value={renameValue}
@@ -397,39 +374,41 @@ const ChatHistoryItem = memo(function ChatHistoryItem({
               }
             }}
             disabled={isSavingRename}
-            className="w-full border-b border-white/20 bg-transparent text-xs text-white outline-none placeholder:text-white/30 disabled:opacity-60"
+            className="w-full border-b border-white/20 bg-transparent text-[13px] font-medium text-white outline-none disabled:opacity-60"
           />
           {isSavingRename && (
-            <span className="text-[10px] text-white/30">Saving...</span>
+            <span className="mt-1 text-[10px] text-white/25">Saving...</span>
           )}
         </div>
       ) : (
-        <>
+        <div className="group relative">
           <Link
             href={`${CHAT_HREF}?session=${session.id}`}
             onClick={onClose}
-            className={`${chatSubLinkClass(isActive)} flex-col items-start gap-0.5`}
+            className={`${chatItemClass(isActive)} block pr-16`}
+            style={{ "--history-index": index } as React.CSSProperties}
           >
-            <span className="w-full truncate">
-              {truncateTitle(session.title)}
+            <span className="block truncate">
+              {displaySessionTitle(session.title)}
             </span>
-            <span className="text-[10px] text-white/30">{timeLabel}</span>
+            <span className="mt-0.5 block text-[10px] font-normal text-white/25">
+              {timeLabel}
+            </span>
           </Link>
 
-          <div className="dash-chat-history-actions pointer-events-none absolute right-1.5 top-1/2 flex -translate-y-1/2 items-center gap-0.5 opacity-0 group-hover:pointer-events-auto group-hover:opacity-100">
+          <div className="pointer-events-none absolute right-1.5 top-1/2 flex -translate-y-1/2 items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100">
             <button
               type="button"
               onClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
-                setConfirmDelete(false);
                 setRenameValue(session.title);
                 setIsRenaming(true);
               }}
               className={historyActionIconClass}
               aria-label={`Rename ${session.title}`}
             >
-              <svg viewBox="0 0 16 16" fill="none" className="h-3 w-3" aria-hidden>
+              <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5" aria-hidden>
                 <path
                   d="M11.5 2.5 13.5 4.5 5.5 12.5H3.5V10.5L11.5 2.5Z"
                   stroke="currentColor"
@@ -440,40 +419,11 @@ const ChatHistoryItem = memo(function ChatHistoryItem({
             </button>
             <button
               type="button"
-              onClick={(event) => void handleDuplicate(event)}
-              disabled={isDuplicating}
-              className={historyActionIconClass}
-              aria-label={`Duplicate ${session.title}`}
-            >
-              <svg viewBox="0 0 16 16" fill="none" className="h-3 w-3" aria-hidden>
-                <rect
-                  x="5"
-                  y="5"
-                  width="8"
-                  height="8"
-                  rx="1.5"
-                  stroke="currentColor"
-                  strokeWidth="1.25"
-                />
-                <path
-                  d="M5 11H4a1.5 1.5 0 0 1-1.5-1.5V4A1.5 1.5 0 0 1 4 2.5h5.5A1.5 1.5 0 0 1 11 4v1"
-                  stroke="currentColor"
-                  strokeWidth="1.25"
-                />
-              </svg>
-            </button>
-            <button
-              type="button"
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                setConfirmDelete(true);
-              }}
-              disabled={isDeleting}
+              onClick={(event) => void handleDelete(event)}
               className={`${historyActionIconClass} hover:text-red-400`}
               aria-label={`Delete ${session.title}`}
             >
-              <svg viewBox="0 0 16 16" fill="none" className="h-3 w-3" aria-hidden>
+              <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5" aria-hidden>
                 <path
                   d="M3.5 5.5h9M6 5.5V4.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1m1.5 0v7a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-7"
                   stroke="currentColor"
@@ -482,37 +432,6 @@ const ChatHistoryItem = memo(function ChatHistoryItem({
                   strokeLinejoin="round"
                 />
               </svg>
-            </button>
-          </div>
-        </>
-      )}
-
-      {confirmDelete && !isRenaming && (
-        <div className="absolute left-6 right-2 top-full z-10 mt-1 rounded-lg border border-white/10 bg-[#13131f] px-2.5 py-2 shadow-lg">
-          <p className="text-[10px] text-white/50">Delete?</p>
-          <div className="mt-1.5 flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                void confirmDeleteSession();
-              }}
-              disabled={isDeleting}
-              className="rounded-md bg-red-500/20 px-2 py-0.5 text-[10px] font-medium text-red-300 transition-all duration-150 hover:bg-red-500/30"
-            >
-              Yes
-            </button>
-            <button
-              type="button"
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                setConfirmDelete(false);
-              }}
-              className="rounded-md bg-white/5 px-2 py-0.5 text-[10px] font-medium text-white/60 transition-all duration-150 hover:bg-white/10 hover:text-white/80"
-            >
-              No
             </button>
           </div>
         </div>
@@ -525,10 +444,12 @@ function SidebarNavLink({
   item,
   pathname,
   onClose,
+  animationIndex,
 }: {
   item: NavItem;
   pathname: string;
   onClose: () => void;
+  animationIndex: number;
 }) {
   const active =
     item.href === "/dashboard"
@@ -540,18 +461,22 @@ function SidebarNavLink({
       href={item.href}
       onClick={onClose}
       className={navLinkClass(active)}
+      style={
+        {
+          "--nav-index": animationIndex,
+          animationDelay: `${animationIndex * 30}ms`,
+        } as React.CSSProperties
+      }
       aria-current={active ? "page" : undefined}
     >
       <span
-        className={`relative z-[1] transition-all duration-200 ${
-          active
-            ? "text-pink-400"
-            : "text-white/40 group-hover:text-pink-400/80"
+        className={`relative z-[1] shrink-0 transition-all duration-200 ${
+          active ? "text-pink-400" : "text-white/35 group-hover:text-pink-400/70"
         }`}
       >
         {item.icon}
       </span>
-      <span className="relative z-[1]">{item.label}</span>
+      <span className="relative z-[1] truncate">{item.label}</span>
     </Link>
   );
 }
@@ -560,10 +485,12 @@ const ChatNavSection = memo(function ChatNavSection({
   item,
   pathname,
   onClose,
+  animationIndex,
 }: {
   item: NavItem;
   pathname: string;
   onClose: () => void;
+  animationIndex: number;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -573,6 +500,10 @@ const ChatNavSection = memo(function ChatNavSection({
 
   const [sessions, setSessions] = useState<ChatSessionSummary[]>([]);
   const [now, setNow] = useState(() => Date.now());
+  const [undoDelete, setUndoDelete] = useState<DeletedSessionSnapshot | null>(
+    null,
+  );
+  const undoTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const loadSessions = useCallback(async () => {
     try {
@@ -618,6 +549,61 @@ const ChatNavSection = memo(function ChatNavSection({
     return () => window.clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (undoTimeoutRef.current) {
+        clearTimeout(undoTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const showUndoToast = useCallback((snapshot: DeletedSessionSnapshot) => {
+    setUndoDelete(snapshot);
+
+    if (undoTimeoutRef.current) {
+      window.clearTimeout(undoTimeoutRef.current);
+    }
+
+    undoTimeoutRef.current = setTimeout(() => {
+      setUndoDelete(null);
+    }, 3000);
+  }, []);
+
+  const handleUndoDelete = useCallback(async () => {
+    if (!undoDelete) return;
+
+    const response = await fetch("/api/chat-sessions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: undoDelete.title,
+        messages: undoDelete.messages,
+      }),
+    });
+
+    if (!response.ok) return;
+
+    const data = (await response.json()) as {
+      session?: ChatSessionSummary;
+    };
+
+    if (!data.session) return;
+
+    setSessions((current) =>
+      [data.session!, ...current].slice(0, 10),
+    );
+
+    if (undoDelete.wasActive) {
+      router.push(`${CHAT_HREF}?session=${data.session.id}`);
+    }
+
+    setUndoDelete(null);
+    if (undoTimeoutRef.current) {
+      window.clearTimeout(undoTimeoutRef.current);
+    }
+    dispatchChatSessionsUpdated();
+  }, [undoDelete, router]);
+
   const handleRenameSession = useCallback(
     async (sessionId: string, title: string) => {
       const response = await fetch(`/api/chat-sessions/${sessionId}`, {
@@ -647,34 +633,31 @@ const ChatNavSection = memo(function ChatNavSection({
     [],
   );
 
-  const handleDuplicateSession = useCallback(
-    async (sessionId: string) => {
-      const response = await fetch(`/api/chat-sessions/${sessionId}`, {
-        method: "POST",
-      });
-
-      if (!response.ok) return null;
-
-      const data = (await response.json()) as {
-        session?: ChatSessionSummary;
-      };
-
-      if (!data.session) return null;
-
-      setSessions((current) =>
-        [data.session!, ...current.filter((s) => s.id !== data.session!.id)].slice(
-          0,
-          10,
-        ),
-      );
-      dispatchChatSessionsUpdated();
-      return data.session;
-    },
-    [],
-  );
-
   const handleDeleteSession = useCallback(
     async (sessionId: string) => {
+      const snapshotResponse = await fetch(`/api/chat-sessions/${sessionId}`);
+      let snapshot: DeletedSessionSnapshot = {
+        title: "New Chat",
+        messages: [],
+        wasActive: activeSessionId === sessionId,
+      };
+
+      if (snapshotResponse.ok) {
+        const snapshotData = (await snapshotResponse.json()) as {
+          session?: { title?: string; messages?: unknown[] };
+        };
+
+        if (snapshotData.session) {
+          snapshot = {
+            title: snapshotData.session.title ?? "New Chat",
+            messages: Array.isArray(snapshotData.session.messages)
+              ? snapshotData.session.messages
+              : [],
+            wasActive: activeSessionId === sessionId,
+          };
+        }
+      }
+
       const response = await fetch(`/api/chat-sessions/${sessionId}`, {
         method: "DELETE",
       });
@@ -689,10 +672,11 @@ const ChatNavSection = memo(function ChatNavSection({
         router.push(CHAT_HREF);
       }
 
+      showUndoToast(snapshot);
       dispatchChatSessionsUpdated();
       return true;
     },
-    [activeSessionId, router],
+    [activeSessionId, router, showUndoToast],
   );
 
   return (
@@ -701,66 +685,76 @@ const ChatNavSection = memo(function ChatNavSection({
         href={CHAT_HREF}
         onClick={onClose}
         className={navLinkClass(isParentActive)}
+        style={
+          {
+            animationDelay: `${animationIndex * 30}ms`,
+          } as React.CSSProperties
+        }
         aria-current={isParentActive ? "page" : undefined}
       >
         <span
-          className={`relative z-[1] transition-all duration-200 ${
+          className={`relative z-[1] shrink-0 transition-all duration-200 ${
             isParentActive
               ? "text-pink-400"
-              : "text-white/40 group-hover:text-pink-400/80"
+              : "text-white/35 group-hover:text-pink-400/70"
           }`}
         >
           {item.icon}
         </span>
-        <span className="relative z-[1]">{item.label}</span>
+        <span className="relative z-[1] truncate">{item.label}</span>
       </Link>
 
       {isChatPage && (
-        <ul className="mt-1 space-y-0.5">
-          <li
-            className="dash-chat-history-item"
+        <div className="mt-2 space-y-1 px-1">
+          <Link
+            href={CHAT_HREF}
+            onClick={onClose}
+            className="dash-new-chat-btn dash-chat-rise-in flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-pink-500 to-orange-500 py-2 text-sm font-semibold text-white shadow-[0_0_24px_-8px_rgba(236,72,153,0.5)] transition-all duration-200"
             style={{ "--history-index": 0 } as React.CSSProperties}
           >
-            <Link
-              href={CHAT_HREF}
-              onClick={onClose}
-              className={`${chatSubLinkClass(!activeSessionId)} gap-2`}
-            >
-              <svg
-                viewBox="0 0 16 16"
-                fill="none"
-                className="h-3 w-3 shrink-0 text-pink-500"
-                aria-hidden
-              >
-                <path
-                  d="M8 3v10M3 8h10"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <span>New Chat</span>
-            </Link>
-          </li>
+            <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4" aria-hidden>
+              <path
+                d="M8 3v10M3 8h10"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+              />
+            </svg>
+            New Chat
+          </Link>
 
           {sessions.length === 0 ? (
-            <li className="px-8 py-2 text-xs text-white/30">No chats yet</li>
+            <p className="px-2 py-2 text-xs text-white/30">No chats yet</p>
           ) : (
-            sessions.map((session, index) => (
-              <ChatHistoryItem
-                key={session.id}
-                session={session}
-                index={index}
-                isActive={activeSessionId === session.id}
-                timeLabel={formatTimeAgo(session.updated_at, now)}
-                onClose={onClose}
-                onRename={handleRenameSession}
-                onDuplicate={handleDuplicateSession}
-                onDelete={handleDeleteSession}
-              />
-            ))
+            <ul className="space-y-0.5">
+              {sessions.map((session, index) => (
+                <ChatHistoryItem
+                  key={session.id}
+                  session={session}
+                  index={index + 1}
+                  isActive={activeSessionId === session.id}
+                  timeLabel={formatTimeAgo(session.updated_at, now)}
+                  onClose={onClose}
+                  onRename={handleRenameSession}
+                  onDelete={handleDeleteSession}
+                />
+              ))}
+            </ul>
           )}
-        </ul>
+
+          {undoDelete && (
+            <div className="dash-chat-rise-in mx-1 mt-2 flex items-center justify-between gap-2 rounded-xl border border-white/10 bg-[#13131f]/95 px-3 py-2.5">
+              <span className="text-xs text-white/50">Chat deleted</span>
+              <button
+                type="button"
+                onClick={() => void handleUndoDelete()}
+                className="text-xs font-semibold text-pink-400 transition-colors duration-150 hover:text-pink-300"
+              >
+                Undo
+              </button>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
@@ -781,7 +775,7 @@ export function DashboardSidebar({
 
   return (
     <aside
-      className={`dash-sidebar-enter fixed inset-y-0 left-0 z-50 flex h-full w-[17.5rem] flex-col border-r border-[#EC4899]/10 bg-[#0D0D1A]/95 backdrop-blur-2xl transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-transform md:translate-x-0 ${
+      className={`dash-sidebar-enter fixed inset-y-0 left-0 z-50 flex h-full w-[17.5rem] flex-col border-r border-white/5 bg-[#0D0D1A]/98 backdrop-blur-2xl transition-transform duration-300 ease-out will-change-transform md:translate-x-0 ${
         isMobileOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >
@@ -796,89 +790,96 @@ export function DashboardSidebar({
       />
 
       {/* Logo */}
-      <div className="relative shrink-0 border-b border-[#EC4899]/10 px-6 py-7">
-        <div className="flex items-center gap-3.5">
-          <ClotterLogo size={32} />
-          <div>
-            <p className="font-heading text-base font-bold tracking-[-0.02em] text-white">
-              Clotter AI
-            </p>
+      <div className="relative shrink-0 px-4 py-5 md:px-5">
+        <div className="flex items-center gap-3">
+          <div className="sidebar-logo-glow">
+            <ClotterLogo size={32} />
           </div>
+          <p className="font-heading text-[15px] font-bold tracking-[-0.02em] text-white">
+            Clotter AI
+          </p>
         </div>
+        <div aria-hidden className="sidebar-logo-line mt-5" />
       </div>
 
       {/* Navigation */}
       <nav
-        className="min-h-0 flex-1 overflow-y-auto px-4 py-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        className="min-h-0 flex-1 overflow-y-auto px-4 py-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
-        <SidebarNavLink
-          item={dashboardNavItem}
-          pathname={pathname}
-          onClose={onClose}
-        />
+        {(() => {
+          let navIndex = 0;
+          const nextIndex = () => navIndex++;
 
-        {navGroups.map((group, groupIndex) => (
-          <div key={group.label} className="mt-6">
-            <p
-              className="dash-nav-group-label mb-1 px-3 text-[10px] font-semibold uppercase tracking-[0.15em] text-white/25"
-              style={{ "--group-index": groupIndex } as React.CSSProperties}
-            >
-              {group.label}
-            </p>
-            <div className="space-y-1">
-              {group.items.map((item) =>
-                item.href === CHAT_HREF ? (
-                  <ChatNavSection
-                    key={item.label}
-                    item={item}
-                    pathname={pathname}
-                    onClose={onClose}
-                  />
-                ) : (
-                  <SidebarNavLink
-                    key={item.label}
-                    item={item}
-                    pathname={pathname}
-                    onClose={onClose}
-                  />
-                ),
-              )}
-            </div>
-          </div>
-        ))}
+          return (
+            <>
+              <SidebarNavLink
+                item={dashboardNavItem}
+                pathname={pathname}
+                onClose={onClose}
+                animationIndex={nextIndex()}
+              />
+
+              {navGroups.map((group, groupIndex) => (
+                <div key={group.label} className="mt-5">
+                  <p
+                    className="dash-nav-group-label mb-1.5 px-3 text-[9px] font-semibold uppercase tracking-[0.2em] text-white/25"
+                    style={{ "--group-index": groupIndex } as React.CSSProperties}
+                  >
+                    {group.label}
+                  </p>
+                  <div className="space-y-0.5">
+                    {group.items.map((item) =>
+                      item.href === CHAT_HREF ? (
+                        <ChatNavSection
+                          key={item.label}
+                          item={item}
+                          pathname={pathname}
+                          onClose={onClose}
+                          animationIndex={nextIndex()}
+                        />
+                      ) : (
+                        <SidebarNavLink
+                          key={item.label}
+                          item={item}
+                          pathname={pathname}
+                          onClose={onClose}
+                          animationIndex={nextIndex()}
+                        />
+                      ),
+                    )}
+                  </div>
+                </div>
+              ))}
+            </>
+          );
+        })()}
       </nav>
 
       {/* Profile */}
-      <div className="shrink-0 border-t border-white/10 p-5">
-        <div className="dash-glass-v2 !rounded-2xl !p-4 transition-transform duration-200 hover:-translate-y-0.5">
-          <div className="flex items-center gap-3.5">
-            {user.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={user.avatarUrl}
-                alt=""
-                loading="lazy"
-                className="h-10 w-10 shrink-0 rounded-full object-cover ring-1 ring-[#EC4899]/30"
-              />
-            ) : (
-              <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#EC4899]/40 to-[#F97316]/20 text-sm font-semibold text-[#FECDD3] ring-1 ring-[#EC4899]/30">
-                {user.initials}
-                <div
-                  aria-hidden
-                  className="absolute inset-0 rounded-full bg-[#EC4899]/20 blur-sm"
-                />
-              </div>
-            )}
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[15px] font-medium tracking-[-0.02em] text-white/95">
-                {user.fullName}
-              </p>
-              <p className="truncate text-xs text-white/40">{user.email}</p>
+      <div className="shrink-0 border-t border-white/10 px-4 py-4">
+        <div className="flex items-center gap-3">
+          {user.avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={user.avatarUrl}
+              alt=""
+              loading="lazy"
+              className="h-9 w-9 shrink-0 rounded-full object-cover ring-1 ring-white/10"
+            />
+          ) : (
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-pink-500/30 to-orange-500/20 text-xs font-semibold text-white/90 ring-1 ring-white/10">
+              {user.initials}
             </div>
+          )}
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[13px] font-medium text-white/90">
+              {user.fullName}
+            </p>
+            <p className="truncate text-[11px] text-white/35">{user.email}</p>
           </div>
-          <LogoutButton />
         </div>
+        <LogoutButton />
       </div>
     </aside>
   );

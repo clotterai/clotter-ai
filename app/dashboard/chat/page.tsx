@@ -20,10 +20,7 @@ function ChatPageContent() {
         />
         <div className="flex items-center justify-between gap-3 md:gap-6">
           <div className="min-w-0 flex-1">
-            <p className="hidden text-xs font-semibold uppercase tracking-[0.12em] text-[#A855F7]/70 md:block">
-              AI Chat
-            </p>
-            <h1 className="font-heading truncate text-xl font-bold tracking-[-0.02em] text-white md:mt-1.5 md:text-4xl lg:text-[3rem]">
+            <h1 className="font-heading truncate text-xl font-bold tracking-[-0.02em] text-white md:text-4xl lg:text-[3rem]">
               Creative co-pilot
             </h1>
           </div>
