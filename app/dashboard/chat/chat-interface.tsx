@@ -116,9 +116,13 @@ function MessageActions({
 const pillButtonClass =
   "inline-flex h-7 shrink-0 items-center gap-1 rounded-full border border-white/8 bg-white/[0.04] px-2.5 text-[11px] font-medium transition-all duration-150 hover:scale-[1.02] hover:border-white/15 hover:bg-white/[0.08]";
 
+const iconActionButtonClass =
+  "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-white/6 bg-white/[0.02] text-[13px] leading-none transition-all duration-150 hover:border-white/10 hover:bg-white/[0.06]";
+
 function AssistantMessageActions({
   messageIndex,
   content,
+  createdAt,
   feedback,
   copiedIndex,
   feedbackThanksIndex,
@@ -127,6 +131,7 @@ function AssistantMessageActions({
 }: {
   messageIndex: number;
   content: string;
+  createdAt?: string;
   feedback?: MessageFeedback;
   copiedIndex: number | null;
   feedbackThanksIndex: number | null;
@@ -139,87 +144,58 @@ function AssistantMessageActions({
 
   return (
     <div className="chat-actions-fade-in mt-2">
-      <div className="flex flex-wrap items-center gap-1.5">
-        <button
-          type="button"
-          onClick={() => onFeedback(messageIndex, "like")}
-          className={`${pillButtonClass} ${
-            isLiked
-              ? "border-green-500/30 text-green-400"
-              : "text-white/40 hover:text-white/65"
-          }`}
-          aria-label="Mark as helpful"
-        >
-          <svg
-            viewBox="0 0 16 16"
-            fill={isLiked ? "currentColor" : "none"}
-            className="h-3 w-3 shrink-0"
-            aria-hidden
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => onFeedback(messageIndex, "like")}
+            className={`${iconActionButtonClass} ${
+              isLiked
+                ? "border-green-500/25 bg-green-500/10 opacity-100"
+                : "opacity-50 hover:opacity-80"
+            }`}
+            aria-label="Mark as helpful"
           >
-            <path
-              d="M5 14V7.5M5 7.5L6.8 3.2a1 1 0 0 1 .95-.7H10a1 1 0 0 1 1 1v2h2.2a1 1 0 0 1 .98 1.2l-.8 4A1 1 0 0 1 12.4 11H8.5"
-              stroke="currentColor"
-              strokeWidth="1.25"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M5 7.5H3.5a1 1 0 0 0-1 1V13a1 1 0 0 0 1 1H5"
-              stroke="currentColor"
-              strokeWidth="1.25"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          Helpful
-        </button>
-        <button
-          type="button"
-          onClick={() => onFeedback(messageIndex, "dislike")}
-          className={`${pillButtonClass} ${
-            isDisliked
-              ? "border-red-500/30 text-red-400"
-              : "text-white/40 hover:text-white/65"
-          }`}
-          aria-label="Mark as not helpful"
-        >
-          <svg
-            viewBox="0 0 16 16"
-            fill={isDisliked ? "currentColor" : "none"}
-            className="h-3 w-3 shrink-0"
-            aria-hidden
+            👍
+          </button>
+          <button
+            type="button"
+            onClick={() => onFeedback(messageIndex, "dislike")}
+            className={`${iconActionButtonClass} ${
+              isDisliked
+                ? "border-red-500/25 bg-red-500/10 opacity-100"
+                : "opacity-50 hover:opacity-80"
+            }`}
+            aria-label="Mark as not helpful"
           >
-            <path
-              d="M5 2v6.5M5 8.5L6.8 12.8a1 1 0 0 0 .95.7H10a1 1 0 0 0 1-1v-2h2.2a1 1 0 0 0 .98-1.2l-.8-4A1 1 0 0 0 12.4 5H8.5"
-              stroke="currentColor"
-              strokeWidth="1.25"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M5 8.5H3.5a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1H5"
-              stroke="currentColor"
-              strokeWidth="1.25"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          Not helpful
-        </button>
-        <button
-          type="button"
-          onClick={() => onCopy(messageIndex, content)}
-          className={`${pillButtonClass} ${
-            isCopied
-              ? "border-green-500/30 text-green-400"
-              : "text-white/40 hover:text-white/65"
-          }`}
-          aria-label={isCopied ? "Copied" : "Copy message"}
-        >
-          {isCopied ? (
-            "Copied!"
-          ) : (
-            <>
+            👎
+          </button>
+          <button
+            type="button"
+            onClick={() => onCopy(messageIndex, content)}
+            className={`${iconActionButtonClass} ${
+              isCopied
+                ? "border-green-500/25 text-green-400 opacity-100"
+                : "text-white/40 opacity-50 hover:opacity-80"
+            }`}
+            aria-label={isCopied ? "Copied" : "Copy message"}
+          >
+            {isCopied ? (
+              <svg
+                viewBox="0 0 16 16"
+                fill="none"
+                className="h-3 w-3 shrink-0"
+                aria-hidden
+              >
+                <path
+                  d="m4 8.5 2.5 2.5L12 5.5"
+                  stroke="currentColor"
+                  strokeWidth="1.25"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            ) : (
               <svg
                 viewBox="0 0 16 16"
                 fill="none"
@@ -241,10 +217,12 @@ function AssistantMessageActions({
                   strokeWidth="1.25"
                 />
               </svg>
-              Copy
-            </>
-          )}
-        </button>
+            )}
+          </button>
+        </div>
+        <span className="ml-auto shrink-0 text-[10px] text-white/25">
+          {formatMessageTime(createdAt)}
+        </span>
       </div>
       {feedbackThanksIndex === messageIndex && (
         <p className="mt-2 text-[11px] font-medium text-white/35">
@@ -743,9 +721,6 @@ export function ChatInterface({
                             }
                           >
                             <MessageText content={message.content} />
-                            {!isStreamingMessage && (
-                              <MessageTimestamp createdAt={message.createdAt} />
-                            )}
                           </div>
                         ) : (
                           <span className="inline-block h-4 w-4" aria-hidden />
@@ -755,6 +730,7 @@ export function ChatInterface({
                         <AssistantMessageActions
                           messageIndex={index}
                           content={message.content}
+                          createdAt={message.createdAt}
                           feedback={feedback[index]}
                           copiedIndex={copiedIndex}
                           feedbackThanksIndex={feedbackThanksIndex}
