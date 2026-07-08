@@ -427,7 +427,23 @@ h6,
 }
 
 .dash-chat-history-delete {
-  transition: opacity 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.dash-chat-history-actions {
+  transition: opacity 0.15s ease;
+}
+
+@keyframes dash-chat-history-fade-out {
+  to {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+}
+
+.dash-chat-history-fade-out {
+  animation: dash-chat-history-fade-out 0.2s ease forwards;
+  pointer-events: none;
 }
 
 /* ── Hero floating orb — top right ── */

@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Suspense, memo, useCallback, useEffect, useState, type ReactNode } from "react";
+import { Suspense, memo, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import {
   CHAT_SESSIONS_UPDATED_EVENT,
+  dispatchChatSessionsUpdated,
 } from "@/lib/chat-sessions-events";
 import { LogoutButton } from "./logout-button";
 import { ClotterLogo } from "./clotter-logo";
@@ -247,9 +248,9 @@ function truncateTitle(title: string, maxLength = 28) {
   return `${formatted.slice(0, maxLength - 3)}...`;
 }
 
-function formatTimeAgo(dateString: string) {
+function formatTimeAgo(dateString: string, now = Date.now()) {
   const date = new Date(dateString);
-  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  const seconds = Math.floor((now - date.getTime()) / 1000);
 
   if (seconds < 60) return "Just now";
 
@@ -267,12 +268,258 @@ function formatTimeAgo(dateString: string) {
 }
 
 function chatSubLinkClass(active: boolean) {
-  return `dash-chat-history-item flex items-center rounded-lg py-1.5 pl-8 pr-3 text-xs transition-all duration-200 ${
+  return `dash-chat-history-item flex items-center rounded-lg py-1.5 pl-8 pr-16 text-xs transition-all duration-200 ${
     active
       ? "border-l-2 border-pink-500 bg-pink-500/10 text-white/80 shadow-[0_0_20px_-10px_rgba(236,72,153,0.5)]"
       : "border-l-2 border-transparent text-white/50 hover:bg-white/5 hover:text-white/80"
   }`;
 }
+
+const historyActionIconClass =
+  "rounded p-1 text-white/40 transition-all duration-150 hover:scale-[1.05] hover:text-white/80 disabled:opacity-40";
+
+const ChatHistoryItem = memo(function ChatHistoryItem({
+  session,
+  index,
+  isActive,
+  timeLabel,
+  onClose,
+  onRename,
+  onDuplicate,
+  onDelete,
+}: {
+  session: ChatSessionSummary;
+  index: number;
+  isActive: boolean;
+  timeLabel: string;
+  onClose: () => void;
+  onRename: (id: string, title: string) => Promise<boolean>;
+  onDuplicate: (id: string) => Promise<ChatSessionSummary | null>;
+  onDelete: (id: string) => Promise<boolean>;
+}) {
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [renameValue, setRenameValue] = useState(session.title);
+  const [isSavingRename, setIsSavingRename] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isFadingOut, setIsFadingOut] = useState(false);
+  const [isDuplicating, setIsDuplicating] = useState(false);
+  const renameInputRef = useRef<HTMLInputElement>(null);
+  const escapingRenameRef = useRef(false);
+
+  useEffect(() => {
+    if (isRenaming && renameInputRef.current) {
+      renameInputRef.current.focus();
+      renameInputRef.current.select();
+    }
+  }, [isRenaming]);
+
+  useEffect(() => {
+    if (!isRenaming) {
+      setRenameValue(session.title);
+    }
+  }, [session.title, isRenaming]);
+
+  async function saveRename() {
+    const trimmed = renameValue.trim();
+
+    if (!trimmed || trimmed === session.title) {
+      cancelRename();
+      return;
+    }
+
+    setIsSavingRename(true);
+    const saved = await onRename(session.id, trimmed);
+    setIsSavingRename(false);
+
+    if (saved) {
+      setIsRenaming(false);
+    }
+  }
+
+  function cancelRename() {
+    escapingRenameRef.current = false;
+    setRenameValue(session.title);
+    setIsRenaming(false);
+    setIsSavingRename(false);
+  }
+
+  function handleRenameBlur() {
+    if (escapingRenameRef.current) {
+      escapingRenameRef.current = false;
+      return;
+    }
+    void saveRename();
+  }
+
+  async function confirmDeleteSession() {
+    setIsDeleting(true);
+    setIsFadingOut(true);
+    setConfirmDelete(false);
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    await onDelete(session.id);
+    setIsDeleting(false);
+  }
+
+  async function handleDuplicate(event: React.MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    setConfirmDelete(false);
+    setIsDuplicating(true);
+    await onDuplicate(session.id);
+    setIsDuplicating(false);
+  }
+
+  return (
+    <li
+      className={`group relative dash-chat-history-item ${
+        isFadingOut ? "dash-chat-history-fade-out" : ""
+      }`}
+      style={{ "--history-index": index + 1 } as React.CSSProperties}
+    >
+      {isRenaming ? (
+        <div className={`${chatSubLinkClass(isActive)} flex-col items-start gap-1`}>
+          <input
+            ref={renameInputRef}
+            value={renameValue}
+            onChange={(event) => setRenameValue(event.target.value)}
+            onBlur={handleRenameBlur}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                void saveRename();
+              }
+              if (event.key === "Escape") {
+                event.preventDefault();
+                escapingRenameRef.current = true;
+                cancelRename();
+              }
+            }}
+            disabled={isSavingRename}
+            className="w-full border-b border-white/20 bg-transparent text-xs text-white outline-none placeholder:text-white/30 disabled:opacity-60"
+          />
+          {isSavingRename && (
+            <span className="text-[10px] text-white/30">Saving...</span>
+          )}
+        </div>
+      ) : (
+        <>
+          <Link
+            href={`${CHAT_HREF}?session=${session.id}`}
+            onClick={onClose}
+            className={`${chatSubLinkClass(isActive)} flex-col items-start gap-0.5`}
+          >
+            <span className="w-full truncate">
+              {truncateTitle(session.title)}
+            </span>
+            <span className="text-[10px] text-white/30">{timeLabel}</span>
+          </Link>
+
+          <div className="dash-chat-history-actions pointer-events-none absolute right-1.5 top-1/2 flex -translate-y-1/2 items-center gap-0.5 opacity-0 group-hover:pointer-events-auto group-hover:opacity-100">
+            <button
+              type="button"
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                setConfirmDelete(false);
+                setRenameValue(session.title);
+                setIsRenaming(true);
+              }}
+              className={historyActionIconClass}
+              aria-label={`Rename ${session.title}`}
+            >
+              <svg viewBox="0 0 16 16" fill="none" className="h-3 w-3" aria-hidden>
+                <path
+                  d="M11.5 2.5 13.5 4.5 5.5 12.5H3.5V10.5L11.5 2.5Z"
+                  stroke="currentColor"
+                  strokeWidth="1.25"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={(event) => void handleDuplicate(event)}
+              disabled={isDuplicating}
+              className={historyActionIconClass}
+              aria-label={`Duplicate ${session.title}`}
+            >
+              <svg viewBox="0 0 16 16" fill="none" className="h-3 w-3" aria-hidden>
+                <rect
+                  x="5"
+                  y="5"
+                  width="8"
+                  height="8"
+                  rx="1.5"
+                  stroke="currentColor"
+                  strokeWidth="1.25"
+                />
+                <path
+                  d="M5 11H4a1.5 1.5 0 0 1-1.5-1.5V4A1.5 1.5 0 0 1 4 2.5h5.5A1.5 1.5 0 0 1 11 4v1"
+                  stroke="currentColor"
+                  strokeWidth="1.25"
+                />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                setConfirmDelete(true);
+              }}
+              disabled={isDeleting}
+              className={`${historyActionIconClass} hover:text-red-400`}
+              aria-label={`Delete ${session.title}`}
+            >
+              <svg viewBox="0 0 16 16" fill="none" className="h-3 w-3" aria-hidden>
+                <path
+                  d="M3.5 5.5h9M6 5.5V4.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1m1.5 0v7a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-7"
+                  stroke="currentColor"
+                  strokeWidth="1.25"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+        </>
+      )}
+
+      {confirmDelete && !isRenaming && (
+        <div className="absolute left-6 right-2 top-full z-10 mt-1 rounded-lg border border-white/10 bg-[#13131f] px-2.5 py-2 shadow-lg">
+          <p className="text-[10px] text-white/50">Delete?</p>
+          <div className="mt-1.5 flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                void confirmDeleteSession();
+              }}
+              disabled={isDeleting}
+              className="rounded-md bg-red-500/20 px-2 py-0.5 text-[10px] font-medium text-red-300 transition-all duration-150 hover:bg-red-500/30"
+            >
+              Yes
+            </button>
+            <button
+              type="button"
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                setConfirmDelete(false);
+              }}
+              className="rounded-md bg-white/5 px-2 py-0.5 text-[10px] font-medium text-white/60 transition-all duration-150 hover:bg-white/10 hover:text-white/80"
+            >
+              No
+            </button>
+          </div>
+        </div>
+      )}
+    </li>
+  );
+});
 
 function SidebarNavLink({
   item,
@@ -325,6 +572,7 @@ const ChatNavSection = memo(function ChatNavSection({
   const isParentActive = isChatPage;
 
   const [sessions, setSessions] = useState<ChatSessionSummary[]>([]);
+  const [now, setNow] = useState(() => Date.now());
 
   const loadSessions = useCallback(async () => {
     try {
@@ -362,27 +610,90 @@ const ChatNavSection = memo(function ChatNavSection({
     };
   }, [loadSessions]);
 
-  async function handleDeleteSession(
-    event: React.MouseEvent,
-    sessionId: string,
-  ) {
-    event.preventDefault();
-    event.stopPropagation();
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setNow(Date.now());
+    }, 30000);
 
-    const response = await fetch(`/api/chat-sessions/${sessionId}`, {
-      method: "DELETE",
-    });
+    return () => window.clearInterval(interval);
+  }, []);
 
-    if (!response.ok) return;
+  const handleRenameSession = useCallback(
+    async (sessionId: string, title: string) => {
+      const response = await fetch(`/api/chat-sessions/${sessionId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title }),
+      });
 
-    setSessions((current) =>
-      current.filter((session) => session.id !== sessionId),
-    );
+      if (!response.ok) return false;
 
-    if (activeSessionId === sessionId) {
-      router.push(CHAT_HREF);
-    }
-  }
+      const data = (await response.json()) as {
+        session?: ChatSessionSummary;
+      };
+
+      if (!data.session) return false;
+
+      setSessions((current) =>
+        current.map((session) =>
+          session.id === sessionId
+            ? { ...session, title: data.session!.title }
+            : session,
+        ),
+      );
+      dispatchChatSessionsUpdated();
+      return true;
+    },
+    [],
+  );
+
+  const handleDuplicateSession = useCallback(
+    async (sessionId: string) => {
+      const response = await fetch(`/api/chat-sessions/${sessionId}`, {
+        method: "POST",
+      });
+
+      if (!response.ok) return null;
+
+      const data = (await response.json()) as {
+        session?: ChatSessionSummary;
+      };
+
+      if (!data.session) return null;
+
+      setSessions((current) =>
+        [data.session!, ...current.filter((s) => s.id !== data.session!.id)].slice(
+          0,
+          10,
+        ),
+      );
+      dispatchChatSessionsUpdated();
+      return data.session;
+    },
+    [],
+  );
+
+  const handleDeleteSession = useCallback(
+    async (sessionId: string) => {
+      const response = await fetch(`/api/chat-sessions/${sessionId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) return false;
+
+      setSessions((current) =>
+        current.filter((session) => session.id !== sessionId),
+      );
+
+      if (activeSessionId === sessionId) {
+        router.push(CHAT_HREF);
+      }
+
+      dispatchChatSessionsUpdated();
+      return true;
+    },
+    [activeSessionId, router],
+  );
 
   return (
     <div>
@@ -435,55 +746,19 @@ const ChatNavSection = memo(function ChatNavSection({
           {sessions.length === 0 ? (
             <li className="px-8 py-2 text-xs text-white/30">No chats yet</li>
           ) : (
-            sessions.map((session, index) => {
-              const isActive = activeSessionId === session.id;
-
-              return (
-                <li
-                  key={session.id}
-                  className="group relative dash-chat-history-item"
-                  style={
-                    { "--history-index": index + 1 } as React.CSSProperties
-                  }
-                >
-                  <Link
-                    href={`${CHAT_HREF}?session=${session.id}`}
-                    onClick={onClose}
-                    className={`${chatSubLinkClass(isActive)} flex-col items-start gap-0.5 pr-8`}
-                  >
-                    <span className="w-full truncate">
-                      {truncateTitle(session.title)}
-                    </span>
-                    <span className="text-[10px] text-white/30">
-                      {formatTimeAgo(session.updated_at)}
-                    </span>
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={(event) =>
-                      void handleDeleteSession(event, session.id)
-                    }
-                    className="dash-chat-history-delete absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-white/40 opacity-0 group-hover:opacity-100 hover:text-red-400"
-                    aria-label={`Delete ${session.title}`}
-                  >
-                    <svg
-                      viewBox="0 0 16 16"
-                      fill="none"
-                      className="h-3 w-3"
-                      aria-hidden
-                    >
-                      <path
-                        d="M3.5 5.5h9M6 5.5V4.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1m1.5 0v7a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-7"
-                        stroke="currentColor"
-                        strokeWidth="1.25"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
-                </li>
-              );
-            })
+            sessions.map((session, index) => (
+              <ChatHistoryItem
+                key={session.id}
+                session={session}
+                index={index}
+                isActive={activeSessionId === session.id}
+                timeLabel={formatTimeAgo(session.updated_at, now)}
+                onClose={onClose}
+                onRename={handleRenameSession}
+                onDuplicate={handleDuplicateSession}
+                onDelete={handleDeleteSession}
+              />
+            ))
           )}
         </ul>
       )}

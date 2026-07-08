@@ -103,6 +103,49 @@ export async function PATCH(request: Request, context: RouteContext) {
   return NextResponse.json({ session });
 }
 
+export async function POST(_request: Request, context: RouteContext) {
+  const { id } = await context.params;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
+  const owned = await getOwnedSession(supabase, id, user.id);
+
+  if (!owned.session) {
+    return NextResponse.json({ error: owned.error }, { status: owned.status });
+  }
+
+  const sourceTitle =
+    typeof owned.session.title === "string" && owned.session.title.trim()
+      ? owned.session.title.trim()
+      : "New Chat";
+  const duplicateTitle = `${sourceTitle} (copy)`;
+  const messages = Array.isArray(owned.session.messages)
+    ? owned.session.messages
+    : [];
+
+  const { data: session, error } = await supabase
+    .from("chat_sessions")
+    .insert({
+      user_id: user.id,
+      title: duplicateTitle,
+      messages,
+    })
+    .select("id, user_id, title, messages, created_at, updated_at")
+    .single();
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ session });
+}
+
 export async function DELETE(_request: Request, context: RouteContext) {
   const { id } = await context.params;
   const supabase = await createClient();
