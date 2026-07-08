@@ -38,21 +38,6 @@ const navGroups = [
     label: "CREATE",
     items: [
       {
-        label: "New Chat",
-        href: "/dashboard/chat",
-        icon: (
-          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
-            <path
-              d="M8 10h8M8 14h5M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 0 1-4-.8L3 21l1.8-4.2A8.8 8.8 0 0 1 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8Z"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        ),
-      },
-      {
         label: "Bubble",
         href: "/dashboard/bubble",
         icon: (
@@ -482,21 +467,16 @@ function SidebarNavLink({
 }
 
 const ChatNavSection = memo(function ChatNavSection({
-  item,
   pathname,
   onClose,
-  animationIndex,
 }: {
-  item: NavItem;
   pathname: string;
   onClose: () => void;
-  animationIndex: number;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeSessionId = searchParams.get("session");
   const isChatPage = pathname.startsWith(CHAT_HREF);
-  const isParentActive = isChatPage;
 
   const [sessions, setSessions] = useState<ChatSessionSummary[]>([]);
   const [now, setNow] = useState(() => Date.now());
@@ -680,49 +660,26 @@ const ChatNavSection = memo(function ChatNavSection({
   );
 
   return (
-    <div>
+    <div className="mb-1 space-y-1 px-1">
       <Link
         href={CHAT_HREF}
         onClick={onClose}
-        className={navLinkClass(isParentActive)}
-        style={
-          {
-            animationDelay: `${animationIndex * 30}ms`,
-          } as React.CSSProperties
-        }
-        aria-current={isParentActive ? "page" : undefined}
+        className="dash-new-chat-btn dash-chat-rise-in flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-pink-500 to-orange-500 py-2 text-sm font-semibold text-white shadow-[0_0_24px_-8px_rgba(236,72,153,0.5)] transition-all duration-200"
+        style={{ "--history-index": 0 } as React.CSSProperties}
       >
-        <span
-          className={`relative z-[1] shrink-0 transition-all duration-200 ${
-            isParentActive
-              ? "text-pink-400"
-              : "text-white/35 group-hover:text-pink-400/70"
-          }`}
-        >
-          {item.icon}
-        </span>
-        <span className="relative z-[1] truncate">{item.label}</span>
+        <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4" aria-hidden>
+          <path
+            d="M8 3v10M3 8h10"
+            stroke="currentColor"
+            strokeWidth="1.75"
+            strokeLinecap="round"
+          />
+        </svg>
+        New Chat
       </Link>
 
       {isChatPage && (
-        <div className="mt-2 space-y-1 px-1">
-          <Link
-            href={CHAT_HREF}
-            onClick={onClose}
-            className="dash-new-chat-btn dash-chat-rise-in flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-pink-500 to-orange-500 py-2 text-sm font-semibold text-white shadow-[0_0_24px_-8px_rgba(236,72,153,0.5)] transition-all duration-200"
-            style={{ "--history-index": 0 } as React.CSSProperties}
-          >
-            <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4" aria-hidden>
-              <path
-                d="M8 3v10M3 8h10"
-                stroke="currentColor"
-                strokeWidth="1.75"
-                strokeLinecap="round"
-              />
-            </svg>
-            New Chat
-          </Link>
-
+        <>
           {sessions.length === 0 ? (
             <p className="px-2 py-2 text-xs text-white/30">No chats yet</p>
           ) : (
@@ -754,7 +711,7 @@ const ChatNavSection = memo(function ChatNavSection({
               </button>
             </div>
           )}
-        </div>
+        </>
       )}
     </div>
   );
@@ -829,25 +786,21 @@ export function DashboardSidebar({
                     {group.label}
                   </p>
                   <div className="space-y-0.5">
-                    {group.items.map((item) =>
-                      item.href === CHAT_HREF ? (
-                        <ChatNavSection
-                          key={item.label}
-                          item={item}
-                          pathname={pathname}
-                          onClose={onClose}
-                          animationIndex={nextIndex()}
-                        />
-                      ) : (
-                        <SidebarNavLink
-                          key={item.label}
-                          item={item}
-                          pathname={pathname}
-                          onClose={onClose}
-                          animationIndex={nextIndex()}
-                        />
-                      ),
+                    {group.label === "CREATE" && (
+                      <ChatNavSection
+                        pathname={pathname}
+                        onClose={onClose}
+                      />
                     )}
+                    {group.items.map((item) => (
+                      <SidebarNavLink
+                        key={item.label}
+                        item={item}
+                        pathname={pathname}
+                        onClose={onClose}
+                        animationIndex={nextIndex()}
+                      />
+                    ))}
                   </div>
                 </div>
               ))}
