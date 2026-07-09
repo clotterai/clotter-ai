@@ -15,14 +15,20 @@ function getFirstName(user: {
   const email = user.email ?? "";
   const meta = user.user_metadata ?? {};
 
-  const displayName =
-    (typeof meta.full_name === "string" && meta.full_name.trim()) ||
+  const fullName =
+    typeof meta.full_name === "string" ? meta.full_name.trim() : "";
+
+  if (fullName) {
+    return fullName.split(/\s+/)[0];
+  }
+
+  const name =
     (typeof meta.name === "string" && meta.name.trim()) ||
     (typeof meta.given_name === "string" && meta.given_name.trim()) ||
     "";
 
-  if (displayName) {
-    return displayName.split(/\s+/)[0];
+  if (name) {
+    return name.split(/\s+/)[0];
   }
 
   const emailPrefix = email.split("@")[0]?.trim();

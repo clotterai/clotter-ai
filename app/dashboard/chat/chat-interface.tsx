@@ -316,9 +316,6 @@ function ThumbsDownIcon({
 }
 
 function isAcceptedFile(file: File) {
-  if (file.type.startsWith("video/")) {
-    return false;
-  }
   return file.type === "application/pdf" || file.type.startsWith("image/");
 }
 
@@ -626,11 +623,7 @@ export function ChatInterface({
     if (!file) return;
 
     if (!isAcceptedFile(file)) {
-      if (file.type.startsWith("video/")) {
-        setError("Videos aren't supported in chat yet. Please attach an image or PDF.");
-      } else {
-        setError("Please select a JPG, PNG, WebP image, or PDF file.");
-      }
+      setError("Please select a JPG, PNG, WebP image, or PDF file.");
       return;
     }
 
@@ -1185,10 +1178,9 @@ export function ChatInterface({
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*,video/*,application/pdf"
-              capture="environment"
+              accept="image/*,application/pdf"
+              style={{ display: "none" }}
               onChange={(event) => void handleFileSelect(event)}
-              className="hidden"
             />
             <button
               type="button"

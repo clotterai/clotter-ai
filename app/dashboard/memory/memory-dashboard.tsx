@@ -328,19 +328,22 @@ export function MemoryDashboard() {
 
   if (loading) {
     return (
-      <div className="script-loading-card mx-6 mb-12 mt-8 sm:mx-10">
-        <div className="script-loading-dots">
-          <span className="script-loading-dot" />
-          <span className="script-loading-dot" />
-          <span className="script-loading-dot" />
-        </div>
-        <p className="mt-4 text-sm text-white/45">Loading your Creator Brain...</p>
+      <div className="premium-feature-body">
+        <div className="premium-skeleton-card mx-auto max-w-md" style={{ height: 120 }} />
+        <p className="premium-loading-label mt-6 text-center">
+          Loading your Creator Brain
+          <span className="premium-loading-dots" aria-hidden>
+            <span>.</span>
+            <span>.</span>
+            <span>.</span>
+          </span>
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="relative z-10 mx-6 mb-16 mt-6 flex flex-1 flex-col sm:mx-10">
+    <div className="premium-feature-body">
       <div className="memory-tabs mb-8 flex flex-wrap gap-2">
         {(
           [

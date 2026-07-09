@@ -2,6 +2,16 @@
 
 import { useState } from "react";
 import { FeatureEmptyState } from "@/app/dashboard/components/feature-empty-state";
+import {
+  PremiumError,
+  PremiumFieldLabel,
+  PremiumGenerateButton,
+  PremiumLoadingSkeleton,
+  PremiumPillGroup,
+  PremiumResultCard,
+  PremiumResultsHeader,
+  PremiumTextarea,
+} from "@/app/dashboard/components/premium-ui";
 import { useToast } from "@/app/dashboard/components/toast-provider";
 
 const tones = [
@@ -67,73 +77,44 @@ export function CaptionGenerator() {
   }
 
   return (
-    <div className="captions-fade-in relative z-10 flex-1 overflow-y-auto px-6 pb-16 pt-8 sm:px-10 sm:pb-20 sm:pt-10">
+    <div className="premium-feature-body">
       <div className="mx-auto w-full max-w-2xl">
-        <section className="space-y-8">
+        <section className="premium-form-section">
           <div>
-            <label
-              htmlFor="topic"
-              className="text-xs font-semibold uppercase tracking-[0.1em] text-white/35"
-            >
-              Post topic
-            </label>
-            <textarea
+            <PremiumFieldLabel htmlFor="topic">Post topic</PremiumFieldLabel>
+            <PremiumTextarea
               id="topic"
               value={topic}
               onChange={(event) => setTopic(event.target.value)}
               placeholder="What's your post about? Be specific — topic, angle, audience..."
               rows={5}
               disabled={isLoading}
-              className="captions-textarea mt-3 w-full resize-none disabled:opacity-50"
             />
           </div>
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-white/35">
-              Tone
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2 sm:gap-2.5">
-              {tones.map((option) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  onClick={() => setTone(option.id)}
-                  disabled={isLoading}
-                  aria-pressed={tone === option.id}
-                  className={`captions-tone-pill${
-                    tone === option.id ? " captions-tone-pill--active" : ""
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
+            <PremiumFieldLabel>Tone</PremiumFieldLabel>
+            <PremiumPillGroup
+              options={tones}
+              value={tone}
+              onChange={(id) => setTone(id as ToneId)}
+              disabled={isLoading}
+            />
           </div>
 
-          <button
-            type="button"
+          <PremiumGenerateButton
             onClick={() => void generateCaptions()}
-            disabled={!topic.trim() || isLoading}
-            className="captions-generate-btn"
+            disabled={!topic.trim()}
+            loading={isLoading}
+            loadingLabel="Generating"
           >
-            <span className="relative z-[1] flex items-center justify-center gap-2">
-              {isLoading ? (
-                <>
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                  Generating...
-                </>
-              ) : (
-                "Generate 5 captions"
-              )}
-            </span>
-          </button>
+            Generate 5 captions
+          </PremiumGenerateButton>
         </section>
 
-        {error && (
-          <p className="mt-8 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-4 text-sm leading-relaxed text-red-300">
-            {error}
-          </p>
-        )}
+        {error && <PremiumError message={error} />}
+
+        {isLoading && <PremiumLoadingSkeleton count={5} />}
 
         {!isLoading && captions.length === 0 && !error && (
           <FeatureEmptyState
@@ -150,42 +131,28 @@ export function CaptionGenerator() {
             }
             title="Scroll-stopping captions"
             description="Describe your post topic and tone — Clotter AI will generate five unique captions tailored to your voice."
-            cta="Fill in the form above and hit Generate"
           />
         )}
 
-        {captions.length > 0 && (
-          <section className="mt-16">
-            <div className="mb-6 flex items-end justify-between gap-4">
-              <div>
-                <h2 className="font-heading text-lg font-bold tracking-[-0.02em] text-white">
-                  Your captions
-                </h2>
-                <p className="mt-1 text-sm text-white/40">
-                  {captions.length} options ready to copy
-                </p>
-              </div>
-            </div>
-
+        {captions.length > 0 && !isLoading && (
+          <section className="mt-12">
+            <PremiumResultsHeader
+              title="Your captions"
+              subtitle={`${captions.length} options ready to copy`}
+            />
             <ul className="space-y-3">
               {captions.map((caption, index) => (
-                <li
+                <PremiumResultCard
                   key={index}
-                  className="captions-glass-card"
-                  style={{ animationDelay: `${index * 0.08}s` }}
+                  index={index + 1}
+                  onCopy={() => void copyCaption(caption, index)}
+                  copied={copiedIndex === index}
+                  delay={index * 0.06}
                 >
-                  <span className="captions-num-badge">{index + 1}</span>
-                  <p className="min-w-0 flex-1 text-[0.9375rem] leading-[1.75] tracking-[-0.014em] text-white/85 sm:text-base">
+                  <p className="text-[0.9375rem] leading-[1.75] tracking-[-0.014em] text-white/85 sm:text-base">
                     {caption}
                   </p>
-                  <button
-                    type="button"
-                    onClick={() => void copyCaption(caption, index)}
-                    className="captions-copy-btn"
-                  >
-                    {copiedIndex === index ? "Copied!" : "Copy"}
-                  </button>
-                </li>
+                </PremiumResultCard>
               ))}
             </ul>
           </section>

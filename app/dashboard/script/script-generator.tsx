@@ -2,6 +2,17 @@
 
 import { useState } from "react";
 import { FeatureEmptyState } from "@/app/dashboard/components/feature-empty-state";
+import {
+  PremiumCopyButton,
+  PremiumError,
+  PremiumFieldLabel,
+  PremiumGenerateButton,
+  PremiumInput,
+  PremiumLoadingSkeleton,
+  PremiumPillGroup,
+  PremiumResultsHeader,
+  PremiumTextarea,
+} from "@/app/dashboard/components/premium-ui";
 import { useToast } from "@/app/dashboard/components/toast-provider";
 
 const platforms = [
@@ -80,29 +91,10 @@ function buildFullScript(script: ScriptResult) {
   return `HOOK (0:00-0:03)\n${script.hook}\n\nOPENING\n${script.opening}\n\n${body}\n\nCTA\n${script.cta}`;
 }
 
-function ScriptLoading() {
-  return (
-    <div className="script-loading-card">
-      <div className="script-loading-dots" aria-hidden>
-        <span className="script-loading-dot" />
-        <span className="script-loading-dot" />
-        <span className="script-loading-dot" />
-      </div>
-      <p className="mt-4 text-sm font-medium text-white/70">
-        Crafting your viral script...
-      </p>
-      <p className="mt-1 text-xs text-white/35">
-        Optimizing hook, pacing, and retention
-      </p>
-    </div>
-  );
-}
-
 type ScriptSectionCardProps = {
   label: string;
   badge?: string;
   content: string;
-  variant?: "default" | "hook" | "cta";
   onCopy: () => void;
   copied: boolean;
   delay?: number;
@@ -112,24 +104,21 @@ function ScriptSectionCard({
   label,
   badge,
   content,
-  variant = "default",
   onCopy,
   copied,
   delay = 0,
 }: ScriptSectionCardProps) {
   return (
     <article
-      className={`script-section-card script-section-card--${variant}`}
+      className="premium-script-section"
       style={{ animationDelay: `${delay}s` }}
     >
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="script-section-label">{label}</p>
-          {badge && <span className="script-section-badge">{badge}</span>}
+          <p className="premium-script-section-label">{label}</p>
+          {badge && <span className="premium-script-section-badge">{badge}</span>}
         </div>
-        <button type="button" onClick={onCopy} className="captions-copy-btn">
-          {copied ? "Copied!" : "Copy"}
-        </button>
+        <PremiumCopyButton onClick={onCopy} copied={copied} />
       </div>
       <p className="mt-4 whitespace-pre-wrap text-[0.9375rem] leading-[1.8] tracking-[-0.014em] text-white/88 sm:text-base">
         {content}
@@ -196,32 +185,24 @@ export function ScriptGenerator() {
   }
 
   return (
-    <div className="captions-fade-in relative z-10 flex-1 overflow-y-auto px-6 pb-16 pt-8 sm:px-10 sm:pb-20 sm:pt-10">
+    <div className="premium-feature-body">
       <div className="mx-auto w-full max-w-3xl">
-        <section className="script-form-card space-y-8 p-6 sm:p-8">
+        <section className="premium-form-section">
           <div>
-            <label
-              htmlFor="script-topic"
-              className="text-xs font-semibold uppercase tracking-[0.1em] text-white/35"
-            >
-              Video topic
-            </label>
-            <textarea
+            <PremiumFieldLabel htmlFor="script-topic">Video topic</PremiumFieldLabel>
+            <PremiumTextarea
               id="script-topic"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               placeholder={`What's your video about?\n\nExamples:\n• ${topicExamples.join("\n• ")}`}
               rows={6}
               disabled={isLoading}
-              className="captions-textarea mt-3 w-full resize-none disabled:opacity-50"
             />
           </div>
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-white/35">
-              Platform
-            </p>
-            <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+            <PremiumFieldLabel>Platform</PremiumFieldLabel>
+            <div className="premium-platform-grid">
               {platforms.map((option) => (
                 <button
                   key={option.id}
@@ -229,134 +210,79 @@ export function ScriptGenerator() {
                   onClick={() => setPlatform(option.id)}
                   disabled={isLoading}
                   aria-pressed={platform === option.id}
-                  className={`script-platform-card${
-                    platform === option.id ? " script-platform-card--active" : ""
+                  className={`premium-platform-card${
+                    platform === option.id ? " premium-platform-card--active" : ""
                   }`}
                 >
-                  <span className="script-platform-card-label">{option.label}</span>
-                  <span className="script-platform-card-desc">{option.description}</span>
+                  <span className="premium-platform-card-label">{option.label}</span>
+                  <span className="premium-platform-card-desc">{option.description}</span>
                 </button>
               ))}
             </div>
           </div>
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-white/35">
-              Tone
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {tones.map((option) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  onClick={() => setTone(option.id)}
-                  disabled={isLoading}
-                  aria-pressed={tone === option.id}
-                  className={`captions-tone-pill${
-                    tone === option.id ? " captions-tone-pill--active" : ""
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
+            <PremiumFieldLabel>Tone</PremiumFieldLabel>
+            <PremiumPillGroup
+              options={tones}
+              value={tone}
+              onChange={(id) => setTone(id as ToneId)}
+              disabled={isLoading}
+            />
           </div>
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-white/35">
-              Duration
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {durations.map((option) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  onClick={() => setDuration(option.id)}
-                  disabled={isLoading}
-                  aria-pressed={duration === option.id}
-                  className={`captions-tone-pill${
-                    duration === option.id ? " captions-tone-pill--active" : ""
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
+            <PremiumFieldLabel>Duration</PremiumFieldLabel>
+            <PremiumPillGroup
+              options={durations}
+              value={duration}
+              onChange={(id) => setDuration(id as DurationId)}
+              disabled={isLoading}
+            />
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2">
             <div>
-              <label
-                htmlFor="script-audience"
-                className="text-xs font-semibold uppercase tracking-[0.1em] text-white/35"
-              >
-                Target audience{" "}
-                <span className="normal-case tracking-normal text-white/25">
-                  (optional)
-                </span>
-              </label>
-              <input
+              <PremiumFieldLabel htmlFor="script-audience">
+                Target audience (optional)
+              </PremiumFieldLabel>
+              <PremiumInput
                 id="script-audience"
                 type="text"
                 value={audience}
                 onChange={(e) => setAudience(e.target.value)}
                 placeholder="e.g. fitness beginners, SaaS founders"
                 disabled={isLoading}
-                className="captions-textarea mt-3 !min-h-0 !py-3.5 text-base sm:text-[1.0625rem]"
               />
             </div>
             <div>
-              <label
-                htmlFor="script-keypoints"
-                className="text-xs font-semibold uppercase tracking-[0.1em] text-white/35"
-              >
-                Key points{" "}
-                <span className="normal-case tracking-normal text-white/25">
-                  (optional)
-                </span>
-              </label>
-              <input
+              <PremiumFieldLabel htmlFor="script-keypoints">
+                Key points (optional)
+              </PremiumFieldLabel>
+              <PremiumInput
                 id="script-keypoints"
                 type="text"
                 value={keyPoints}
                 onChange={(e) => setKeyPoints(e.target.value)}
                 placeholder="e.g. tip 1, myth bust, personal story"
                 disabled={isLoading}
-                className="captions-textarea mt-3 !min-h-0 !py-3.5 text-base sm:text-[1.0625rem]"
               />
             </div>
           </div>
 
-          <button
-            type="button"
+          <PremiumGenerateButton
             onClick={() => void generateScript()}
-            disabled={!topic.trim() || isLoading}
-            className="captions-generate-btn"
+            disabled={!topic.trim()}
+            loading={isLoading}
+            loadingLabel="Generating"
           >
-            <span className="relative z-[1] flex items-center justify-center gap-2">
-              {isLoading ? (
-                <>
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                  Generating script...
-                </>
-              ) : (
-                "Generate viral script"
-              )}
-            </span>
-          </button>
+            Generate viral script
+          </PremiumGenerateButton>
         </section>
 
-        {error && (
-          <p className="mt-8 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-4 text-sm leading-relaxed text-red-300">
-            {error}
-          </p>
-        )}
+        {error && <PremiumError message={error} />}
 
-        {isLoading && (
-          <div className="mt-10">
-            <ScriptLoading />
-          </div>
-        )}
+        {isLoading && <PremiumLoadingSkeleton count={4} />}
 
         {!isLoading && !script && !error && (
           <FeatureEmptyState
@@ -378,49 +304,36 @@ export function ScriptGenerator() {
             }
             title="Viral video scripts"
             description="Describe your topic, platform, and tone — Clotter AI builds a full script with hook, sections, and CTA optimized for retention."
-            cta="Fill in the form above and hit Generate"
           />
         )}
 
         {script && !isLoading && (
           <section className="mt-12 space-y-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <h2 className="font-heading text-xl font-bold tracking-[-0.02em] text-white sm:text-2xl">
-                  Your script
-                </h2>
-                <div className="mt-2 flex flex-wrap gap-3 text-sm text-white/45">
-                  {script.wordCount > 0 && (
-                    <span className="script-stat-pill">{script.wordCount} words</span>
-                  )}
-                  {script.speakingTime && (
-                    <span className="script-stat-pill">~{script.speakingTime}</span>
-                  )}
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => void copyText(buildFullScript(script), "full")}
-                  className="script-action-btn script-action-btn--primary"
-                >
-                  {copiedKey === "full" ? "Copied!" : "Copy full script"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void generateScript()}
-                  className="script-action-btn"
-                >
-                  Regenerate
-                </button>
-              </div>
+            <PremiumResultsHeader
+              title="Your script"
+              subtitle={`${script.wordCount > 0 ? `${script.wordCount} words` : ""}${script.wordCount > 0 && script.speakingTime ? " · " : ""}${script.speakingTime ? `~${script.speakingTime}` : ""}`}
+            />
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => void copyText(buildFullScript(script), "full")}
+                className="premium-pill premium-pill--active"
+              >
+                {copiedKey === "full" ? "Copied!" : "Copy full script"}
+              </button>
+              <button
+                type="button"
+                onClick={() => void generateScript()}
+                className="premium-pill"
+              >
+                Regenerate
+              </button>
             </div>
 
             <ScriptSectionCard
               label="Hook"
               badge="First 3 seconds"
               content={script.hook}
-              variant="hook"
               onCopy={() => void copyText(script.hook, "hook")}
               copied={copiedKey === "hook"}
               delay={0.05}
@@ -452,7 +365,6 @@ export function ScriptGenerator() {
               label="Call to action"
               badge="CTA"
               content={script.cta}
-              variant="cta"
               onCopy={() => void copyText(script.cta, "cta")}
               copied={copiedKey === "cta"}
               delay={0.2 + script.sections.length * 0.05}

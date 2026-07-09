@@ -339,7 +339,7 @@ export function DashboardHome({ greeting, firstName }: DashboardHomeProps) {
 
         {!isLoadingStats && hasNoContent && (
           <p className="dash-fade-in text-sm text-white/40">
-            Start creating to see your stats
+            Start creating!
           </p>
         )}
 

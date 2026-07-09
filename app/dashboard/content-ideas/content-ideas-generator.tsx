@@ -2,6 +2,16 @@
 
 import { useState } from "react";
 import { FeatureEmptyState } from "@/app/dashboard/components/feature-empty-state";
+import {
+  PremiumError,
+  PremiumFieldLabel,
+  PremiumGenerateButton,
+  PremiumLoadingSkeleton,
+  PremiumPillGroup,
+  PremiumResultCard,
+  PremiumResultsHeader,
+  PremiumTextarea,
+} from "@/app/dashboard/components/premium-ui";
 import { useToast } from "@/app/dashboard/components/toast-provider";
 
 const platforms = [
@@ -67,73 +77,44 @@ export function ContentIdeasGenerator() {
   }
 
   return (
-    <div className="captions-fade-in relative z-10 flex-1 overflow-y-auto px-6 pb-16 pt-8 sm:px-10 sm:pb-20 sm:pt-10">
+    <div className="premium-feature-body">
       <div className="mx-auto w-full max-w-2xl">
-        <section className="space-y-8">
+        <section className="premium-form-section">
           <div>
-            <label
-              htmlFor="content-niche"
-              className="text-xs font-semibold uppercase tracking-[0.1em] text-white/35"
-            >
-              Your niche
-            </label>
-            <textarea
+            <PremiumFieldLabel htmlFor="content-niche">Your niche</PremiumFieldLabel>
+            <PremiumTextarea
               id="content-niche"
               value={niche}
               onChange={(event) => setNiche(event.target.value)}
               placeholder="e.g. fitness for busy professionals, personal finance for Gen Z, vegan meal prep..."
               rows={4}
               disabled={isLoading}
-              className="captions-textarea mt-3 w-full resize-none disabled:opacity-50"
             />
           </div>
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-white/35">
-              Platform
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2 sm:gap-2.5">
-              {platforms.map((option) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  onClick={() => setPlatform(option.id)}
-                  disabled={isLoading}
-                  aria-pressed={platform === option.id}
-                  className={`captions-tone-pill${
-                    platform === option.id ? " captions-tone-pill--active" : ""
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
+            <PremiumFieldLabel>Platform</PremiumFieldLabel>
+            <PremiumPillGroup
+              options={platforms}
+              value={platform}
+              onChange={(id) => setPlatform(id as PlatformId)}
+              disabled={isLoading}
+            />
           </div>
 
-          <button
-            type="button"
+          <PremiumGenerateButton
             onClick={() => void generateIdeas()}
-            disabled={!niche.trim() || isLoading}
-            className="captions-generate-btn"
+            disabled={!niche.trim()}
+            loading={isLoading}
+            loadingLabel="Generating"
           >
-            <span className="relative z-[1] flex items-center justify-center gap-2">
-              {isLoading ? (
-                <>
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                  Generating...
-                </>
-              ) : (
-                "Generate 20 ideas"
-              )}
-            </span>
-          </button>
+            Generate 20 ideas
+          </PremiumGenerateButton>
         </section>
 
-        {error && (
-          <p className="mt-8 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-4 text-sm leading-relaxed text-red-300">
-            {error}
-          </p>
-        )}
+        {error && <PremiumError message={error} />}
+
+        {isLoading && <PremiumLoadingSkeleton count={5} />}
 
         {!isLoading && ideas.length === 0 && !error && (
           <FeatureEmptyState
@@ -154,40 +135,28 @@ export function ContentIdeasGenerator() {
             }
             title="Fresh content ideas"
             description="Tell Clotter your niche and platform — get 20 viral content concepts you haven't seen a hundred times before."
-            cta="Fill in the form above and hit Generate"
           />
         )}
 
-        {ideas.length > 0 && (
-          <section className="mt-16">
-            <div className="mb-6">
-              <h2 className="font-heading text-lg font-bold tracking-[-0.02em] text-white">
-                Your content ideas
-              </h2>
-              <p className="mt-1 text-sm text-white/40">
-                {ideas.length} viral concepts ready to copy
-              </p>
-            </div>
-
+        {ideas.length > 0 && !isLoading && (
+          <section className="mt-12">
+            <PremiumResultsHeader
+              title="Your content ideas"
+              subtitle={`${ideas.length} viral concepts ready to copy`}
+            />
             <ul className="space-y-3">
               {ideas.map((idea, index) => (
-                <li
+                <PremiumResultCard
                   key={index}
-                  className="captions-glass-card"
-                  style={{ animationDelay: `${Math.min(index * 0.04, 0.6)}s` }}
+                  index={index + 1}
+                  onCopy={() => void copyIdea(idea, index)}
+                  copied={copiedIndex === index}
+                  delay={Math.min(index * 0.04, 0.6)}
                 >
-                  <span className="captions-num-badge">{index + 1}</span>
-                  <p className="min-w-0 flex-1 text-[0.9375rem] leading-[1.75] tracking-[-0.014em] text-white/85 sm:text-base">
+                  <p className="text-[0.9375rem] leading-[1.75] tracking-[-0.014em] text-white/85 sm:text-base">
                     {idea}
                   </p>
-                  <button
-                    type="button"
-                    onClick={() => void copyIdea(idea, index)}
-                    className="captions-copy-btn"
-                  >
-                    {copiedIndex === index ? "Copied!" : "Copy"}
-                  </button>
-                </li>
+                </PremiumResultCard>
               ))}
             </ul>
           </section>

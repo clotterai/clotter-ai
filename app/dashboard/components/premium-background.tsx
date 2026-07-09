@@ -64,7 +64,13 @@ const orbBaseStyle: CSSProperties = {
   pointerEvents: "none",
 };
 
-export function PremiumBackground() {
+export function PremiumBackground({
+  variant = "default",
+}: {
+  variant?: "default" | "feature";
+}) {
+  const orbOpacity = variant === "feature" ? 0.04 : 0.15;
+
   return (
     <div aria-hidden className="chat-nebula">
       <div className="chat-nebula-void" />
@@ -98,27 +104,36 @@ export function PremiumBackground() {
         <div
           style={{
             ...orbBaseStyle,
+            opacity: orbOpacity,
             top: "-8%",
             left: "-10%",
+            background:
+              "radial-gradient(circle, rgba(249, 115, 22, 0.9) 0%, rgba(249, 115, 22, 0.4) 40%, transparent 70%)",
             animation: "chat-inline-orb-float-tl 28s ease-in-out infinite",
           }}
         />
         <div
           style={{
             ...orbBaseStyle,
+            opacity: orbOpacity,
             bottom: "-8%",
             right: "-10%",
+            background:
+              "radial-gradient(circle, rgba(236, 72, 153, 0.9) 0%, rgba(249, 115, 22, 0.45) 40%, transparent 70%)",
             animation: "chat-inline-orb-float-br 32s ease-in-out infinite",
           }}
         />
-        <div
-          style={{
-            ...orbBaseStyle,
-            top: "35%",
-            right: "-6%",
-            animation: "chat-inline-orb-float-cr 9s ease-in-out infinite",
-          }}
-        />
+        {variant === "default" && (
+          <div
+            style={{
+              ...orbBaseStyle,
+              opacity: orbOpacity,
+              top: "35%",
+              right: "-6%",
+              animation: "chat-inline-orb-float-cr 9s ease-in-out infinite",
+            }}
+          />
+        )}
       </div>
     </div>
   );

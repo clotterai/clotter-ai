@@ -19,11 +19,13 @@ export type SidebarUser = {
   initials: string;
 };
 
+const navIconClass = "h-[18px] w-[18px]";
+
 const dashboardNavItem = {
   label: "Dashboard",
   href: "/dashboard",
   icon: (
-    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+    <svg viewBox="0 0 24 24" fill="none" className={navIconClass} aria-hidden>
       <path
         d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5Z"
         stroke="currentColor"
@@ -42,7 +44,7 @@ const navGroups = [
         label: "Caption Generator",
         href: "/dashboard/captions",
         icon: (
-          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+          <svg viewBox="0 0 24 24" fill="none" className={navIconClass} aria-hidden>
             <path
               d="M4 6h16M4 12h12M4 18h8M20 18l-2 2-4-4"
               stroke="currentColor"
@@ -57,7 +59,7 @@ const navGroups = [
         label: "Hook Generator",
         href: "/dashboard/hooks",
         icon: (
-          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+          <svg viewBox="0 0 24 24" fill="none" className={navIconClass} aria-hidden>
             <path
               d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"
               stroke="currentColor"
@@ -72,7 +74,7 @@ const navGroups = [
         label: "Script Generator",
         href: "/dashboard/script",
         icon: (
-          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+          <svg viewBox="0 0 24 24" fill="none" className={navIconClass} aria-hidden>
             <path
               d="M8 4h8a2 2 0 0 1 2 2v14l-3-2-3 2-3-2-3 2V6a2 2 0 0 1 2-2Z"
               stroke="currentColor"
@@ -97,7 +99,7 @@ const navGroups = [
         label: "Content Ideas",
         href: "/dashboard/content-ideas",
         icon: (
-          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+          <svg viewBox="0 0 24 24" fill="none" className={navIconClass} aria-hidden>
             <path
               d="M9.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"
               stroke="currentColor"
@@ -116,7 +118,7 @@ const navGroups = [
         label: "Content Planner",
         href: "/dashboard/planner",
         icon: (
-          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+          <svg viewBox="0 0 24 24" fill="none" className={navIconClass} aria-hidden>
             <path
               d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"
               stroke="currentColor"
@@ -136,7 +138,7 @@ const navGroups = [
         label: "Trend Analyzer",
         href: "/dashboard/trends",
         icon: (
-          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+          <svg viewBox="0 0 24 24" fill="none" className={navIconClass} aria-hidden>
             <path
               d="M3 17l6-6 4 4 8-10"
               stroke="currentColor"
@@ -163,7 +165,7 @@ const navGroups = [
         label: "AI Memory",
         href: "/dashboard/memory",
         icon: (
-          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+          <svg viewBox="0 0 24 24" fill="none" className={navIconClass} aria-hidden>
             <path
               d="M9.5 2A2.5 2.5 0 0 0 7 4.5v.5A2.5 2.5 0 0 0 5 7.5 2.5 2.5 0 0 0 2.5 10v1A2.5 2.5 0 0 0 5 13.5 2.5 2.5 0 0 0 7 15.5v.5A2.5 2.5 0 0 0 9.5 18h1A2.5 2.5 0 0 0 13 15.5v-.5a2.5 2.5 0 0 0 2-2.45V12a2.5 2.5 0 0 0-2-2.45V9A2.5 2.5 0 0 0 13 6.5V6A2.5 2.5 0 0 0 10.5 3.5h-1Z"
               stroke="currentColor"
@@ -202,15 +204,15 @@ const navLinkBase =
 
 function navLinkClass(active: boolean) {
   return active
-    ? `${navLinkBase} border-pink-400 bg-pink-500/10 text-white`
-    : `${navLinkBase} border-transparent text-white/45 hover:translate-x-1 hover:bg-pink-500/5 hover:text-white/85`;
+    ? `${navLinkBase} border-pink-500 bg-pink-500/10 text-white`
+    : `${navLinkBase} border-transparent text-white/45 hover:translate-x-0.5 hover:bg-pink-500/5 hover:text-white/80`;
 }
 
 function chatItemClass(active: boolean) {
   return `dash-chat-rise-in group/history relative flex min-h-[44px] flex-col justify-center rounded-xl border-l-2 px-3 py-2.5 text-[13px] font-medium transition-all duration-200 ease-out ${
     active
-      ? "border-pink-400 bg-pink-500/10 text-white"
-      : "border-transparent text-white/45 hover:bg-pink-500/5 hover:text-white/85"
+      ? "border-pink-500 bg-pink-500/10 text-white"
+      : "border-transparent text-white/45 hover:bg-pink-500/5 hover:text-white/80"
   }`;
 }
 
@@ -440,7 +442,7 @@ function SidebarNavLink({
     >
       <span
         className={`relative z-[1] shrink-0 transition-all duration-200 ${
-          active ? "text-pink-400" : "text-white/35 group-hover:text-pink-400/70"
+          active ? "text-pink-500" : "text-white/45 group-hover:text-white/80"
         }`}
       >
         {item.icon}
@@ -767,7 +769,7 @@ export function DashboardSidebar({
               {navGroups.map((group, groupIndex) => (
                 <div key={group.label} className="mt-5">
                   <p
-                    className="dash-nav-group-label mb-1.5 px-3 text-[9px] font-semibold uppercase tracking-[0.2em] text-white/25"
+                    className="dash-nav-group-label mb-2 px-3 text-[9px] font-semibold uppercase tracking-[0.2em] text-white/25"
                     style={{ "--group-index": groupIndex } as React.CSSProperties}
                   >
                     {group.label}

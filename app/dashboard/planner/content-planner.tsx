@@ -193,24 +193,12 @@ export function ContentPlanner() {
 
   return (
     <>
-      <header className="captions-fade-in relative z-10 shrink-0 px-6 pb-4 pt-10 sm:px-10 sm:pt-14">
-        <span className="captions-glow-badge">Content Planner</span>
-        <h1 className="font-heading mt-6 max-w-3xl text-[2.5rem] font-bold leading-[1.08] tracking-[-0.02em] text-white sm:text-5xl lg:text-[3.25rem]">
-          Plan your week.{" "}
-          <span className="bg-gradient-to-r from-[#FB7185] via-[#EC4899] to-[#F97316] bg-clip-text text-transparent">
-            Own your growth.
-          </span>
-        </h1>
-        <p className="mt-5 max-w-xl text-[1.0625rem] leading-relaxed tracking-[-0.016em] text-white/45">
-          Map your content across the week — click any day to schedule ideas,
-          track status, and stay consistent.
-        </p>
-
-        <div className="mt-8 flex flex-wrap items-center gap-3">
+      <div className="premium-feature-body">
+        <div className="mx-auto mb-8 flex max-w-[1400px] flex-wrap items-center gap-3">
           <button
             type="button"
             onClick={goToPrevWeek}
-            className="planner-week-btn"
+            className="premium-pill"
             aria-label="Previous week"
           >
             <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
@@ -229,7 +217,7 @@ export function ContentPlanner() {
           <button
             type="button"
             onClick={goToNextWeek}
-            className="planner-week-btn"
+            className="premium-pill"
             aria-label="Next week"
           >
             <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
@@ -245,14 +233,13 @@ export function ContentPlanner() {
           <button
             type="button"
             onClick={goToThisWeek}
-            className="ml-1 rounded-full border border-pink-500/25 bg-pink-500/10 px-3.5 py-1.5 text-xs font-semibold text-[#EC4899] transition-colors hover:border-pink-500/40 hover:bg-pink-500/20"
+            className="premium-pill premium-pill--active"
           >
             Today
           </button>
         </div>
-      </header>
 
-      <div className="captions-fade-in relative z-10 flex-1 overflow-x-auto px-6 pb-16 pt-6 sm:px-10 sm:pb-20">
+      <div className="relative z-10 flex-1 overflow-x-auto pb-16">
         <div className="mx-auto min-w-[720px] max-w-[1400px]">
           <div className="grid grid-cols-7 gap-3 sm:gap-4">
             {weekDays.map(({ name, date }, index) => {
@@ -326,6 +313,7 @@ export function ContentPlanner() {
             ))}
           </div>
         </div>
+      </div>
       </div>
 
       {modalDateKey && modalDate && (
@@ -420,7 +408,7 @@ export function ContentPlanner() {
                   onChange={(e) => setIdea(e.target.value)}
                   placeholder="What's the content about?"
                   rows={3}
-                  className="captions-textarea mt-2 w-full resize-none text-sm"
+                  className="premium-input mt-2 w-full resize-none text-sm"
                 />
               </div>
 
@@ -488,7 +476,7 @@ export function ContentPlanner() {
                 type="button"
                 onClick={addItem}
                 disabled={!idea.trim()}
-                className="planner-add-btn captions-generate-btn disabled:!opacity-40"
+                className="premium-generate-btn planner-add-btn disabled:!opacity-40"
               >
                 <span className="relative z-[1]">Add to calendar</span>
               </button>
