@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ClotterLogo } from "@/app/dashboard/components/clotter-logo";
+import { BubbleIcon } from "@/app/dashboard/bubble/bubble-icon";
 import { createClient } from "@/lib/supabase/client";
 import { dispatchChatSessionsUpdated } from "@/lib/chat-sessions-events";
 import { generateSmartChatTitle } from "@/lib/generate-chat-title";
@@ -315,16 +316,6 @@ function ThumbsDownIcon({
 
 function isAcceptedFile(file: File) {
   return file.type === "application/pdf" || file.type.startsWith("image/");
-}
-
-function ClotterLogoMark() {
-  return (
-    <div className="chat-logo-glow">
-      <div className="origin-center md:scale-150">
-        <ClotterLogo size={64} />
-      </div>
-    </div>
-  );
 }
 
 function MessageText({ content }: { content: string }) {
@@ -979,8 +970,48 @@ export function ChatInterface({
           }
         }
 
+        @keyframes chat-welcome-in {
+          from { opacity: 0; transform: translateY(16px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
         .chat-mic-pulse {
           animation: chat-mic-pulse 1.2s ease-in-out infinite;
+        }
+
+        .chat-welcome-title {
+          animation: chat-welcome-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+        }
+
+        .chat-welcome-subtitle {
+          animation: chat-welcome-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both;
+        }
+
+        .chat-prompt-chip {
+          border: 1px solid rgba(236, 72, 153, 0.2);
+          border-radius: 9999px;
+          background: rgba(255, 255, 255, 0.04);
+          padding: 0.625rem 1.125rem;
+          font-size: 0.875rem;
+          font-weight: 500;
+          letter-spacing: -0.015em;
+          color: rgba(255, 255, 255, 0.6);
+          transition:
+            border-color 0.3s ease,
+            background 0.3s ease,
+            color 0.3s ease,
+            box-shadow 0.3s ease,
+            transform 0.3s ease;
+          animation: chat-welcome-in 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+          animation-delay: var(--chip-delay, 0s);
+        }
+
+        .chat-prompt-chip:hover:not(:disabled) {
+          border-color: rgba(236, 72, 153, 0.4);
+          background: rgba(236, 72, 153, 0.08);
+          color: white;
+          box-shadow: 0 0 24px -8px rgba(236, 72, 153, 0.5);
+          transform: translateY(-1px);
         }
       `}</style>
       {/* Messages or welcome */}
@@ -990,23 +1021,27 @@ export function ChatInterface({
             <p className="text-sm text-white/40">Loading chat...</p>
           </div>
         ) : isEmpty ? (
-          <div className="chat-welcome flex h-full min-h-0 flex-col items-center justify-center gap-3 overflow-hidden px-4 py-3 md:gap-6 md:px-6 md:py-12">
-            <ClotterLogoMark />
-            <h2 className="font-heading chat-welcome-title-shimmer text-center text-2xl font-bold leading-[1.12] tracking-[-0.02em] md:text-4xl">
+          <div className="flex h-full flex-col items-center justify-center px-6 py-12">
+            <div
+              className="chat-welcome-title"
+              style={{ animationDelay: "0.05s" }}
+            >
+              <BubbleIcon size={64} />
+            </div>
+            <h2 className="font-heading chat-welcome-title mt-8 text-center text-[2rem] font-bold leading-[1.12] tracking-[-0.02em] text-white sm:text-[2.75rem]">
               What are we creating today?
             </h2>
-            <p className="chat-welcome-subtitle hidden max-w-md text-center text-[1.0625rem] leading-relaxed tracking-[-0.018em] text-white/45 md:block">
-              Your AI creative partner for content ideas, captions, hooks, and
-              growth strategy.
+            <p className="chat-welcome-subtitle mt-4 max-w-md text-center text-[1.0625rem] leading-relaxed tracking-[-0.018em] text-white/45">
+              Your creative co-pilot — built to make you go viral.
             </p>
-            <div className="mt-1 grid w-full max-w-md grid-cols-2 gap-2 md:mt-10 md:flex md:max-w-none md:flex-wrap md:items-center md:justify-center md:gap-3">
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
               {suggestedPrompts.map((prompt, index) => (
                 <button
                   key={prompt}
                   type="button"
                   onClick={() => void sendMessage(prompt)}
                   disabled={isLoading}
-                  className="chat-prompt-chip px-3 py-2 text-xs transition-transform duration-150 hover:scale-105 md:px-5 md:py-3 md:text-[0.9375rem]"
+                  className="chat-prompt-chip"
                   style={{ "--chip-delay": `${0.55 + index * 0.1}s` } as React.CSSProperties}
                 >
                   {prompt}
@@ -1105,10 +1140,10 @@ export function ChatInterface({
       </div>
 
       {/* Input area */}
-      <div className="sticky bottom-0 z-20 shrink-0 border-t border-[#7C3AED]/10 bg-[#05050f]/90 px-4 py-3 backdrop-blur-xl md:px-6">
+      <div className="sticky bottom-0 z-20 shrink-0 border-t border-[#EC4899]/10 bg-[#05050f]/90 px-4 py-3 backdrop-blur-xl md:px-6">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#A855F7]/30 to-transparent"
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#EC4899]/30 to-transparent"
         />
         <div className="mx-auto w-full max-w-3xl">
           {error && (

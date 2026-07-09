@@ -16,7 +16,7 @@ export default function HooksPage() {
             height: "520px",
             borderRadius: "50%",
             background:
-              "radial-gradient(circle, rgba(168, 85, 247, 0.9) 0%, rgba(124, 58, 237, 0.4) 50%, transparent 70%)",
+              "radial-gradient(circle, rgba(236, 72, 153, 0.9) 0%, rgba(249, 115, 22, 0.4) 50%, transparent 70%)",
             filter: "blur(100px)",
             opacity: 0.2,
             animation: "captions-orb-drift-1 30s ease-in-out infinite",
@@ -31,7 +31,7 @@ export default function HooksPage() {
             height: "480px",
             borderRadius: "50%",
             background:
-              "radial-gradient(circle, rgba(192, 132, 252, 0.85) 0%, rgba(124, 58, 237, 0.35) 50%, transparent 70%)",
+              "radial-gradient(circle, rgba(251, 113, 133, 0.85) 0%, rgba(249, 115, 22, 0.35) 50%, transparent 70%)",
             filter: "blur(100px)",
             opacity: 0.2,
             animation: "captions-orb-drift-2 36s ease-in-out infinite",
@@ -46,7 +46,7 @@ export default function HooksPage() {
             height: "420px",
             borderRadius: "50%",
             background:
-              "radial-gradient(circle, rgba(139, 92, 246, 0.8) 0%, rgba(88, 28, 135, 0.3) 55%, transparent 72%)",
+              "radial-gradient(circle, rgba(236, 72, 153, 0.8) 0%, rgba(194, 65, 12, 0.3) 55%, transparent 72%)",
             filter: "blur(100px)",
             opacity: 0.2,
             animation: "captions-orb-drift-3 24s ease-in-out infinite",
@@ -60,7 +60,7 @@ export default function HooksPage() {
         <span className="captions-glow-badge">Hook Generator</span>
         <h1 className="font-heading mt-6 max-w-3xl text-[2.5rem] font-bold leading-[1.08] tracking-[-0.02em] text-white sm:text-5xl lg:text-[3.25rem]">
           Open with a hook they can&apos;t{" "}
-          <span className="bg-gradient-to-r from-[#C084FC] via-[#A855F7] to-[#7C3AED] bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-[#FB7185] via-[#EC4899] to-[#F97316] bg-clip-text text-transparent">
             skip.
           </span>
         </h1>

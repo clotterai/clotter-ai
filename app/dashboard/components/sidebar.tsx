@@ -38,23 +38,6 @@ const navGroups = [
     label: "CREATE",
     items: [
       {
-        label: "Bubble",
-        href: "/dashboard/bubble",
-        icon: (
-          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
-            <circle
-              cx="12"
-              cy="12"
-              r="8"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            />
-            <circle cx="9" cy="10" r="1.5" fill="currentColor" opacity="0.5" />
-            <circle cx="14" cy="14" r="1" fill="currentColor" opacity="0.35" />
-          </svg>
-        ),
-      },
-      {
         label: "Caption Generator",
         href: "/dashboard/captions",
         icon: (
@@ -218,15 +201,15 @@ const navLinkBase =
 
 function navLinkClass(active: boolean) {
   return active
-    ? `${navLinkBase} border-pink-400 bg-gradient-to-r from-pink-500/15 to-orange-500/5 text-white`
-    : `${navLinkBase} border-transparent text-white/45 hover:translate-x-1 hover:bg-white/5 hover:text-white/85`;
+    ? `${navLinkBase} border-pink-400 bg-pink-500/10 text-white`
+    : `${navLinkBase} border-transparent text-white/45 hover:translate-x-1 hover:bg-pink-500/5 hover:text-white/85`;
 }
 
 function chatItemClass(active: boolean) {
   return `dash-chat-rise-in group/history relative flex min-h-[44px] flex-col justify-center rounded-xl border-l-2 px-3 py-2.5 text-[13px] font-medium transition-all duration-200 ease-out ${
     active
-      ? "border-pink-400 bg-white/[0.08] text-white"
-      : "border-transparent text-white/45 hover:bg-white/5 hover:text-white/85"
+      ? "border-pink-400 bg-pink-500/10 text-white"
+      : "border-transparent text-white/45 hover:bg-pink-500/5 hover:text-white/85"
   }`;
 }
 

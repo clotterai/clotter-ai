@@ -84,8 +84,8 @@ function CompletionRing({ percent }: { percent: number }) {
         />
         <defs>
           <linearGradient id="memory-ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#6366F1" />
-            <stop offset="100%" stopColor="#A855F7" />
+            <stop offset="0%" stopColor="#EC4899" />
+            <stop offset="100%" stopColor="#F97316" />
           </linearGradient>
         </defs>
       </svg>
@@ -462,12 +462,12 @@ export function MemoryDashboard() {
           {stats && (
             <p className="mb-6 text-sm text-white/50">
               You&apos;ve generated{" "}
-              <span className="text-[#C084FC]">{stats.script} scripts</span>,{" "}
-              <span className="text-[#C084FC]">{stats.caption} captions</span>,{" "}
-              <span className="text-[#C084FC]">{stats.hook} hooks</span>
+              <span className="text-[#EC4899]">{stats.script} scripts</span>,{" "}
+              <span className="text-[#EC4899]">{stats.caption} captions</span>,{" "}
+              <span className="text-[#EC4899]">{stats.hook} hooks</span>
               {stats.idea > 0 && (
                 <>
-                  , <span className="text-[#C084FC]">{stats.idea} ideas</span>
+                  , <span className="text-[#EC4899]">{stats.idea} ideas</span>
                 </>
               )}
             </p>

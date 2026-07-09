@@ -16,7 +16,7 @@ export default function ScriptPage() {
             height: "520px",
             borderRadius: "50%",
             background:
-              "radial-gradient(circle, rgba(99, 102, 241, 0.85) 0%, rgba(124, 58, 237, 0.35) 50%, transparent 70%)",
+              "radial-gradient(circle, rgba(236, 72, 153, 0.85) 0%, rgba(249, 115, 22, 0.35) 50%, transparent 70%)",
             filter: "blur(100px)",
             opacity: 0.22,
             animation: "captions-orb-drift-1 30s ease-in-out infinite",
@@ -31,7 +31,7 @@ export default function ScriptPage() {
             height: "480px",
             borderRadius: "50%",
             background:
-              "radial-gradient(circle, rgba(168, 85, 247, 0.8) 0%, rgba(99, 102, 241, 0.3) 50%, transparent 70%)",
+              "radial-gradient(circle, rgba(236, 72, 153, 0.8) 0%, rgba(249, 115, 22, 0.3) 50%, transparent 70%)",
             filter: "blur(100px)",
             opacity: 0.2,
             animation: "captions-orb-drift-2 36s ease-in-out infinite",
@@ -45,7 +45,7 @@ export default function ScriptPage() {
         <span className="script-glow-badge">Script Generator</span>
         <h1 className="font-heading mt-6 max-w-3xl text-[2.5rem] font-bold leading-[1.08] tracking-[-0.02em] text-white sm:text-5xl lg:text-[3.25rem]">
           Write scripts that{" "}
-          <span className="bg-gradient-to-r from-[#C084FC] via-[#6366F1] to-[#A855F7] bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-[#FB7185] via-[#EC4899] to-[#F97316] bg-clip-text text-transparent">
             go viral.
           </span>
         </h1>

@@ -319,7 +319,7 @@ export function TrendAnalyzer() {
 
                   <div className="space-y-4 px-5 py-4 sm:px-6">
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#A855F7]/60">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#EC4899]/60">
                         Why it&apos;s trending
                       </p>
                       <p className="mt-1.5 text-sm leading-relaxed text-white/70">
@@ -327,7 +327,7 @@ export function TrendAnalyzer() {
                       </p>
                     </div>
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#A855F7]/60">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#EC4899]/60">
                         Content angle
                       </p>
                       <p className="mt-1.5 text-sm leading-relaxed text-white/70">
