@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ClotterLogo } from "@/app/dashboard/components/clotter-logo";
 import { createClient } from "@/lib/supabase/client";
@@ -57,12 +57,6 @@ type ApiChatMessage = {
   content: string | ApiContentPart[];
 };
 
-const ACCEPTED_FILE_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "application/pdf",
-];
 const MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024;
 
 function isMessageAttachment(value: unknown): value is MessageAttachment {
@@ -171,11 +165,14 @@ function PdfIcon({ className }: { className?: string }) {
   );
 }
 
-const inputUtilityButtonClass =
-  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-white/50 transition-all duration-150 hover:border-white/20 hover:bg-white/[0.08] hover:text-white/80 disabled:cursor-not-allowed disabled:opacity-40 sm:h-12 sm:w-12";
+const CHAT_INPUT_LINE_HEIGHT = 20;
+const CHAT_INPUT_MAX_LINES = 4;
 
-const mobileAttachButtonClass =
-  "inline-flex h-11 min-w-[3.25rem] shrink-0 flex-col items-center justify-center gap-0.5 rounded-xl border border-white/10 bg-white/[0.04] px-2 text-white/50 transition-all duration-150 hover:border-white/20 hover:bg-white/[0.08] hover:text-white/80 disabled:cursor-not-allowed disabled:opacity-40";
+const inputUtilityButtonClass =
+  "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-white/50 transition-all duration-150 hover:border-white/20 hover:bg-white/[0.08] hover:text-white/80 disabled:cursor-not-allowed disabled:opacity-40";
+
+const sendButtonClass =
+  "chat-send-btn inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-pink-500 to-orange-500 text-white shadow-[0_0_24px_-8px_rgba(236,72,153,0.55)] ring-1 ring-white/10 transition-all duration-150 hover:scale-[1.03] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:scale-100";
 
 type MessageFeedback = "like" | "dislike";
 
@@ -511,7 +508,6 @@ export function ChatInterface({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<BrowserSpeechRecognition | null>(null);
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -813,10 +809,6 @@ export function ChatInterface({
     setError(null);
     setIsLoading(true);
 
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-    }
-
     try {
       if (!activeSessionId) {
         const title = generateTitle(trimmed || attachment?.name || "New Chat");
@@ -932,19 +924,29 @@ export function ChatInterface({
     }
   }
 
-  function handleInput(event: React.ChangeEvent<HTMLTextAreaElement>) {
-    setInput(event.target.value);
-    event.target.style.height = "auto";
-    event.target.style.height = `${Math.min(event.target.scrollHeight, 200)}px`;
-  }
-
-  useEffect(() => {
+  const syncTextareaHeight = useCallback(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
 
-    textarea.style.height = "auto";
-    textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
-  }, [input]);
+    const maxHeight = CHAT_INPUT_LINE_HEIGHT * CHAT_INPUT_MAX_LINES;
+    textarea.style.height = `${CHAT_INPUT_LINE_HEIGHT}px`;
+    const nextHeight = Math.min(
+      Math.max(textarea.scrollHeight, CHAT_INPUT_LINE_HEIGHT),
+      maxHeight,
+    );
+    textarea.style.height = `${nextHeight}px`;
+    textarea.style.overflowY =
+      textarea.scrollHeight > maxHeight ? "auto" : "hidden";
+  }, []);
+
+  function handleInput(event: React.ChangeEvent<HTMLTextAreaElement>) {
+    setInput(event.target.value);
+    requestAnimationFrame(syncTextareaHeight);
+  }
+
+  useEffect(() => {
+    syncTextareaHeight();
+  }, [input, syncTextareaHeight]);
 
   const canSend = Boolean(input.trim() || selectedAttachment);
 
@@ -1103,14 +1105,14 @@ export function ChatInterface({
       </div>
 
       {/* Input area */}
-      <div className="sticky bottom-0 z-20 shrink-0 border-t border-[#7C3AED]/10 bg-[#05050f]/35 px-4 py-4 backdrop-blur-xl md:px-6 md:py-6 sm:px-10 sm:py-8">
+      <div className="sticky bottom-0 z-20 shrink-0 border-t border-[#7C3AED]/10 bg-[#05050f]/90 px-4 py-3 backdrop-blur-xl md:px-6">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#A855F7]/30 to-transparent"
         />
         <div className="mx-auto w-full max-w-3xl">
           {error && (
-            <p className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-3 text-[15px] leading-relaxed text-red-300">
+            <p className="mb-3 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2.5 text-sm leading-relaxed text-red-300">
               {error}
             </p>
           )}
@@ -1122,17 +1124,17 @@ export function ChatInterface({
           )}
 
           {selectedAttachment && (
-            <div className="mb-3 flex items-center gap-3 rounded-xl border border-white/10 bg-[#13131f]/90 px-3 py-2.5">
+            <div className="mb-3 flex items-center gap-3 rounded-xl border border-white/10 bg-[#13131f]/90 px-3 py-2">
               {selectedAttachment.type === "image" ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={selectedAttachment.dataUrl}
                   alt={selectedAttachment.name}
-                  className="h-14 w-14 shrink-0 rounded-lg object-cover ring-1 ring-white/10"
+                  className="h-10 w-10 shrink-0 rounded-lg object-cover ring-1 ring-white/10"
                 />
               ) : (
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-white/5 text-white/60 ring-1 ring-white/10">
-                  <PdfIcon className="h-6 w-6" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/5 text-white/60 ring-1 ring-white/10">
+                  <PdfIcon className="h-5 w-5" />
                 </div>
               )}
               <div className="min-w-0 flex-1">
@@ -1147,14 +1149,14 @@ export function ChatInterface({
                 type="button"
                 onClick={handleRemoveAttachment}
                 disabled={isLoading}
-                className="inline-flex h-9 shrink-0 items-center rounded-lg px-3 text-xs font-medium text-white/45 transition-colors duration-150 hover:bg-white/5 hover:text-white/75 disabled:opacity-40"
+                className="inline-flex h-8 shrink-0 items-center rounded-lg px-2.5 text-xs font-medium text-white/45 transition-colors duration-150 hover:bg-white/5 hover:text-white/75 disabled:opacity-40"
               >
                 Remove
               </button>
             </div>
           )}
 
-          <div className="chat-input-bar flex items-end gap-2 rounded-2xl border border-white/10 bg-[#13131f]/90 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:gap-3 sm:p-3.5">
+          <div className="chat-input-bar flex min-h-[56px] items-center gap-2 rounded-2xl border border-white/10 bg-[#13131f]/90 px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
             <input
               ref={fileInputRef}
               type="file"
@@ -1162,58 +1164,18 @@ export function ChatInterface({
               onChange={(event) => void handleFileSelect(event)}
               className="hidden"
             />
-            <input
-              ref={cameraInputRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onChange={(event) => void handleFileSelect(event)}
-              className="hidden"
-            />
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={isLoading}
-              className={`${inputUtilityButtonClass} hidden md:inline-flex ${
+              className={`${inputUtilityButtonClass} ${
                 selectedAttachment
                   ? "border-pink-500/30 bg-pink-500/10 text-pink-400"
                   : ""
               }`}
               aria-label="Attach image or PDF"
             >
-              <PaperclipIcon className="h-5 w-5" />
-            </button>
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isLoading}
-              className={`${mobileAttachButtonClass} md:hidden ${
-                selectedAttachment
-                  ? "border-pink-500/30 bg-pink-500/10 text-pink-400"
-                  : ""
-              }`}
-              aria-label="Attach file"
-            >
-              <span className="text-base leading-none" aria-hidden>
-                📎
-              </span>
-              <span className="text-[10px] font-medium leading-none">File</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => cameraInputRef.current?.click()}
-              disabled={isLoading}
-              className={`${mobileAttachButtonClass} md:hidden ${
-                selectedAttachment?.type === "image"
-                  ? "border-pink-500/30 bg-pink-500/10 text-pink-400"
-                  : ""
-              }`}
-              aria-label="Take photo"
-            >
-              <span className="text-base leading-none" aria-hidden>
-                📷
-              </span>
-              <span className="text-[10px] font-medium leading-none">Camera</span>
+              <PaperclipIcon className="h-4 w-4" />
             </button>
             <textarea
               ref={textareaRef}
@@ -1224,7 +1186,8 @@ export function ChatInterface({
               placeholder="Message Clotter AI..."
               rows={1}
               disabled={isLoading}
-              className="max-h-52 min-h-[52px] flex-1 resize-none bg-transparent px-2 py-2.5 text-[1rem] leading-[1.65] tracking-[-0.018em] text-white placeholder:text-white/35 focus:outline-none disabled:opacity-50 sm:min-h-[56px] sm:px-3 sm:py-3"
+              style={{ resize: "none", overflow: "hidden" }}
+              className="max-h-20 min-h-[20px] flex-1 resize-none bg-transparent py-0 text-[15px] leading-5 tracking-[-0.018em] text-white placeholder:text-white/35 focus:outline-none disabled:opacity-50"
             />
             <button
               type="button"
@@ -1237,16 +1200,16 @@ export function ChatInterface({
               }`}
               aria-label={isRecording ? "Stop voice input" : "Start voice input"}
             >
-              <MicIcon className="h-5 w-5" />
+              <MicIcon className="h-4 w-4" />
             </button>
             <button
               type="button"
               onClick={() => void sendMessage()}
               disabled={!canSend || isLoading}
-              className="chat-send-btn inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-orange-500 text-white shadow-[0_0_40px_-6px_rgba(236,72,153,0.6)] ring-1 ring-white/10 transition-transform duration-150 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:scale-100"
+              className={sendButtonClass}
               aria-label="Send message"
             >
-              <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+              <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
                 <path
                   d="M12 19V5M7 10l5-5 5 5"
                   stroke="currentColor"
@@ -1257,7 +1220,7 @@ export function ChatInterface({
               </svg>
             </button>
           </div>
-          <p className="mt-3 text-center text-[13px] tracking-[-0.01em] text-white/30 md:mt-4">
+          <p className="mt-2 text-center text-xs tracking-[-0.01em] text-white/30 md:mt-3 md:text-[13px]">
             Clotter AI may make mistakes. Please double-check important information.
           </p>
         </div>
