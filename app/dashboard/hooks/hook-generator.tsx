@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { FeatureEmptyState } from "@/app/dashboard/components/feature-empty-state";
+import { useToast } from "@/app/dashboard/components/toast-provider";
 
 const platforms = [
   { id: "reels", label: "Reels" },
@@ -12,6 +14,7 @@ const platforms = [
 type PlatformId = (typeof platforms)[number]["id"];
 
 export function HookGenerator() {
+  const { showToast } = useToast();
   const [topic, setTopic] = useState("");
   const [platform, setPlatform] = useState<PlatformId>("reels");
   const [hooks, setHooks] = useState<string[]>([]);
@@ -48,6 +51,7 @@ export function HookGenerator() {
       }
 
       setHooks(data.hooks);
+      showToast("Content generated");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -58,6 +62,7 @@ export function HookGenerator() {
   async function copyHook(hook: string, index: number) {
     await navigator.clipboard.writeText(hook);
     setCopiedIndex(index);
+    showToast("Message copied");
     setTimeout(() => setCopiedIndex(null), 2000);
   }
 
@@ -128,6 +133,25 @@ export function HookGenerator() {
           <p className="mt-8 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-4 text-sm leading-relaxed text-red-300">
             {error}
           </p>
+        )}
+
+        {!isLoading && hooks.length === 0 && !error && (
+          <FeatureEmptyState
+            icon={
+              <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8" aria-hidden>
+                <path
+                  d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            }
+            title="Attention-grabbing hooks"
+            description="Enter your video topic and platform — get scroll-stopping openers that grab viewers in the first two seconds."
+            cta="Fill in the form above and hit Generate"
+          />
         )}
 
         {hooks.length > 0 && (

@@ -210,12 +210,12 @@ export function OnboardingFlow() {
           />
         </div>
 
-        <div className="relative z-10 flex min-h-screen w-full flex-col items-center justify-start px-4 py-8 md:py-16">
+        <div className="relative z-10 flex min-h-screen w-full flex-col items-center justify-start px-4 py-6 md:py-16">
           <div className="relative z-10 mb-8 w-full max-w-2xl text-center md:mb-10">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6366F1]">
               Step {step + 1} of {TOTAL_STEPS}
             </p>
-            <h1 className="font-heading mt-3 text-2xl font-bold tracking-[-0.02em] text-white md:text-4xl">
+            <h1 className="font-heading mt-3 text-xl font-bold tracking-[-0.02em] text-white md:text-3xl">
               Let&apos;s build your Creator DNA
             </h1>
             <p className="mt-3 max-w-lg text-base text-white/45">
@@ -234,7 +234,7 @@ export function OnboardingFlow() {
           >
             {step === 0 && (
               <section className="relative z-10">
-                <h2 className="font-heading text-2xl font-bold tracking-[-0.02em] text-white md:text-4xl">
+                <h2 className="font-heading text-xl font-bold tracking-[-0.02em] text-white md:text-3xl">
                   What&apos;s your creator niche?
                 </h2>
                 <div className={`mt-6 ${optionGridClass}`}>
@@ -265,7 +265,7 @@ export function OnboardingFlow() {
 
             {step === 1 && (
               <section className="relative z-10">
-                <h2 className="font-heading text-2xl font-bold tracking-[-0.02em] text-white md:text-4xl">
+                <h2 className="font-heading text-xl font-bold tracking-[-0.02em] text-white md:text-3xl">
                   What platforms do you create for?
                 </h2>
                 <p className="mt-2 text-base text-white/40">Select all that apply</p>
@@ -291,7 +291,7 @@ export function OnboardingFlow() {
             {step === 2 && (
               <section className="relative z-10 space-y-6">
                 <div>
-                  <h2 className="font-heading text-2xl font-bold tracking-[-0.02em] text-white md:text-4xl">
+                  <h2 className="font-heading text-xl font-bold tracking-[-0.02em] text-white md:text-3xl">
                     Who is your audience?
                   </h2>
                   <p className="mt-2 text-sm font-semibold uppercase tracking-[0.1em] text-white/35 md:text-base">
@@ -359,7 +359,7 @@ export function OnboardingFlow() {
 
             {step === 3 && (
               <section className="relative z-10">
-                <h2 className="font-heading text-2xl font-bold tracking-[-0.02em] text-white md:text-4xl">
+                <h2 className="font-heading text-xl font-bold tracking-[-0.02em] text-white md:text-3xl">
                   What&apos;s your content style?
                 </h2>
                 <div className={`mt-6 ${optionGridClass}`}>
@@ -383,7 +383,7 @@ export function OnboardingFlow() {
 
             {step === 4 && (
               <section className="relative z-10">
-                <h2 className="font-heading text-2xl font-bold tracking-[-0.02em] text-white md:text-4xl">
+                <h2 className="font-heading text-xl font-bold tracking-[-0.02em] text-white md:text-3xl">
                   What&apos;s your biggest goal right now?
                 </h2>
                 <div className={`mt-6 ${optionGridClass}`}>
@@ -407,7 +407,7 @@ export function OnboardingFlow() {
 
             {step === 5 && (
               <section className="relative z-10">
-                <h2 className="font-heading text-2xl font-bold tracking-[-0.02em] text-white md:text-4xl">
+                <h2 className="font-heading text-xl font-bold tracking-[-0.02em] text-white md:text-3xl">
                   How often do you post?
                 </h2>
                 <div className="mt-6 flex flex-wrap gap-2">
@@ -431,7 +431,7 @@ export function OnboardingFlow() {
 
             {step === 6 && (
               <section className="relative z-10">
-                <h2 className="font-heading text-2xl font-bold tracking-[-0.02em] text-white md:text-4xl">
+                <h2 className="font-heading text-xl font-bold tracking-[-0.02em] text-white md:text-3xl">
                   What makes your content unique?
                 </h2>
                 <p className="mt-2 text-base text-white/40">

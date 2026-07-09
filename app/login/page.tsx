@@ -487,8 +487,15 @@ export default async function LoginPage({
 
       {/* Footer */}
       <footer className="relative z-10 border-t border-white/[0.05] px-6 py-10 sm:px-10">
-        <p className="text-center text-sm text-white/35">
-          © 2026 Clotter AI — The AI OS for Creators
+        <p className="text-center text-sm text-white/30">
+          <a href="/privacy" className="transition-colors hover:text-white/50">
+            Privacy Policy
+          </a>
+          {" | "}
+          <a href="/terms" className="transition-colors hover:text-white/50">
+            Terms of Service
+          </a>
+          {" | © 2026 Clotter AI"}
         </p>
       </footer>
     </div>

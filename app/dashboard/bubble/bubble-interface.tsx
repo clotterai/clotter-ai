@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useToast } from "@/app/dashboard/components/toast-provider";
 import { BubbleIcon } from "./bubble-icon";
 
 type Message = {
@@ -214,6 +215,7 @@ function FeedbackButtons({
 }
 
 export function BubbleInterface() {
+  const { showToast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -251,6 +253,7 @@ export function BubbleInterface() {
     try {
       await navigator.clipboard.writeText(content);
       setCopiedIndex(messageIndex);
+      showToast("Message copied");
 
       if (copyTimeoutRef.current) {
         clearTimeout(copyTimeoutRef.current);
@@ -660,7 +663,7 @@ export function BubbleInterface() {
             </button>
           </div>
           <p className="mt-4 text-center text-[13px] tracking-[-0.01em] text-white/30">
-            Clotter AI may make mistakes. Verify important information before using.
+            Clotter AI can make mistakes.
           </p>
         </div>
       </div>

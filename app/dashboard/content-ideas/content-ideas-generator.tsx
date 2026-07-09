@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { FeatureEmptyState } from "@/app/dashboard/components/feature-empty-state";
+import { useToast } from "@/app/dashboard/components/toast-provider";
 
 const platforms = [
   { id: "instagram", label: "Instagram" },
@@ -12,6 +14,7 @@ const platforms = [
 type PlatformId = (typeof platforms)[number]["id"];
 
 export function ContentIdeasGenerator() {
+  const { showToast } = useToast();
   const [niche, setNiche] = useState("");
   const [platform, setPlatform] = useState<PlatformId>("instagram");
   const [ideas, setIdeas] = useState<string[]>([]);
@@ -48,6 +51,7 @@ export function ContentIdeasGenerator() {
       }
 
       setIdeas(data.ideas);
+      showToast("Content generated");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -58,6 +62,7 @@ export function ContentIdeasGenerator() {
   async function copyIdea(idea: string, index: number) {
     await navigator.clipboard.writeText(idea);
     setCopiedIndex(index);
+    showToast("Message copied");
     setTimeout(() => setCopiedIndex(null), 2000);
   }
 
@@ -128,6 +133,29 @@ export function ContentIdeasGenerator() {
           <p className="mt-8 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-4 text-sm leading-relaxed text-red-300">
             {error}
           </p>
+        )}
+
+        {!isLoading && ideas.length === 0 && !error && (
+          <FeatureEmptyState
+            icon={
+              <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8" aria-hidden>
+                <path
+                  d="M9.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                />
+                <path
+                  d="M12 6v6l3 2"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+            }
+            title="Fresh content ideas"
+            description="Tell Clotter your niche and platform — get 20 viral content concepts you haven't seen a hundred times before."
+            cta="Fill in the form above and hit Generate"
+          />
         )}
 
         {ideas.length > 0 && (

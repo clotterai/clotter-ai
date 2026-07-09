@@ -34,7 +34,20 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isDashboard = request.nextUrl.pathname.startsWith("/dashboard");
+  const pathname = request.nextUrl.pathname;
+  const isDashboard = pathname.startsWith("/dashboard");
+  const isLogin = pathname === "/login";
+
+  if (isLogin && user) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
+    url.search = "";
+    const dashboardRedirect = NextResponse.redirect(url);
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+      dashboardRedirect.cookies.set(cookie);
+    });
+    return dashboardRedirect;
+  }
 
   if (isDashboard && !user) {
     const url = request.nextUrl.clone();

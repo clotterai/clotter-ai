@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { FeatureEmptyState } from "@/app/dashboard/components/feature-empty-state";
+import { useToast } from "@/app/dashboard/components/toast-provider";
 
 const platforms = [
   {
@@ -137,6 +139,7 @@ function ScriptSectionCard({
 }
 
 export function ScriptGenerator() {
+  const { showToast } = useToast();
   const [topic, setTopic] = useState("");
   const [platform, setPlatform] = useState<PlatformId>("instagram_reels");
   const [tone, setTone] = useState<ToneId>("entertaining");
@@ -177,6 +180,7 @@ export function ScriptGenerator() {
       }
 
       setScript(data);
+      showToast("Content generated");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -187,6 +191,7 @@ export function ScriptGenerator() {
   async function copyText(text: string, key: string) {
     await navigator.clipboard.writeText(text);
     setCopiedKey(key);
+    showToast("Message copied");
     setTimeout(() => setCopiedKey(null), 2000);
   }
 
@@ -351,6 +356,30 @@ export function ScriptGenerator() {
           <div className="mt-10">
             <ScriptLoading />
           </div>
+        )}
+
+        {!isLoading && !script && !error && (
+          <FeatureEmptyState
+            icon={
+              <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8" aria-hidden>
+                <path
+                  d="M8 4h8a2 2 0 0 1 2 2v14l-3-2-3 2-3-2-3 2V6a2 2 0 0 1 2-2Z"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M10 8h4M10 12h4M10 16h2"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+            }
+            title="Viral video scripts"
+            description="Describe your topic, platform, and tone — Clotter AI builds a full script with hook, sections, and CTA optimized for retention."
+            cta="Fill in the form above and hit Generate"
+          />
         )}
 
         {script && !isLoading && (

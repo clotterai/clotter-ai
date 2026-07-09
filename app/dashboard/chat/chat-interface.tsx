@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ClotterLogo } from "@/app/dashboard/components/clotter-logo";
+import { useToast } from "@/app/dashboard/components/toast-provider";
 import { BubbleIcon } from "@/app/dashboard/bubble/bubble-icon";
 import { createClient } from "@/lib/supabase/client";
 import { dispatchChatSessionsUpdated } from "@/lib/chat-sessions-events";
@@ -315,6 +316,9 @@ function ThumbsDownIcon({
 }
 
 function isAcceptedFile(file: File) {
+  if (file.type.startsWith("video/")) {
+    return false;
+  }
   return file.type === "application/pdf" || file.type.startsWith("image/");
 }
 
@@ -481,6 +485,7 @@ export function ChatInterface({
   sessionId?: string | null;
 }) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
   const [suggestedPrompts] = useState(() => pickRandomPrompts(4));
   const [input, setInput] = useState("");
@@ -495,12 +500,10 @@ export function ChatInterface({
   const [selectedAttachment, setSelectedAttachment] =
     useState<MessageAttachment | null>(null);
   const [isRecording, setIsRecording] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<BrowserSpeechRecognition | null>(null);
-  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const locallyActiveSessionRef = useRef<string | null>(null);
@@ -612,24 +615,9 @@ export function ChatInterface({
       if (feedbackTimeoutRef.current) {
         clearTimeout(feedbackTimeoutRef.current);
       }
-      if (toastTimeoutRef.current) {
-        clearTimeout(toastTimeoutRef.current);
-      }
       recognitionRef.current?.stop();
     };
   }, []);
-
-  function showToast(message: string) {
-    setToast(message);
-
-    if (toastTimeoutRef.current) {
-      clearTimeout(toastTimeoutRef.current);
-    }
-
-    toastTimeoutRef.current = setTimeout(() => {
-      setToast(null);
-    }, 3000);
-  }
 
   async function handleFileSelect(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -638,7 +626,11 @@ export function ChatInterface({
     if (!file) return;
 
     if (!isAcceptedFile(file)) {
-      setError("Please select a JPG, PNG, WebP image, or PDF file.");
+      if (file.type.startsWith("video/")) {
+        setError("Videos aren't supported in chat yet. Please attach an image or PDF.");
+      } else {
+        setError("Please select a JPG, PNG, WebP image, or PDF file.");
+      }
       return;
     }
 
@@ -670,7 +662,7 @@ export function ChatInterface({
       window.SpeechRecognition ?? window.webkitSpeechRecognition;
 
     if (!SpeechRecognitionConstructor) {
-      showToast("Voice not supported on this browser");
+      showToast("Voice not supported on this browser", "error");
       return;
     }
 
@@ -721,6 +713,7 @@ export function ChatInterface({
     try {
       await navigator.clipboard.writeText(content);
       setCopiedIndex(messageIndex);
+      showToast("Message copied");
 
       if (copyTimeoutRef.current) {
         clearTimeout(copyTimeoutRef.current);
@@ -1140,7 +1133,10 @@ export function ChatInterface({
       </div>
 
       {/* Input area */}
-      <div className="sticky bottom-0 z-20 shrink-0 border-t border-[#EC4899]/10 bg-[#05050f]/90 px-4 py-3 backdrop-blur-xl md:px-6">
+      <div
+        className="sticky bottom-0 z-20 shrink-0 border-t border-[#EC4899]/10 bg-[#05050f]/90 px-4 py-3 backdrop-blur-xl md:px-6"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#EC4899]/30 to-transparent"
@@ -1149,12 +1145,6 @@ export function ChatInterface({
           {error && (
             <p className="mb-3 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2.5 text-sm leading-relaxed text-red-300">
               {error}
-            </p>
-          )}
-
-          {toast && (
-            <p className="mb-3 rounded-xl border border-white/10 bg-[#13131f]/95 px-4 py-2.5 text-center text-sm text-white/70">
-              {toast}
             </p>
           )}
 
@@ -1195,7 +1185,8 @@ export function ChatInterface({
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*,application/pdf"
+              accept="image/*,video/*,application/pdf"
+              capture="environment"
               onChange={(event) => void handleFileSelect(event)}
               className="hidden"
             />
@@ -1256,7 +1247,7 @@ export function ChatInterface({
             </button>
           </div>
           <p className="mt-2 text-center text-xs tracking-[-0.01em] text-white/30 md:mt-3 md:text-[13px]">
-            Clotter AI may make mistakes. Please double-check important information.
+            Clotter AI can make mistakes.
           </p>
         </div>
       </div>

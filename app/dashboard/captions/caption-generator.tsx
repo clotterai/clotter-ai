@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { FeatureEmptyState } from "@/app/dashboard/components/feature-empty-state";
+import { useToast } from "@/app/dashboard/components/toast-provider";
 
 const tones = [
   { id: "funny", label: "Funny" },
@@ -12,6 +14,7 @@ const tones = [
 type ToneId = (typeof tones)[number]["id"];
 
 export function CaptionGenerator() {
+  const { showToast } = useToast();
   const [topic, setTopic] = useState("");
   const [tone, setTone] = useState<ToneId>("viral");
   const [captions, setCaptions] = useState<string[]>([]);
@@ -48,6 +51,7 @@ export function CaptionGenerator() {
       }
 
       setCaptions(data.captions);
+      showToast("Content generated");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -58,6 +62,7 @@ export function CaptionGenerator() {
   async function copyCaption(caption: string, index: number) {
     await navigator.clipboard.writeText(caption);
     setCopiedIndex(index);
+    showToast("Message copied");
     setTimeout(() => setCopiedIndex(null), 2000);
   }
 
@@ -128,6 +133,25 @@ export function CaptionGenerator() {
           <p className="mt-8 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-4 text-sm leading-relaxed text-red-300">
             {error}
           </p>
+        )}
+
+        {!isLoading && captions.length === 0 && !error && (
+          <FeatureEmptyState
+            icon={
+              <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8" aria-hidden>
+                <path
+                  d="M4 6h16M4 12h12M4 18h8M20 18l-2 2-4-4"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            }
+            title="Scroll-stopping captions"
+            description="Describe your post topic and tone — Clotter AI will generate five unique captions tailored to your voice."
+            cta="Fill in the form above and hit Generate"
+          />
         )}
 
         {captions.length > 0 && (

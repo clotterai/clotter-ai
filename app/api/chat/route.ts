@@ -1,3 +1,4 @@
+import { checkRateLimit } from "@/lib/rate-limit";
 import { saveContentHistory } from "@/lib/memory/getCreatorContext";
 import { buildSystemPromptWithMemory } from "@/lib/memory/injectMemory";
 import { NextResponse } from "next/server";
@@ -169,6 +170,25 @@ export async function POST(request: Request) {
 
   const { systemPrompt, supabase, user } =
     await buildSystemPromptWithMemory(SYSTEM_PROMPT);
+
+  if (user) {
+    const { allowed } = checkRateLimit(
+      `chat:${user.id}`,
+      30,
+      60 * 60 * 1000,
+    );
+
+    if (!allowed) {
+      return NextResponse.json(
+        {
+          error:
+            "You've reached your hourly limit of 30 messages. Please wait before sending more.",
+        },
+        { status: 429 },
+      );
+    }
+  }
+
   const lastUserMessage = [...messages].reverse().find((m) => m.role === "user");
   const normalizedMessages = normalizeChatMessages(messages);
 

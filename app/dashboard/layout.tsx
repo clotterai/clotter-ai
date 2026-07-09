@@ -8,6 +8,7 @@ import {
   DashboardNavigation,
   type SidebarUser,
 } from "./components/sidebar";
+import { ToastProvider } from "./components/toast-provider";
 
 export const dynamic = "force-dynamic";
 
@@ -94,6 +95,7 @@ export default async function DashboardLayout({
 
   const sidebarUser = toSidebarUser(user);
   return (
+    <ToastProvider>
     <div className="dash-shell relative flex min-h-full overflow-hidden bg-[#0D0D1A] font-sans text-white">
       {/* Top gradient progress bar with shimmer */}
       <div aria-hidden className="dash-top-bar" />
@@ -119,5 +121,6 @@ export default async function DashboardLayout({
         </div>
       </DashboardNavigation>
     </div>
+    </ToastProvider>
   );
 }

@@ -10,6 +10,7 @@ import {
 import { displaySessionTitle } from "@/lib/generate-chat-title";
 import { LogoutButton } from "./logout-button";
 import { ClotterLogo } from "./clotter-logo";
+import { useToast } from "./toast-provider";
 
 export type SidebarUser = {
   email: string;
@@ -458,6 +459,7 @@ const ChatNavSection = memo(function ChatNavSection({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { showToast } = useToast();
   const activeSessionId = searchParams.get("session");
   const isChatPage = pathname.startsWith(CHAT_HREF);
 
@@ -591,9 +593,10 @@ const ChatNavSection = memo(function ChatNavSection({
         ),
       );
       dispatchChatSessionsUpdated();
+      showToast("Chat renamed");
       return true;
     },
-    [],
+    [showToast],
   );
 
   const handleDeleteSession = useCallback(
@@ -636,10 +639,11 @@ const ChatNavSection = memo(function ChatNavSection({
       }
 
       showUndoToast(snapshot);
+      showToast("Chat deleted");
       dispatchChatSessionsUpdated();
       return true;
     },
-    [activeSessionId, router, showUndoToast],
+    [activeSessionId, router, showUndoToast, showToast],
   );
 
   return (
