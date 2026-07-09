@@ -174,6 +174,9 @@ function PdfIcon({ className }: { className?: string }) {
 const inputUtilityButtonClass =
   "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-white/50 transition-all duration-150 hover:border-white/20 hover:bg-white/[0.08] hover:text-white/80 disabled:cursor-not-allowed disabled:opacity-40 sm:h-12 sm:w-12";
 
+const mobileAttachButtonClass =
+  "inline-flex h-11 min-w-[3.25rem] shrink-0 flex-col items-center justify-center gap-0.5 rounded-xl border border-white/10 bg-white/[0.04] px-2 text-white/50 transition-all duration-150 hover:border-white/20 hover:bg-white/[0.08] hover:text-white/80 disabled:cursor-not-allowed disabled:opacity-40";
+
 type MessageFeedback = "like" | "dislike";
 
 const promptPool = [
@@ -313,10 +316,16 @@ function ThumbsDownIcon({
   );
 }
 
+function isAcceptedFile(file: File) {
+  return file.type === "application/pdf" || file.type.startsWith("image/");
+}
+
 function ClotterLogoMark() {
   return (
     <div className="chat-logo-glow">
-      <ClotterLogo size={64} />
+      <div className="origin-center md:scale-150">
+        <ClotterLogo size={64} />
+      </div>
     </div>
   );
 }
@@ -502,6 +511,7 @@ export function ChatInterface({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<BrowserSpeechRecognition | null>(null);
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -640,7 +650,7 @@ export function ChatInterface({
 
     if (!file) return;
 
-    if (!ACCEPTED_FILE_TYPES.includes(file.type)) {
+    if (!isAcceptedFile(file)) {
       setError("Please select a JPG, PNG, WebP image, or PDF file.");
       return;
     }
@@ -972,29 +982,29 @@ export function ChatInterface({
         }
       `}</style>
       {/* Messages or welcome */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="min-h-0 flex-1 overflow-y-auto">
         {isLoadingSession ? (
           <div className="chat-session-loading flex h-full items-center justify-center px-6 py-12">
             <p className="text-sm text-white/40">Loading chat...</p>
           </div>
         ) : isEmpty ? (
-          <div className="chat-welcome flex h-full flex-col items-center justify-center px-6 py-12">
+          <div className="chat-welcome flex h-full min-h-0 flex-col items-center justify-center gap-3 overflow-hidden px-4 py-3 md:gap-6 md:px-6 md:py-12">
             <ClotterLogoMark />
-            <h2 className="font-heading chat-welcome-title-shimmer mt-8 text-center text-[2rem] font-bold leading-[1.12] tracking-[-0.02em] sm:text-[2.75rem]">
+            <h2 className="font-heading chat-welcome-title-shimmer text-center text-2xl font-bold leading-[1.12] tracking-[-0.02em] md:text-4xl">
               What are we creating today?
             </h2>
-            <p className="chat-welcome-subtitle mt-4 max-w-md text-center text-[1.0625rem] leading-relaxed tracking-[-0.018em] text-white/45">
+            <p className="chat-welcome-subtitle hidden max-w-md text-center text-[1.0625rem] leading-relaxed tracking-[-0.018em] text-white/45 md:block">
               Your AI creative partner for content ideas, captions, hooks, and
               growth strategy.
             </p>
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+            <div className="mt-1 grid w-full max-w-md grid-cols-2 gap-2 md:mt-10 md:flex md:max-w-none md:flex-wrap md:items-center md:justify-center md:gap-3">
               {suggestedPrompts.map((prompt, index) => (
                 <button
                   key={prompt}
                   type="button"
                   onClick={() => void sendMessage(prompt)}
                   disabled={isLoading}
-                  className="chat-prompt-chip transition-transform duration-150 hover:scale-105"
+                  className="chat-prompt-chip px-3 py-2 text-xs transition-transform duration-150 hover:scale-105 md:px-5 md:py-3 md:text-[0.9375rem]"
                   style={{ "--chip-delay": `${0.55 + index * 0.1}s` } as React.CSSProperties}
                 >
                   {prompt}
@@ -1003,7 +1013,7 @@ export function ChatInterface({
             </div>
           </div>
         ) : (
-          <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
+          <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-3 py-4 pb-4 md:gap-6 md:px-6 md:py-10 md:pb-4">
             {messages.map((message, index) => {
               const isStreamingMessage =
                 isLoading &&
@@ -1018,8 +1028,8 @@ export function ChatInterface({
               >
                 {message.role === "user" ? (
                   <div className="flex justify-end">
-                    <div className="flex max-w-[85%] flex-col items-end">
-                      <div className="rounded-2xl bg-gradient-to-br from-pink-500 to-orange-500 px-4 py-3 text-white shadow-[0_8px_32px_-12px_rgba(236,72,153,0.45)]">
+                    <div className="flex max-w-[85%] flex-col items-end md:max-w-[85%]">
+                      <div className="rounded-2xl bg-gradient-to-br from-pink-500 to-orange-500 px-3 py-2 text-white shadow-[0_8px_32px_-12px_rgba(236,72,153,0.45)] md:px-4 md:py-3">
                         {message.attachment?.type === "image" && (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
@@ -1048,11 +1058,11 @@ export function ChatInterface({
                     </div>
                   </div>
                 ) : (
-                  <div className="flex w-full gap-3">
+                  <div className="flex w-full gap-2 md:gap-3">
                     <ChatAiAvatar thinking={isStreamingMessage} />
-                    <div className="min-w-0 flex-1">
+                    <div className="min-w-0 max-w-[85%] flex-1 md:max-w-none">
                       <div
-                        className={`rounded-2xl border border-white/8 bg-white/5 px-4 py-3 text-white/95 backdrop-blur-md ${
+                        className={`rounded-2xl border border-white/8 bg-white/5 px-3 py-2 text-white/95 backdrop-blur-md md:px-4 md:py-3 ${
                           isStreamingMessage ? "chat-streaming-bubble" : ""
                         }`}
                       >
@@ -1093,7 +1103,7 @@ export function ChatInterface({
       </div>
 
       {/* Input area */}
-      <div className="relative shrink-0 border-t border-[#7C3AED]/10 bg-[#05050f]/35 px-6 py-6 backdrop-blur-xl sm:px-10 sm:py-8">
+      <div className="sticky bottom-0 z-20 shrink-0 border-t border-[#7C3AED]/10 bg-[#05050f]/35 px-4 py-4 backdrop-blur-xl md:px-6 md:py-6 sm:px-10 sm:py-8">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#A855F7]/30 to-transparent"
@@ -1148,7 +1158,15 @@ export function ChatInterface({
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/jpeg,image/png,image/webp,application/pdf,.pdf"
+              accept="image/*,application/pdf"
+              onChange={(event) => void handleFileSelect(event)}
+              className="hidden"
+            />
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
               onChange={(event) => void handleFileSelect(event)}
               className="hidden"
             />
@@ -1156,7 +1174,7 @@ export function ChatInterface({
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={isLoading}
-              className={`${inputUtilityButtonClass} ${
+              className={`${inputUtilityButtonClass} hidden md:inline-flex ${
                 selectedAttachment
                   ? "border-pink-500/30 bg-pink-500/10 text-pink-400"
                   : ""
@@ -1164,6 +1182,38 @@ export function ChatInterface({
               aria-label="Attach image or PDF"
             >
               <PaperclipIcon className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isLoading}
+              className={`${mobileAttachButtonClass} md:hidden ${
+                selectedAttachment
+                  ? "border-pink-500/30 bg-pink-500/10 text-pink-400"
+                  : ""
+              }`}
+              aria-label="Attach file"
+            >
+              <span className="text-base leading-none" aria-hidden>
+                📎
+              </span>
+              <span className="text-[10px] font-medium leading-none">File</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => cameraInputRef.current?.click()}
+              disabled={isLoading}
+              className={`${mobileAttachButtonClass} md:hidden ${
+                selectedAttachment?.type === "image"
+                  ? "border-pink-500/30 bg-pink-500/10 text-pink-400"
+                  : ""
+              }`}
+              aria-label="Take photo"
+            >
+              <span className="text-base leading-none" aria-hidden>
+                📷
+              </span>
+              <span className="text-[10px] font-medium leading-none">Camera</span>
             </button>
             <textarea
               ref={textareaRef}
@@ -1207,7 +1257,7 @@ export function ChatInterface({
               </svg>
             </button>
           </div>
-          <p className="mt-4 text-center text-[13px] tracking-[-0.01em] text-white/30">
+          <p className="mt-3 text-center text-[13px] tracking-[-0.01em] text-white/30 md:mt-4">
             Clotter AI may make mistakes. Please double-check important information.
           </p>
         </div>
