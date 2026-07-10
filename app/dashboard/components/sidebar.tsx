@@ -736,19 +736,23 @@ function SidebarProfileSection({ user: initialUser }: { user: SidebarUser }) {
   const router = useRouter();
   const { showToast } = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [displayName, setDisplayName] = useState(initialUser.displayName);
   const [preferredName, setPreferredName] = useState(initialUser.preferredName);
+  const [avatarUrl, setAvatarUrl] = useState(initialUser.avatarUrl);
   const [editValue, setEditValue] = useState(initialUser.preferredName ?? "");
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   useEffect(() => {
     setDisplayName(initialUser.displayName);
     setPreferredName(initialUser.preferredName);
+    setAvatarUrl(initialUser.avatarUrl);
     setEditValue(initialUser.preferredName ?? "");
-  }, [initialUser.displayName, initialUser.preferredName]);
+  }, [initialUser.displayName, initialUser.preferredName, initialUser.avatarUrl]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -807,6 +811,62 @@ function SidebarProfileSection({ user: initialUser }: { user: SidebarUser }) {
     }
   }
 
+  async function handleAvatarUpload(file: File) {
+    if (!file.type.startsWith("image/")) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      showToast("Image must be under 2MB");
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+
+    try {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) return;
+
+      const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const filePath = `${user.id}/avatar.${extension}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, file, {
+          upsert: true,
+          contentType: file.type,
+        });
+
+      if (uploadError) return;
+
+      const { data: publicUrlData } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(filePath);
+
+      const publicUrl = publicUrlData.publicUrl;
+
+      const response = await fetch("/api/memory/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatar_url: publicUrl }),
+      });
+
+      if (!response.ok) return;
+
+      setAvatarUrl(publicUrl);
+      showToast("Profile photo updated");
+    } catch {
+      // Save silently on failure.
+    } finally {
+      setIsUploadingAvatar(false);
+      if (avatarInputRef.current) {
+        avatarInputRef.current.value = "";
+      }
+    }
+  }
+
   async function handleSignOut() {
     setIsSigningOut(true);
     const supabase = createClient();
@@ -817,11 +877,24 @@ function SidebarProfileSection({ user: initialUser }: { user: SidebarUser }) {
 
   return (
     <div ref={containerRef} className="relative">
+      <input
+        ref={avatarInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (file) {
+            void handleAvatarUpload(file);
+          }
+        }}
+      />
+
       <div className="flex items-center gap-3">
-        {initialUser.avatarUrl ? (
+        {avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={initialUser.avatarUrl}
+            src={avatarUrl}
             alt=""
             loading="lazy"
             className="h-9 w-9 shrink-0 rounded-full object-cover ring-1 ring-white/10"
@@ -884,6 +957,30 @@ function SidebarProfileSection({ user: initialUser }: { user: SidebarUser }) {
             <p className="mt-1 truncate text-sm text-white/85">
               {initialUser.email}
             </p>
+          </div>
+
+          <div className="flex items-center gap-3 border-b border-white/8 px-4 py-3">
+            {avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={avatarUrl}
+                alt=""
+                loading="lazy"
+                className="h-10 w-10 shrink-0 rounded-full object-cover ring-1 ring-white/10"
+              />
+            ) : (
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-pink-500/30 to-orange-500/20 text-xs font-semibold text-white/90 ring-1 ring-white/10">
+                {initialUser.initials}
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => avatarInputRef.current?.click()}
+              disabled={isUploadingAvatar}
+              className="rounded-lg border border-white/10 px-3 py-2 text-xs font-medium text-white/75 transition-colors hover:border-white/20 hover:bg-white/[0.04] hover:text-white disabled:opacity-50"
+            >
+              {isUploadingAvatar ? "Uploading..." : "Change Photo"}
+            </button>
           </div>
 
           {isEditing ? (

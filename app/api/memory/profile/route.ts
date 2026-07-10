@@ -61,6 +61,7 @@ export async function PATCH(request: Request) {
     "brand_name",
     "unique_angle",
     "preferred_name",
+    "avatar_url",
   ] as const;
 
   const updates: Record<string, unknown> = {};

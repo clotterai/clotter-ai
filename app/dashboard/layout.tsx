@@ -46,6 +46,7 @@ function toSidebarUser(
     user_metadata?: Record<string, unknown>;
   },
   preferredName?: string | null,
+  profileAvatarUrl?: string | null,
 ): SidebarUser {
   const email = user.email ?? "";
   const meta = user.user_metadata ?? {};
@@ -57,6 +58,7 @@ function toSidebarUser(
     "Creator";
 
   const avatarUrl =
+    profileAvatarUrl?.trim() ||
     (typeof meta.avatar_url === "string" && meta.avatar_url) ||
     (typeof meta.picture === "string" && meta.picture) ||
     null;
@@ -98,7 +100,7 @@ export default async function DashboardLayout({
   const { data: creatorProfile } = profileExists
     ? await supabase
         .from("creator_profiles")
-        .select("preferred_name")
+        .select("preferred_name, avatar_url")
         .eq("user_id", user.id)
         .maybeSingle()
     : { data: null };
@@ -111,7 +113,11 @@ export default async function DashboardLayout({
     redirect("/dashboard");
   }
 
-  const sidebarUser = toSidebarUser(user, creatorProfile?.preferred_name);
+  const sidebarUser = toSidebarUser(
+    user,
+    creatorProfile?.preferred_name,
+    creatorProfile?.avatar_url,
+  );
   return (
     <ToastProvider>
     <div className="dash-shell relative flex min-h-full overflow-hidden bg-[#0D0D1A] font-sans text-white">

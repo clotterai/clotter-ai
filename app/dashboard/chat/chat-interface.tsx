@@ -1,5 +1,6 @@
 "use client";
 
+import { Square } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ClotterLogo } from "@/app/dashboard/components/clotter-logo";
@@ -251,25 +252,23 @@ function ThumbsUpIcon({
 }) {
   return (
     <svg
-      viewBox="0 0 16 16"
-      fill={filled ? "currentColor" : "none"}
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
       className={className}
       aria-hidden
     >
       <path
-        d="M5 14V7.5M5 7.5L6.8 3.2a1 1 0 0 1 .95-.7H10a1 1 0 0 1 1 1v2h2.2a1 1 0 0 1 .98 1.2l-.8 4A1 1 0 0 1 12.4 11H8.5"
-        stroke="currentColor"
-        strokeWidth="1.25"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"
+        fill={filled ? "currentColor" : "none"}
+        fillOpacity={filled ? 0.2 : 1}
       />
-      <path
-        d="M5 7.5H3.5a1 1 0 0 0-1 1V13a1 1 0 0 0 1 1H5"
-        stroke="currentColor"
-        strokeWidth="1.25"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
     </svg>
   );
 }
@@ -283,25 +282,23 @@ function ThumbsDownIcon({
 }) {
   return (
     <svg
-      viewBox="0 0 16 16"
-      fill={filled ? "currentColor" : "none"}
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
       className={className}
       aria-hidden
     >
       <path
-        d="M5 2v6.5M5 8.5L6.8 12.8a1 1 0 0 0 .95.7H10a1 1 0 0 0 1-1v-2h2.2a1 1 0 0 0 .98-1.2l-.8-4A1 1 0 0 0 12.4 5H8.5"
-        stroke="currentColor"
-        strokeWidth="1.25"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"
+        fill={filled ? "currentColor" : "none"}
+        fillOpacity={filled ? 0.2 : 1}
       />
-      <path
-        d="M5 8.5H3.5a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1H5"
-        stroke="currentColor"
-        strokeWidth="1.25"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17" />
     </svg>
   );
 }
@@ -350,6 +347,9 @@ const iconActionButtonClass =
 
 const actionIconClass = "h-4 w-4 shrink-0";
 
+const feedbackButtonClass =
+  "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-all duration-150";
+
 function AssistantMessageActions({
   messageIndex,
   content,
@@ -380,8 +380,8 @@ function AssistantMessageActions({
           <button
             type="button"
             onClick={() => onFeedback(messageIndex, "like")}
-            className={`${iconActionButtonClass} ${
-              isLiked ? "text-[#EC4899]" : "text-white/40 hover:text-white/60"
+            className={`${feedbackButtonClass} ${
+              isLiked ? "text-pink-400" : "text-white/30 hover:text-white/60"
             }`}
             aria-label="Mark as helpful"
           >
@@ -390,8 +390,10 @@ function AssistantMessageActions({
           <button
             type="button"
             onClick={() => onFeedback(messageIndex, "dislike")}
-            className={`${iconActionButtonClass} ${
-              isDisliked ? "text-[#F97316]" : "text-white/40 hover:text-white/60"
+            className={`${feedbackButtonClass} ${
+              isDisliked
+                ? "text-orange-400"
+                : "text-white/30 hover:text-white/60"
             }`}
             aria-label="Mark as not helpful"
           >
@@ -501,6 +503,7 @@ export function ChatInterface({
   const locallyActiveSessionRef = useRef<string | null>(null);
   const loadGenerationRef = useRef(0);
   const initialPromptSentRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const isEmpty = messages.length === 0;
 
@@ -844,6 +847,8 @@ export function ChatInterface({
     if ((!trimmed && !attachment) || isLoading || isLoadingSession) return;
 
     let activeSessionId = sessionId;
+    let assistantId = "";
+    let streamedContent = "";
 
     const userMessage: Message = {
       id: crypto.randomUUID(),
@@ -859,6 +864,9 @@ export function ChatInterface({
     setSelectedAttachment(null);
     setError(null);
     setIsLoading(true);
+
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
 
     try {
       if (!activeSessionId) {
@@ -892,7 +900,7 @@ export function ChatInterface({
       }
 
       const history = nextMessages.map(toApiMessage);
-      const assistantId = crypto.randomUUID();
+      assistantId = crypto.randomUUID();
 
       setMessages([
         ...nextMessages,
@@ -907,6 +915,7 @@ export function ChatInterface({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: history, selectedModel }),
+        signal: abortController.signal,
       });
 
       if (!response.ok) {
@@ -924,14 +933,13 @@ export function ChatInterface({
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      let content = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        content += decoder.decode(value, { stream: true });
-        const snapshot = content;
+        streamedContent += decoder.decode(value, { stream: true });
+        const snapshot = streamedContent;
         setMessages((current) =>
           current.map((message) =>
             message.id === assistantId
@@ -941,7 +949,7 @@ export function ChatInterface({
         );
       }
 
-      if (!content.trim()) {
+      if (!streamedContent.trim()) {
         setMessages(nextMessages);
         throw new Error("No response content received.");
       }
@@ -952,7 +960,7 @@ export function ChatInterface({
         {
           id: assistantId,
           role: "assistant",
-          content,
+          content: streamedContent,
           createdAt: assistantCreatedAt,
         },
       ];
@@ -961,11 +969,41 @@ export function ChatInterface({
         await persistMessages(activeSessionId, finalMessages);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send message.");
+      const isAbort =
+        (err instanceof DOMException && err.name === "AbortError") ||
+        (err instanceof Error && err.name === "AbortError");
+
+      if (isAbort) {
+        if (streamedContent.trim() && assistantId) {
+          const assistantCreatedAt = new Date().toISOString();
+          const partialMessages: Message[] = [
+            ...nextMessages,
+            {
+              id: assistantId,
+              role: "assistant",
+              content: streamedContent,
+              createdAt: assistantCreatedAt,
+            },
+          ];
+          setMessages(partialMessages);
+          if (activeSessionId) {
+            await persistMessages(activeSessionId, partialMessages);
+          }
+        } else {
+          setMessages(nextMessages);
+        }
+      } else {
+        setError(err instanceof Error ? err.message : "Failed to send message.");
+      }
     } finally {
+      abortControllerRef.current = null;
       setIsLoading(false);
       textareaRef.current?.focus();
     }
+  }
+
+  function stopResponse() {
+    abortControllerRef.current?.abort();
   }
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -1294,23 +1332,34 @@ export function ChatInterface({
             >
               <MicIcon className="h-4 w-4" />
             </button>
-            <button
-              type="button"
-              onClick={() => void sendMessage()}
-              disabled={!canSend || isLoading}
-              className={sendButtonClass}
-              aria-label="Send message"
-            >
-              <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
-                <path
-                  d="M12 19V5M7 10l5-5 5 5"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
+            {isLoading ? (
+              <button
+                type="button"
+                onClick={stopResponse}
+                className="inline-flex shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/10 p-3 text-white/80 transition-all duration-150 hover:bg-white/20"
+                aria-label="Stop response"
+              >
+                <Square className="h-4 w-4 fill-current" strokeWidth={0} />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => void sendMessage()}
+                disabled={!canSend}
+                className={sendButtonClass}
+                aria-label="Send message"
+              >
+                <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
+                  <path
+                    d="M12 19V5M7 10l5-5 5 5"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            )}
           </div>
           <p className="px-8 py-3 text-center text-[12px] tracking-wide text-white/25">
             Clotter AI can make mistakes — always double-check important information.
