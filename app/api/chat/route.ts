@@ -1,7 +1,31 @@
-import { checkRateLimit } from "@/lib/rate-limit";
 import { saveContentHistory } from "@/lib/memory/getCreatorContext";
 import { buildSystemPromptWithMemory } from "@/lib/memory/injectMemory";
 import { NextResponse } from "next/server";
+
+const chatRateLimits = new Map<
+  string,
+  { count: number; resetTime: number }
+>();
+
+const CHAT_RATE_LIMIT = 25;
+const CHAT_RATE_WINDOW_MS = 3600000;
+
+function checkChatRateLimit(userId: string): boolean {
+  const now = Date.now();
+  let entry = chatRateLimits.get(userId);
+
+  if (!entry || now >= entry.resetTime) {
+    entry = { count: 0, resetTime: now + CHAT_RATE_WINDOW_MS };
+    chatRateLimits.set(userId, entry);
+  }
+
+  if (entry.count >= CHAT_RATE_LIMIT) {
+    return false;
+  }
+
+  entry.count += 1;
+  return true;
+}
 
 const MODEL = "google/gemini-2.5-flash";
 const SYSTEM_PROMPT = `YOU ARE CLOTTER AI.
@@ -168,21 +192,30 @@ export async function POST(request: Request) {
     );
   }
 
-  const { systemPrompt, supabase, user } =
+  const { systemPrompt: baseSystemPrompt, supabase, user } =
     await buildSystemPromptWithMemory(SYSTEM_PROMPT);
 
-  if (user) {
-    const { allowed } = checkRateLimit(
-      `chat:${user.id}`,
-      30,
-      60 * 60 * 1000,
-    );
+  let systemPrompt = baseSystemPrompt;
 
-    if (!allowed) {
+  if (user) {
+    const { data: profile } = await supabase
+      .from("creator_profiles")
+      .select("preferred_name")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    const preferredName = profile?.preferred_name?.trim();
+    if (preferredName) {
+      systemPrompt += `\n\nThe user wants to be called ${preferredName}. Always address them by this name.`;
+    }
+  }
+
+  if (user) {
+    if (!checkChatRateLimit(user.id)) {
       return NextResponse.json(
         {
           error:
-            "You've reached your hourly limit of 30 messages. Please wait before sending more.",
+            "You've hit your hourly limit of 25 messages. Come back in a bit! ⚡",
         },
         { status: 429 },
       );

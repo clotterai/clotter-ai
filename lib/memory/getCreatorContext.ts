@@ -116,7 +116,10 @@ export const PROFILE_COMPLETION_FIELDS = [
   { key: "biggest_goal", label: "Goals" },
   { key: "posting_frequency", label: "Posting frequency" },
   { key: "unique_angle", label: "Unique angle" },
+  { key: "preferred_name", label: "Preferred name" },
 ] as const;
+
+export const PROFILE_COMPLETION_TOTAL = PROFILE_COMPLETION_FIELDS.length;
 
 function isProfileFieldFilled(value: unknown): boolean {
   if (Array.isArray(value)) return value.length > 0;
@@ -132,7 +135,7 @@ export function calculateProfileCompletion(
     isProfileFieldFilled(profile[field.key]),
   );
 
-  return Math.round((filled.length / PROFILE_COMPLETION_FIELDS.length) * 100);
+  return Math.round((filled.length / PROFILE_COMPLETION_TOTAL) * 100);
 }
 
 export function getMissingProfileFields(

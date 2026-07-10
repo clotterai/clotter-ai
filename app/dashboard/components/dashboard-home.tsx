@@ -188,10 +188,10 @@ function OpportunitySkeleton() {
 
 type DashboardHomeProps = {
   greeting: string;
-  firstName: string;
+  displayName: string;
 };
 
-export function DashboardHome({ greeting, firstName }: DashboardHomeProps) {
+export function DashboardHome({ greeting, displayName }: DashboardHomeProps) {
   const [opportunities, setOpportunities] = useState<string[]>([]);
   const [isLoadingBrief, setIsLoadingBrief] = useState(true);
   const [isRefreshingBrief, setIsRefreshingBrief] = useState(false);
@@ -297,7 +297,7 @@ export function DashboardHome({ greeting, firstName }: DashboardHomeProps) {
       <main className="dash-page-enter flex-1 space-y-10 px-8 py-10 sm:space-y-12 sm:px-10 sm:py-12">
         <section className="dash-fade-in">
           <h2 className="font-heading text-[2rem] font-bold leading-[1.12] tracking-[-0.02em] text-white sm:text-[2.75rem] lg:text-[3rem]">
-            {greeting}, {firstName}
+            {greeting}, {displayName} 👋
           </h2>
           <p className="mt-3 max-w-xl text-[1.0625rem] leading-relaxed tracking-[-0.015em] text-white/50">
             Here&apos;s your creative workspace for today.

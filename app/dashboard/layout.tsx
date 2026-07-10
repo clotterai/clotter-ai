@@ -1,5 +1,6 @@
 import { hasCreatorProfile } from "@/lib/memory/getCreatorContext";
 import { createClient } from "@/lib/supabase/server";
+import { getDisplayName, getFirstNameFromUser } from "@/lib/user-display-name";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { DashboardParticles } from "./components/particles";
@@ -39,10 +40,13 @@ function getInitials(name: string, email: string): string {
   return source.slice(0, 2).toUpperCase();
 }
 
-function toSidebarUser(user: {
-  email?: string;
-  user_metadata?: Record<string, unknown>;
-}): SidebarUser {
+function toSidebarUser(
+  user: {
+    email?: string;
+    user_metadata?: Record<string, unknown>;
+  },
+  preferredName?: string | null,
+): SidebarUser {
   const email = user.email ?? "";
   const meta = user.user_metadata ?? {};
 
@@ -57,11 +61,17 @@ function toSidebarUser(user: {
     (typeof meta.picture === "string" && meta.picture) ||
     null;
 
+  const displayName = getDisplayName(user, preferredName);
+  const fallbackFirstName = getFirstNameFromUser(user);
+
   return {
     email,
     fullName,
+    preferredName: preferredName?.trim() || null,
+    displayName,
+    fallbackFirstName,
     avatarUrl,
-    initials: getInitials(fullName, email),
+    initials: getInitials(displayName || fullName, email),
   };
 }
 
@@ -85,6 +95,14 @@ export default async function DashboardLayout({
 
   const profileExists = await hasCreatorProfile(supabase, user.id);
 
+  const { data: creatorProfile } = profileExists
+    ? await supabase
+        .from("creator_profiles")
+        .select("preferred_name")
+        .eq("user_id", user.id)
+        .maybeSingle()
+    : { data: null };
+
   if (!profileExists && pathname && !isOnboarding) {
     redirect(ONBOARDING_PATH);
   }
@@ -93,7 +111,7 @@ export default async function DashboardLayout({
     redirect("/dashboard");
   }
 
-  const sidebarUser = toSidebarUser(user);
+  const sidebarUser = toSidebarUser(user, creatorProfile?.preferred_name);
   return (
     <ToastProvider>
     <div className="dash-shell relative flex min-h-full overflow-hidden bg-[#0D0D1A] font-sans text-white">

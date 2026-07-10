@@ -15,6 +15,9 @@ import { useToast } from "./toast-provider";
 export type SidebarUser = {
   email: string;
   fullName: string | null;
+  preferredName: string | null;
+  displayName: string;
+  fallbackFirstName: string;
   avatarUrl: string | null;
   initials: string;
 };
@@ -209,10 +212,10 @@ function navLinkClass(active: boolean) {
 }
 
 function chatItemClass(active: boolean) {
-  return `dash-chat-rise-in group/history relative flex min-h-[44px] flex-col justify-center rounded-xl border-l-2 px-3 py-2.5 text-[13px] font-medium transition-all duration-200 ease-out ${
+  return `dash-chat-rise-in group/history relative flex cursor-pointer flex-col rounded-xl px-3 py-2.5 transition-all duration-150 ${
     active
-      ? "border-pink-500 bg-pink-500/10 text-white"
-      : "border-transparent text-white/45 hover:bg-pink-500/5 hover:text-white/80"
+      ? "border-l-2 border-pink-400 bg-pink-500/10 pl-[10px] text-white"
+      : "text-white/60 hover:bg-white/5 hover:text-white/85"
   }`;
 }
 
@@ -356,13 +359,13 @@ const ChatHistoryItem = memo(function ChatHistoryItem({
           <Link
             href={`${CHAT_HREF}?session=${session.id}`}
             onClick={onClose}
-            className={`${chatItemClass(isActive)} block pr-16`}
+            className={`${chatItemClass(isActive)} block pr-14`}
             style={{ "--history-index": index } as React.CSSProperties}
           >
-            <span className="block truncate">
+            <span className="block max-w-[160px] truncate text-[13px] font-medium leading-tight text-inherit">
               {displaySessionTitle(session.title)}
             </span>
-            <span className="mt-0.5 block text-[10px] font-normal text-white/25">
+            <span className="mt-0.5 block text-[10px] text-white/25">
               {timeLabel}
             </span>
           </Link>
@@ -379,7 +382,7 @@ const ChatHistoryItem = memo(function ChatHistoryItem({
               className={historyActionIconClass}
               aria-label={`Rename ${session.title}`}
             >
-              <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5" aria-hidden>
+              <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4" aria-hidden>
                 <path
                   d="M11.5 2.5 13.5 4.5 5.5 12.5H3.5V10.5L11.5 2.5Z"
                   stroke="currentColor"
@@ -394,7 +397,7 @@ const ChatHistoryItem = memo(function ChatHistoryItem({
               className={`${historyActionIconClass} hover:text-red-400`}
               aria-label={`Delete ${session.title}`}
             >
-              <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5" aria-hidden>
+              <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4" aria-hidden>
                 <path
                   d="M3.5 5.5h9M6 5.5V4.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1m1.5 0v7a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-7"
                   stroke="currentColor"
@@ -653,24 +656,23 @@ const ChatNavSection = memo(function ChatNavSection({
       <Link
         href={CHAT_HREF}
         onClick={onClose}
-        className="dash-new-chat-btn dash-chat-rise-in flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-pink-500 to-orange-500 py-2 text-sm font-semibold text-white shadow-[0_0_24px_-8px_rgba(236,72,153,0.5)] transition-all duration-200"
+        className="dash-new-chat-btn dash-chat-rise-in flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-pink-500 to-orange-500 px-3 py-2.5 text-sm font-semibold text-white shadow-[0_0_24px_-8px_rgba(236,72,153,0.5)] transition-all duration-150 hover:shadow-[0_0_32px_-6px_rgba(236,72,153,0.65)]"
         style={{ "--history-index": 0 } as React.CSSProperties}
       >
-        <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4" aria-hidden>
-          <path
-            d="M8 3v10M3 8h10"
-            stroke="currentColor"
-            strokeWidth="1.75"
-            strokeLinecap="round"
-          />
-        </svg>
-        New Chat
+        + New Chat
       </Link>
 
       {isChatPage && (
         <>
+          <p className="mb-1 mt-3 px-3 text-[9px] font-semibold uppercase tracking-[0.15em] text-white/20">
+            Recent Chats
+          </p>
+
           {sessions.length === 0 ? (
-            <p className="px-2 py-2 text-xs text-white/30">No chats yet</p>
+            <div className="py-4 text-center">
+              <p className="text-xs text-white/25">No chats yet</p>
+              <p className="mt-1 text-xs text-white/20">Start a new chat above</p>
+            </div>
           ) : (
             <ul className="space-y-0.5">
               {sessions.map((session, index) => (
@@ -705,6 +707,134 @@ const ChatNavSection = memo(function ChatNavSection({
     </div>
   );
 });
+
+function SidebarProfileSection({ user: initialUser }: { user: SidebarUser }) {
+  const { showToast } = useToast();
+  const [displayName, setDisplayName] = useState(initialUser.displayName);
+  const [preferredName, setPreferredName] = useState(initialUser.preferredName);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(initialUser.preferredName ?? "");
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    setDisplayName(initialUser.displayName);
+    setPreferredName(initialUser.preferredName);
+    setEditValue(initialUser.preferredName ?? "");
+  }, [initialUser.displayName, initialUser.preferredName]);
+
+  async function savePreferredName() {
+    const trimmed = editValue.trim();
+    setIsSaving(true);
+
+    try {
+      const response = await fetch("/api/memory/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ preferred_name: trimmed || null }),
+      });
+
+      const data = (await response.json()) as {
+        profile?: { preferred_name?: string | null };
+        error?: string;
+      };
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to save name.");
+      }
+
+      const saved = data.profile?.preferred_name?.trim() || null;
+      setPreferredName(saved);
+      setDisplayName(saved || initialUser.fallbackFirstName);
+      setIsEditing(false);
+      showToast("Name updated");
+    } catch (err) {
+      showToast(
+        err instanceof Error ? err.message : "Failed to save name.",
+        "error",
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-3">
+      {initialUser.avatarUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={initialUser.avatarUrl}
+          alt=""
+          loading="lazy"
+          className="h-9 w-9 shrink-0 rounded-full object-cover ring-1 ring-white/10"
+        />
+      ) : (
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-pink-500/30 to-orange-500/20 text-xs font-semibold text-white/90 ring-1 ring-white/10">
+          {initialUser.initials}
+        </div>
+      )}
+      <div className="min-w-0 flex-1">
+        {isEditing ? (
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={editValue}
+              onChange={(event) => setEditValue(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  void savePreferredName();
+                }
+                if (event.key === "Escape") {
+                  setEditValue(preferredName ?? "");
+                  setIsEditing(false);
+                }
+              }}
+              placeholder={initialUser.fallbackFirstName}
+              disabled={isSaving}
+              className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-[13px] text-white outline-none placeholder:text-white/30 disabled:opacity-50"
+              autoFocus
+            />
+            <button
+              type="button"
+              onClick={() => void savePreferredName()}
+              disabled={isSaving}
+              className="shrink-0 text-xs font-semibold text-pink-400 hover:text-pink-300 disabled:opacity-50"
+            >
+              Save
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1.5">
+            <p className="truncate text-[13px] font-medium text-white/90">
+              {displayName}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setEditValue(preferredName ?? "");
+                setIsEditing(true);
+              }}
+              className="shrink-0 rounded-md p-1 text-white/30 transition-colors hover:text-white/70"
+              aria-label="Edit preferred name"
+            >
+              <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5" aria-hidden>
+                <path
+                  d="M11.5 2.5 13.5 4.5 5.5 12.5H3.5V10.5L11.5 2.5Z"
+                  stroke="currentColor"
+                  strokeWidth="1.25"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+        )}
+        {!isEditing && preferredName && (
+          <p className="truncate text-[11px] text-white/30">Your Clotter name</p>
+        )}
+      </div>
+    </div>
+  );
+}
 
 type DashboardSidebarProps = {
   user: SidebarUser;
@@ -800,27 +930,7 @@ export function DashboardSidebar({
 
       {/* Profile */}
       <div className="shrink-0 border-t border-white/10 px-4 py-4">
-        <div className="flex items-center gap-3">
-          {user.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={user.avatarUrl}
-              alt=""
-              loading="lazy"
-              className="h-9 w-9 shrink-0 rounded-full object-cover ring-1 ring-white/10"
-            />
-          ) : (
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-pink-500/30 to-orange-500/20 text-xs font-semibold text-white/90 ring-1 ring-white/10">
-              {user.initials}
-            </div>
-          )}
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-[13px] font-medium text-white/90">
-              {user.fullName}
-            </p>
-            <p className="truncate text-[11px] text-white/35">{user.email}</p>
-          </div>
-        </div>
+        <SidebarProfileSection user={user} />
         <LogoutButton />
       </div>
     </aside>

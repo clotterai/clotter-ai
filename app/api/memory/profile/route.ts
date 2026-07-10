@@ -60,6 +60,7 @@ export async function PATCH(request: Request) {
     "biggest_goal",
     "brand_name",
     "unique_angle",
+    "preferred_name",
   ] as const;
 
   const updates: Record<string, unknown> = {};

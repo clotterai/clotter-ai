@@ -89,7 +89,7 @@ export function AddToPlannerButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className={`inline-flex items-center gap-1.5 rounded-xl border border-pink-500/25 bg-pink-500/10 px-3 py-1.5 text-xs font-medium text-pink-200 transition-all hover:border-pink-500/40 hover:bg-pink-500/15 ${className}`}
+        className={`flex items-center gap-1 text-xs text-white/40 transition-colors hover:text-pink-400 ${className}`}
       >
         <span aria-hidden>📅</span>
         Add to Planner

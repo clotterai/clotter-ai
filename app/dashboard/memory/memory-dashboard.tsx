@@ -41,6 +41,7 @@ const PROFILE_FIELDS: {
   label: string;
   type?: "text" | "textarea" | "array";
 }[] = [
+  { key: "preferred_name", label: "What should Clotter call you?" },
   { key: "name", label: "Name" },
   { key: "niche", label: "Niche" },
   { key: "sub_niche", label: "Sub-niche" },
@@ -403,18 +404,19 @@ export function MemoryDashboard() {
               {missingFields.length > 0 && (
                 <div className="mt-5 rounded-xl border border-[#EC4899]/25 bg-[#EC4899]/10 px-4 py-4">
                   <p className="text-sm font-semibold text-white/90">
-                    Complete your profile
+                    Complete your profile to unlock personalized AI
                   </p>
                   <p className="mt-1 text-xs text-white/45">
                     {missingFields.length} field{missingFields.length !== 1 ? "s" : ""}{" "}
                     remaining for 100% AI memory
                   </p>
-                  <ul className="mt-3 flex flex-wrap gap-2">
+                  <ul className="mt-3 space-y-2">
                     {missingFields.map((field) => (
                       <li
                         key={field.key}
-                        className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/60"
+                        className="flex items-center gap-2 text-sm text-white/65"
                       >
+                        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#EC4899]" />
                         {field.label}
                       </li>
                     ))}

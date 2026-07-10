@@ -123,20 +123,6 @@ function toApiMessage(message: Message): ApiChatMessage {
   return { role: message.role, content: parts };
 }
 
-function PaperclipIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
-      <path
-        d="M8 12.5V7.5a3.5 3.5 0 0 1 7 0v8a5.5 5.5 0 0 1-11 0V9"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 function MicIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
@@ -1245,14 +1231,14 @@ export function ChatInterface({
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={isLoading}
-              className={`${inputUtilityButtonClass} ${
+              className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-base transition-all duration-150 hover:border-white/20 hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-40 ${
                 selectedAttachment
-                  ? "border-pink-500/30 bg-pink-500/10 text-pink-400"
-                  : ""
+                  ? "border-pink-500/30 bg-pink-500/10"
+                  : "text-white/50 hover:text-white/80"
               }`}
               aria-label="Attach image or PDF"
             >
-              <PaperclipIcon className="h-4 w-4" />
+              📎
             </button>
             <textarea
               ref={textareaRef}

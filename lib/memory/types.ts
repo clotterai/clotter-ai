@@ -22,6 +22,7 @@ export type CreatorProfile = {
   biggest_goal: string | null;
   brand_name: string | null;
   unique_angle: string | null;
+  preferred_name: string | null;
   created_at: string;
   updated_at: string;
 };
