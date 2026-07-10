@@ -8,7 +8,7 @@ import {
   dispatchChatSessionsUpdated,
 } from "@/lib/chat-sessions-events";
 import { displaySessionTitle } from "@/lib/generate-chat-title";
-import { LogoutButton } from "./logout-button";
+import { createClient } from "@/lib/supabase/client";
 import { ClotterLogo } from "./clotter-logo";
 import { useToast } from "./toast-provider";
 
@@ -709,18 +709,50 @@ const ChatNavSection = memo(function ChatNavSection({
 });
 
 function SidebarProfileSection({ user: initialUser }: { user: SidebarUser }) {
+  const router = useRouter();
   const { showToast } = useToast();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [displayName, setDisplayName] = useState(initialUser.displayName);
   const [preferredName, setPreferredName] = useState(initialUser.preferredName);
-  const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(initialUser.preferredName ?? "");
   const [isSaving, setIsSaving] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   useEffect(() => {
     setDisplayName(initialUser.displayName);
     setPreferredName(initialUser.preferredName);
     setEditValue(initialUser.preferredName ?? "");
   }, [initialUser.displayName, initialUser.preferredName]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    function handlePointerDown(event: MouseEvent) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setMenuOpen(false);
+        setIsEditing(false);
+      }
+    }
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+        setIsEditing(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [menuOpen]);
 
   async function savePreferredName() {
     const trimmed = editValue.trim();
@@ -746,7 +778,7 @@ function SidebarProfileSection({ user: initialUser }: { user: SidebarUser }) {
       setPreferredName(saved);
       setDisplayName(saved || initialUser.fallbackFirstName);
       setIsEditing(false);
-      showToast("Name updated");
+      showToast("Display name updated");
     } catch (err) {
       showToast(
         err instanceof Error ? err.message : "Failed to save name.",
@@ -757,67 +789,140 @@ function SidebarProfileSection({ user: initialUser }: { user: SidebarUser }) {
     }
   }
 
+  async function handleSignOut() {
+    setIsSigningOut(true);
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  }
+
   return (
-    <div className="flex items-center gap-3">
-      {initialUser.avatarUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={initialUser.avatarUrl}
-          alt=""
-          loading="lazy"
-          className="h-9 w-9 shrink-0 rounded-full object-cover ring-1 ring-white/10"
-        />
-      ) : (
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-pink-500/30 to-orange-500/20 text-xs font-semibold text-white/90 ring-1 ring-white/10">
-          {initialUser.initials}
-        </div>
-      )}
-      <div className="min-w-0 flex-1">
-        {isEditing ? (
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              value={editValue}
-              onChange={(event) => setEditValue(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  void savePreferredName();
-                }
-                if (event.key === "Escape") {
-                  setEditValue(preferredName ?? "");
-                  setIsEditing(false);
-                }
-              }}
-              placeholder={initialUser.fallbackFirstName}
-              disabled={isSaving}
-              className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-[13px] text-white outline-none placeholder:text-white/30 disabled:opacity-50"
-              autoFocus
-            />
-            <button
-              type="button"
-              onClick={() => void savePreferredName()}
-              disabled={isSaving}
-              className="shrink-0 text-xs font-semibold text-pink-400 hover:text-pink-300 disabled:opacity-50"
-            >
-              Save
-            </button>
-          </div>
+    <div ref={containerRef} className="relative">
+      <div className="flex items-center gap-3">
+        {initialUser.avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={initialUser.avatarUrl}
+            alt=""
+            loading="lazy"
+            className="h-9 w-9 shrink-0 rounded-full object-cover ring-1 ring-white/10"
+          />
         ) : (
-          <div className="flex items-center gap-1.5">
-            <p className="truncate text-[13px] font-medium text-white/90">
-              {displayName}
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-pink-500/30 to-orange-500/20 text-xs font-semibold text-white/90 ring-1 ring-white/10">
+            {initialUser.initials}
+          </div>
+        )}
+
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[14px] font-semibold leading-tight text-white">
+            {displayName}
+          </p>
+          <p className="truncate text-xs text-white/30">{initialUser.email}</p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            setMenuOpen((open) => !open);
+            setIsEditing(false);
+          }}
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-white/45 transition-colors duration-150 hover:border-white/20 hover:bg-white/[0.08] hover:text-white/80"
+          aria-label="Open profile menu"
+          aria-expanded={menuOpen}
+        >
+          <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
+            <path
+              d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            />
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
+
+      {menuOpen && (
+        <div className="absolute bottom-[calc(100%+8px)] left-0 right-0 z-50 overflow-hidden rounded-xl border border-white/10 bg-[#13131f]/98 shadow-[0_16px_48px_-12px_rgba(0,0,0,0.65)] backdrop-blur-xl">
+          <div className="border-b border-white/8 px-4 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30">
+              Full name
             </p>
+            <p className="mt-1 truncate text-sm text-white/85">
+              {initialUser.fullName}
+            </p>
+          </div>
+
+          <div className="border-b border-white/8 px-4 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30">
+              Email
+            </p>
+            <p className="mt-1 truncate text-sm text-white/85">
+              {initialUser.email}
+            </p>
+          </div>
+
+          {isEditing ? (
+            <div className="space-y-3 border-b border-white/8 px-4 py-3">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30">
+                Display name
+              </p>
+              <input
+                type="text"
+                value={editValue}
+                onChange={(event) => setEditValue(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    void savePreferredName();
+                  }
+                  if (event.key === "Escape") {
+                    setEditValue(preferredName ?? "");
+                    setIsEditing(false);
+                  }
+                }}
+                placeholder={initialUser.fallbackFirstName}
+                disabled={isSaving}
+                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none placeholder:text-white/30 disabled:opacity-50"
+                autoFocus
+              />
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => void savePreferredName()}
+                  disabled={isSaving}
+                  className="flex-1 rounded-lg bg-gradient-to-r from-pink-500 to-orange-500 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50"
+                >
+                  {isSaving ? "Saving..." : "Save"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditValue(preferredName ?? "");
+                    setIsEditing(false);
+                  }}
+                  className="rounded-lg border border-white/10 px-3 py-2 text-xs text-white/50 hover:text-white/80"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
             <button
               type="button"
               onClick={() => {
                 setEditValue(preferredName ?? "");
                 setIsEditing(true);
               }}
-              className="shrink-0 rounded-md p-1 text-white/30 transition-colors hover:text-white/70"
-              aria-label="Edit preferred name"
+              className="flex w-full items-center gap-2 border-b border-white/8 px-4 py-3 text-left text-sm text-white/75 transition-colors hover:bg-white/[0.04] hover:text-white"
             >
-              <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5" aria-hidden>
+              <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4 text-white/40" aria-hidden>
                 <path
                   d="M11.5 2.5 13.5 4.5 5.5 12.5H3.5V10.5L11.5 2.5Z"
                   stroke="currentColor"
@@ -825,13 +930,29 @@ function SidebarProfileSection({ user: initialUser }: { user: SidebarUser }) {
                   strokeLinejoin="round"
                 />
               </svg>
+              Edit Display Name
             </button>
-          </div>
-        )}
-        {!isEditing && preferredName && (
-          <p className="truncate text-[11px] text-white/30">Your Clotter name</p>
-        )}
-      </div>
+          )}
+
+          <button
+            type="button"
+            onClick={() => void handleSignOut()}
+            disabled={isSigningOut}
+            className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-red-300/85 transition-colors hover:bg-red-500/10 hover:text-red-300 disabled:opacity-50"
+          >
+            <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4" aria-hidden>
+              <path
+                d="M6 14H3.5A1.5 1.5 0 0 1 2 12.5v-9A1.5 1.5 0 0 1 3.5 2H6M10 11l3-3-3-3M13 8H6"
+                stroke="currentColor"
+                strokeWidth="1.25"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            {isSigningOut ? "Signing out..." : "Sign out"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -931,7 +1052,6 @@ export function DashboardSidebar({
       {/* Profile */}
       <div className="shrink-0 border-t border-white/10 px-4 py-4">
         <SidebarProfileSection user={user} />
-        <LogoutButton />
       </div>
     </aside>
   );

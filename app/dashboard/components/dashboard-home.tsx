@@ -1,11 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
-import {
-  QUICK_PROMPT_KEY_BY_LABEL,
-  QUICK_PROMPT_LABELS,
-} from "@/lib/chat-quick-prompts";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 
 const CACHE_KEY = "clotter-daily-brief-v1";
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
@@ -15,19 +11,28 @@ type CachedBrief = {
   fetchedAt: number;
 };
 
-type DashboardStats = {
-  contentCreated: number;
-  toolsUsed: number;
-  daysActive: number;
+type FeatureBubble = {
+  label: string;
+  href: string;
+  size: 120 | 80;
+  top: string;
+  left: string;
+  duration: number;
+  opacity: number;
+  icon: ReactNode;
 };
 
-const quickActions = [
+const featureBubbles: FeatureBubble[] = [
   {
-    title: "AI Chat",
-    description: "Brainstorm ideas and refine content with your creative co-pilot.",
+    label: "AI Chat",
     href: "/dashboard/chat",
+    size: 120,
+    top: "8%",
+    left: "6%",
+    duration: 3,
+    opacity: 0.95,
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7" aria-hidden>
         <path
           d="M8 10h8M8 14h5M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 0 1-4-.8L3 21l1.8-4.2A8.8 8.8 0 0 1 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8Z"
           stroke="currentColor"
@@ -39,11 +44,15 @@ const quickActions = [
     ),
   },
   {
-    title: "Captions",
-    description: "Write scroll-stopping captions tailored to your brand voice.",
+    label: "Captions",
     href: "/dashboard/captions",
+    size: 80,
+    top: "18%",
+    left: "72%",
+    duration: 5,
+    opacity: 0.75,
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
         <path
           d="M4 6h16M4 12h12M4 18h8M20 18l-2 2-4-4"
           stroke="currentColor"
@@ -55,11 +64,15 @@ const quickActions = [
     ),
   },
   {
-    title: "Hooks",
-    description: "Craft attention-grabbing openers for Reels, TikTok, and Shorts.",
+    label: "Hooks",
     href: "/dashboard/hooks",
+    size: 120,
+    top: "42%",
+    left: "18%",
+    duration: 6,
+    opacity: 0.85,
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7" aria-hidden>
         <path
           d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"
           stroke="currentColor"
@@ -71,52 +84,34 @@ const quickActions = [
     ),
   },
   {
-    title: "Script",
-    description: "Generate full video scripts optimized for retention and virality.",
+    label: "Scripts",
     href: "/dashboard/script",
+    size: 80,
+    top: "55%",
+    left: "68%",
+    duration: 4,
+    opacity: 0.7,
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
         <path
           d="M8 4h8a2 2 0 0 1 2 2v14l-3-2-3 2-3-2-3 2V6a2 2 0 0 1 2-2Z"
           stroke="currentColor"
           strokeWidth="1.5"
           strokeLinejoin="round"
         />
-        <path
-          d="M10 8h4M10 12h4M10 16h2"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
       </svg>
     ),
   },
   {
-    title: "Content Ideas",
-    description: "Discover fresh content concepts aligned with your niche.",
-    href: "/dashboard/content-ideas",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
-        <path
-          d="M9.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        />
-        <path
-          d="M12 6v6l3 2"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    title: "Trend Analyzer",
-    description: "Spot rising topics before they peak in your audience.",
+    label: "Trends",
     href: "/dashboard/trends",
+    size: 120,
+    top: "62%",
+    left: "42%",
+    duration: 7,
+    opacity: 0.9,
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7" aria-hidden>
         <path
           d="M3 17l6-6 4 4 8-10"
           stroke="currentColor"
@@ -130,6 +125,30 @@ const quickActions = [
           strokeWidth="1.5"
           strokeLinecap="round"
           strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    label: "Content Ideas",
+    href: "/dashboard/content-ideas",
+    size: 80,
+    top: "28%",
+    left: "44%",
+    duration: 8,
+    opacity: 0.8,
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+        <path
+          d="M9.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
+        <path
+          d="M12 6v6l3 2"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
         />
       </svg>
     ),
@@ -167,12 +186,6 @@ function writeCachedBrief(opportunities: string[]) {
   localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
 }
 
-function StatSkeleton() {
-  return (
-    <div className="h-7 w-16 animate-pulse rounded-lg bg-white/10" />
-  );
-}
-
 function OpportunitySkeleton() {
   return (
     <ul className="mt-6 space-y-4">
@@ -195,8 +208,6 @@ export function DashboardHome({ greeting, displayName }: DashboardHomeProps) {
   const [opportunities, setOpportunities] = useState<string[]>([]);
   const [isLoadingBrief, setIsLoadingBrief] = useState(true);
   const [isRefreshingBrief, setIsRefreshingBrief] = useState(false);
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [isLoadingStats, setIsLoadingStats] = useState(true);
 
   const fetchBrief = useCallback(async (skipCache = false) => {
     if (!skipCache) {
@@ -232,129 +243,78 @@ export function DashboardHome({ greeting, displayName }: DashboardHomeProps) {
     }
   }, []);
 
-  const fetchStats = useCallback(async () => {
-    setIsLoadingStats(true);
-
-    try {
-      const response = await fetch("/api/dashboard-stats");
-      const data = (await response.json()) as DashboardStats & { error?: string };
-
-      if (response.ok) {
-        setStats({
-          contentCreated: data.contentCreated ?? 0,
-          toolsUsed: data.toolsUsed ?? 0,
-          daysActive: data.daysActive ?? 0,
-        });
-      }
-    } catch {
-      setStats({ contentCreated: 0, toolsUsed: 0, daysActive: 0 });
-    } finally {
-      setIsLoadingStats(false);
-    }
-  }, []);
-
   useEffect(() => {
     void fetchBrief();
-    void fetchStats();
-  }, [fetchBrief, fetchStats]);
+  }, [fetchBrief]);
 
   const handleRefreshBrief = () => {
     localStorage.removeItem(CACHE_KEY);
     void fetchBrief(true);
   };
 
-  const hasNoContent = stats?.contentCreated === 0;
-
   return (
     <div className="flex min-h-full flex-col">
-      <header className="dash-fade-in relative shrink-0 border-b border-[#EC4899]/10 bg-[#0D0D1A]/60 px-8 py-7 backdrop-blur-2xl sm:px-10">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#EC4899]/40 to-transparent"
-        />
-        <div className="flex items-center justify-between gap-6">
-          <h1 className="font-heading text-[2rem] font-bold tracking-[-0.02em] text-white sm:text-[2.375rem]">
-            Dashboard
+      <style>{`
+        @keyframes dash-bubble-float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-20px); }
+        }
+      `}</style>
+
+      <main className="dash-page-enter flex flex-1 flex-col px-6 py-10 sm:px-10 sm:py-12">
+        {/* Hero */}
+        <section className="dash-fade-in shrink-0">
+          <h1 className="text-3xl font-bold tracking-[-0.02em] text-white">
+            {greeting}, {displayName}
           </h1>
-          <button
-            type="button"
-            className="dash-glass-v2 flex h-11 w-11 items-center justify-center !rounded-xl text-white/50 transition-all duration-300 hover:!border-[#EC4899]/40 hover:text-[#FB923C] hover:shadow-[0_0_32px_-8px_#EC4899]"
-            aria-label="Notifications"
-          >
-            <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
-              <path
-                d="M15 17H9c-2 0-3-.8-3-2.8V10a6 6 0 1 1 12 0v4.2c0 2-1 2.8-3 2.8ZM12 21a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2Z"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-        </div>
-      </header>
-
-      <main className="dash-page-enter flex-1 space-y-10 px-8 py-10 sm:space-y-12 sm:px-10 sm:py-12">
-        <section className="dash-fade-in">
-          <h2 className="font-heading text-[2rem] font-bold leading-[1.12] tracking-[-0.02em] text-white sm:text-[2.75rem] lg:text-[3rem]">
-            {greeting}, {displayName} 👋
-          </h2>
-          <p className="mt-3 max-w-xl text-[1.0625rem] leading-relaxed tracking-[-0.015em] text-white/50">
-            Here&apos;s your creative workspace for today.
+          <p className="mt-2 text-sm text-white/40">
+            What are you creating today?
           </p>
         </section>
 
-        <section
-          className="dash-fade-in grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5"
-          style={{ animationDelay: "0.08s" }}
-        >
-          {[
-            {
-              label: "Content Created",
-              value: stats?.contentCreated ?? 0,
-            },
-            {
-              label: "Tools Used",
-              value: stats?.toolsUsed ?? 0,
-            },
-            {
-              label: "Days Active",
-              value: stats?.daysActive ?? 0,
-            },
-          ].map((stat, index) => (
-            <div
-              key={stat.label}
-              className="dash-fade-in rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-md transition-all duration-300 hover:scale-[1.03] hover:border-[#EC4899]/30 hover:shadow-[0_8px_40px_-12px_rgba(236,72,153,0.45)] sm:p-6"
-              style={{ animationDelay: `${0.12 + index * 0.07}s` }}
-            >
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/35">
-                {stat.label}
-              </p>
-              <div className="mt-3 text-[1.0625rem] font-semibold tracking-[-0.02em] text-white sm:text-lg">
-                {isLoadingStats ? (
-                  <StatSkeleton />
-                ) : (
-                  stat.value
-                )}
-              </div>
-            </div>
-          ))}
+        {/* Floating bubbles */}
+        <section className="relative mx-auto mt-10 w-full max-w-4xl flex-1 sm:mt-12">
+          <div className="relative min-h-[420px] w-full sm:min-h-[480px]">
+            {featureBubbles.map((bubble) => (
+              <Link
+                key={bubble.label}
+                href={bubble.href}
+                className="group absolute flex flex-col items-center justify-center will-change-transform"
+                style={{
+                  top: bubble.top,
+                  left: bubble.left,
+                  width: bubble.size,
+                  height: bubble.size,
+                  animation: `dash-bubble-float ${bubble.duration}s ease-in-out infinite`,
+                }}
+              >
+                <span
+                  className="flex h-full w-full flex-col items-center justify-center gap-2 rounded-full bg-gradient-to-br from-[#EC4899] to-[#F97316] text-white shadow-[0_8px_40px_-12px_rgba(236,72,153,0.55)] ring-1 ring-white/15 transition-transform duration-200 group-hover:scale-105"
+                  style={{ opacity: bubble.opacity }}
+                >
+                  {bubble.icon}
+                  <span
+                    className={`text-center font-semibold leading-tight text-white ${
+                      bubble.size === 120 ? "text-xs" : "text-[10px]"
+                    }`}
+                  >
+                    {bubble.label}
+                  </span>
+                </span>
+              </Link>
+            ))}
+          </div>
         </section>
 
-        {!isLoadingStats && hasNoContent && (
-          <p className="dash-fade-in text-sm text-white/40">
-            Start creating!
-          </p>
-        )}
-
+        {/* Today's Opportunities */}
         <section
-          className="dash-fade-in rounded-2xl border border-white/10 border-l-4 border-l-[#EC4899] bg-white/5 p-6 backdrop-blur-md sm:p-8"
-          style={{ animationDelay: "0.28s" }}
+          className="dash-fade-in mt-auto shrink-0 rounded-2xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-xl sm:p-8"
+          style={{ animationDelay: "0.15s" }}
         >
           <div className="flex items-center justify-between gap-4">
-            <h3 className="font-heading text-xl font-bold tracking-[-0.02em] text-white sm:text-2xl">
+            <h2 className="font-heading text-lg font-bold tracking-[-0.02em] text-white sm:text-xl">
               Today&apos;s Opportunities
-            </h3>
+            </h2>
             <button
               type="button"
               onClick={handleRefreshBrief}
@@ -381,13 +341,16 @@ export function DashboardHome({ greeting, displayName }: DashboardHomeProps) {
 
           {isLoadingBrief ? (
             <OpportunitySkeleton />
+          ) : opportunities.length === 0 ? (
+            <p className="mt-6 text-sm text-white/40">
+              Opportunities will appear here once your daily brief is ready.
+            </p>
           ) : (
             <ul className="mt-6 space-y-4">
               {opportunities.map((suggestion, index) => (
                 <li
                   key={`${suggestion}-${index}`}
-                  className="dash-fade-in flex items-start gap-3 text-[15px] leading-relaxed tracking-[-0.01em] text-white/65 sm:text-base"
-                  style={{ animationDelay: `${0.34 + index * 0.06}s` }}
+                  className="flex items-start gap-3 text-[15px] leading-relaxed text-white/65"
                 >
                   <span
                     aria-hidden
@@ -398,75 +361,6 @@ export function DashboardHome({ greeting, displayName }: DashboardHomeProps) {
               ))}
             </ul>
           )}
-        </section>
-
-        <section className="dash-fade-in" style={{ animationDelay: "0.52s" }}>
-          <div>
-            <h3 className="font-heading text-xl font-bold tracking-[-0.02em] text-white sm:text-2xl">
-              Quick prompts
-            </h3>
-            <p className="mt-2 text-[15px] leading-relaxed tracking-[-0.01em] text-white/45">
-              One tap — Clotter sends a personalized prompt for your niche
-            </p>
-          </div>
-
-          <div className="mt-6 flex flex-wrap gap-3">
-            {QUICK_PROMPT_LABELS.map((label, index) => (
-              <Link
-                key={label}
-                href={`/dashboard/chat?prompt=${QUICK_PROMPT_KEY_BY_LABEL[label]}`}
-                className="dash-fade-in rounded-full border border-[#EC4899]/25 bg-[#EC4899]/10 px-4 py-2.5 text-sm font-medium text-white/80 transition-all duration-300 hover:border-[#EC4899]/45 hover:bg-[#EC4899]/20 hover:text-white"
-                style={{ animationDelay: `${0.58 + index * 0.04}s` }}
-              >
-                {label}
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        <section className="dash-fade-in" style={{ animationDelay: "0.4s" }}>
-          <div>
-            <h3 className="font-heading text-xl font-bold tracking-[-0.02em] text-white sm:text-2xl">
-              Quick actions
-            </h3>
-            <p className="mt-2 text-[15px] leading-relaxed tracking-[-0.01em] text-white/45">
-              Jump into your most-used tools
-            </p>
-          </div>
-
-          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:gap-6">
-            {quickActions.map((action, index) => (
-              <Link
-                key={action.title}
-                href={action.href}
-                className="dash-fade-in group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#EC4899]/35 hover:bg-white/[0.07] hover:shadow-[0_16px_48px_-16px_rgba(236,72,153,0.55)] sm:p-7"
-                style={{ animationDelay: `${0.46 + index * 0.07}s` }}
-              >
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#EC4899]/20 via-[#F97316]/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-[#EC4899]/20 blur-3xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                />
-
-                <div className="relative flex items-start gap-5">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#EC4899] to-[#F97316] text-white shadow-[0_0_32px_-4px_#EC4899] ring-1 ring-white/15 transition-transform duration-300 group-hover:scale-110">
-                    {action.icon}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h4 className="text-[17px] font-semibold tracking-[-0.025em] text-white transition-colors duration-300 group-hover:text-[#FECDD3]">
-                      {action.title}
-                    </h4>
-                    <p className="mt-2 text-[14px] leading-[1.65] tracking-[-0.01em] text-white/40 transition-colors duration-300 group-hover:text-white/60">
-                      {action.description}
-                    </p>
-                    <p className="mt-4 translate-y-1 text-[13px] font-medium text-[#FB923C] opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-                      Open →
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
         </section>
       </main>
     </div>

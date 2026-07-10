@@ -15,8 +15,8 @@ export function DashboardPageContent({ children }: { children: ReactNode }) {
 
   return (
     <div
-      className={`relative z-[1] flex min-h-full w-full flex-col bg-[#0D0D1A] transition-opacity duration-150 ${
-        visible ? "opacity-100" : "opacity-0"
+      className={`relative z-[1] flex min-h-full w-full flex-col bg-[#0D0D1A] transition-all duration-200 ease-out ${
+        visible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"
       }`}
     >
       {children}
