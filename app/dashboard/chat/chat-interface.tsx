@@ -605,6 +605,21 @@ export function ChatInterface({
   }
 
   useEffect(() => {
+    if (sessionId || isLoadingSession || messages.length > 0) return;
+
+    try {
+      const pending = sessionStorage.getItem("clotter-dashboard-chat-prefill");
+      if (pending?.trim()) {
+        sessionStorage.removeItem("clotter-dashboard-chat-prefill");
+        setInput(pending.trim());
+        requestAnimationFrame(() => textareaRef.current?.focus());
+      }
+    } catch {
+      // Ignore storage errors.
+    }
+  }, [sessionId, isLoadingSession, messages.length]);
+
+  useEffect(() => {
     if (
       !initialPromptKey ||
       initialPromptSentRef.current ||
