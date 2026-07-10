@@ -1312,7 +1312,7 @@ export function ChatInterface({
               </svg>
             </button>
           </div>
-          <p className="mt-2 text-center text-xs tracking-[-0.01em] text-white/30 md:mt-3 md:text-[13px]">
+          <p className="px-6 pb-2 py-2 text-center text-[11px] text-white/20">
             Clotter AI can make mistakes.
           </p>
         </div>

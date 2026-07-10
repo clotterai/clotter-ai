@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, memo, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
@@ -469,6 +470,7 @@ const ChatNavSection = memo(function ChatNavSection({
   const isChatPage = pathname.startsWith(CHAT_HREF);
 
   const [sessions, setSessions] = useState<ChatSessionSummary[]>([]);
+  const [isChatsExpanded, setIsChatsExpanded] = useState(true);
   const [now, setNow] = useState(() => Date.now());
   const [undoDelete, setUndoDelete] = useState<DeletedSessionSnapshot | null>(
     null,
@@ -664,44 +666,66 @@ const ChatNavSection = memo(function ChatNavSection({
 
       {isChatPage && (
         <>
-          <p className="mb-1 mt-3 px-3 text-[9px] font-semibold uppercase tracking-[0.15em] text-white/20">
-            Recent Chats
-          </p>
+          <div className="mb-1 mt-3 flex items-center justify-between px-3">
+            <p className="text-[9px] font-semibold uppercase tracking-[0.15em] text-white/20">
+              Recent Chats
+            </p>
+            <button
+              type="button"
+              onClick={() => setIsChatsExpanded((current) => !current)}
+              aria-label={isChatsExpanded ? "Collapse chat history" : "Expand chat history"}
+              className="flex h-6 w-6 items-center justify-center rounded-md text-white/30 transition-colors hover:bg-white/5 hover:text-white/50"
+            >
+              <ChevronDown
+                className="h-3.5 w-3.5"
+                strokeWidth={1.75}
+                style={{
+                  transform: isChatsExpanded ? "rotate(0deg)" : "rotate(-180deg)",
+                  transition: "transform 0.2s ease",
+                }}
+              />
+            </button>
+          </div>
 
-          {sessions.length === 0 ? (
-            <div className="py-4 text-center">
-              <p className="text-xs text-white/25">No chats yet</p>
-              <p className="mt-1 text-xs text-white/20">Start a new chat above</p>
-            </div>
-          ) : (
-            <ul className="space-y-0.5">
-              {sessions.map((session, index) => (
-                <ChatHistoryItem
-                  key={session.id}
-                  session={session}
-                  index={index + 1}
-                  isActive={activeSessionId === session.id}
-                  timeLabel={formatTimeAgo(session.updated_at, now)}
-                  onClose={onClose}
-                  onRename={handleRenameSession}
-                  onDelete={handleDeleteSession}
-                />
-              ))}
-            </ul>
-          )}
+          <div
+            className="overflow-hidden transition-[max-height] duration-200 ease-out"
+            style={{ maxHeight: isChatsExpanded ? "2000px" : "0px" }}
+          >
+            {sessions.length === 0 ? (
+              <div className="py-4 text-center">
+                <p className="text-xs text-white/25">No chats yet</p>
+                <p className="mt-1 text-xs text-white/20">Start a new chat above</p>
+              </div>
+            ) : (
+              <ul className="space-y-0.5">
+                {sessions.map((session, index) => (
+                  <ChatHistoryItem
+                    key={session.id}
+                    session={session}
+                    index={index + 1}
+                    isActive={activeSessionId === session.id}
+                    timeLabel={formatTimeAgo(session.updated_at, now)}
+                    onClose={onClose}
+                    onRename={handleRenameSession}
+                    onDelete={handleDeleteSession}
+                  />
+                ))}
+              </ul>
+            )}
 
-          {undoDelete && (
-            <div className="dash-chat-rise-in mx-1 mt-2 flex items-center justify-between gap-2 rounded-xl border border-white/10 bg-[#13131f]/95 px-3 py-2.5">
-              <span className="text-xs text-white/50">Chat deleted</span>
-              <button
-                type="button"
-                onClick={() => void handleUndoDelete()}
-                className="text-xs font-semibold text-pink-400 transition-colors duration-150 hover:text-pink-300"
-              >
-                Undo
-              </button>
-            </div>
-          )}
+            {undoDelete && (
+              <div className="dash-chat-rise-in mx-1 mt-2 flex items-center justify-between gap-2 rounded-xl border border-white/10 bg-[#13131f]/95 px-3 py-2.5">
+                <span className="text-xs text-white/50">Chat deleted</span>
+                <button
+                  type="button"
+                  onClick={() => void handleUndoDelete()}
+                  className="text-xs font-semibold text-pink-400 transition-colors duration-150 hover:text-pink-300"
+                >
+                  Undo
+                </button>
+              </div>
+            )}
+          </div>
         </>
       )}
     </div>
@@ -765,25 +789,19 @@ function SidebarProfileSection({ user: initialUser }: { user: SidebarUser }) {
         body: JSON.stringify({ preferred_name: trimmed || null }),
       });
 
+      if (!response.ok) return;
+
       const data = (await response.json()) as {
         profile?: { preferred_name?: string | null };
-        error?: string;
       };
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to save name.");
-      }
 
       const saved = data.profile?.preferred_name?.trim() || null;
       setPreferredName(saved);
       setDisplayName(saved || initialUser.fallbackFirstName);
       setIsEditing(false);
       showToast("Display name updated");
-    } catch (err) {
-      showToast(
-        err instanceof Error ? err.message : "Failed to save name.",
-        "error",
-      );
+    } catch {
+      // Save silently on failure.
     } finally {
       setIsSaving(false);
     }
