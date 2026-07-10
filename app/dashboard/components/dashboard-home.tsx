@@ -1,38 +1,57 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 const CACHE_KEY = "clotter-daily-brief-v1";
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
+const SLIDE_COUNT = 4;
 
 type CachedBrief = {
   opportunities: string[];
   fetchedAt: number;
 };
 
-type FeatureBubble = {
-  label: string;
+type CreatorProfileSummary = {
+  niches: string[];
+  platforms: string[];
+  completion: number;
+};
+
+type ToolCard = {
+  title: string;
+  description: string;
   href: string;
-  size: 120 | 80;
-  top: string;
-  left: string;
-  duration: number;
-  opacity: number;
   icon: ReactNode;
 };
 
-const featureBubbles: FeatureBubble[] = [
+const heroBubbles = [
+  { size: 140, top: "18%", left: "12%", duration: 5, delay: 0 },
+  { size: 100, top: "55%", left: "68%", duration: 7, delay: 1 },
+  { size: 120, top: "35%", left: "78%", duration: 6, delay: 0.5 },
+];
+
+const backgroundOrbs = [
+  { size: 420, top: "8%", left: "-8%", color: "rgba(236,72,153,0.05)", duration: 18 },
+  { size: 320, top: "45%", left: "72%", color: "rgba(249,115,22,0.04)", duration: 22 },
+  { size: 280, top: "70%", left: "20%", color: "rgba(236,72,153,0.04)", duration: 20 },
+  { size: 360, top: "25%", left: "55%", color: "rgba(249,115,22,0.05)", duration: 24 },
+  { size: 240, top: "82%", left: "65%", color: "rgba(236,72,153,0.06)", duration: 16 },
+];
+
+const toolCards: ToolCard[] = [
   {
-    label: "AI Chat",
+    title: "AI Chat",
+    description: "Brainstorm ideas and refine content with your co-pilot.",
     href: "/dashboard/chat",
-    size: 120,
-    top: "8%",
-    left: "6%",
-    duration: 3,
-    opacity: 0.95,
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
         <path
           d="M8 10h8M8 14h5M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 0 1-4-.8L3 21l1.8-4.2A8.8 8.8 0 0 1 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8Z"
           stroke="currentColor"
@@ -44,15 +63,11 @@ const featureBubbles: FeatureBubble[] = [
     ),
   },
   {
-    label: "Captions",
+    title: "Caption Generator",
+    description: "Scroll-stopping captions tailored to your voice.",
     href: "/dashboard/captions",
-    size: 80,
-    top: "18%",
-    left: "72%",
-    duration: 5,
-    opacity: 0.75,
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
         <path
           d="M4 6h16M4 12h12M4 18h8M20 18l-2 2-4-4"
           stroke="currentColor"
@@ -64,15 +79,11 @@ const featureBubbles: FeatureBubble[] = [
     ),
   },
   {
-    label: "Hooks",
+    title: "Hook Generator",
+    description: "Grab attention in the first two seconds.",
     href: "/dashboard/hooks",
-    size: 120,
-    top: "42%",
-    left: "18%",
-    duration: 6,
-    opacity: 0.85,
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
         <path
           d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"
           stroke="currentColor"
@@ -84,15 +95,11 @@ const featureBubbles: FeatureBubble[] = [
     ),
   },
   {
-    label: "Scripts",
+    title: "Script Generator",
+    description: "Full video scripts optimized for retention.",
     href: "/dashboard/script",
-    size: 80,
-    top: "55%",
-    left: "68%",
-    duration: 4,
-    opacity: 0.7,
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
         <path
           d="M8 4h8a2 2 0 0 1 2 2v14l-3-2-3 2-3-2-3 2V6a2 2 0 0 1 2-2Z"
           stroke="currentColor"
@@ -103,15 +110,11 @@ const featureBubbles: FeatureBubble[] = [
     ),
   },
   {
-    label: "Trends",
+    title: "Trend Analyzer",
+    description: "Spot rising topics before they peak.",
     href: "/dashboard/trends",
-    size: 120,
-    top: "62%",
-    left: "42%",
-    duration: 7,
-    opacity: 0.9,
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
         <path
           d="M3 17l6-6 4 4 8-10"
           stroke="currentColor"
@@ -130,15 +133,11 @@ const featureBubbles: FeatureBubble[] = [
     ),
   },
   {
-    label: "Content Ideas",
+    title: "Content Ideas",
+    description: "Fresh concepts aligned with your niche.",
     href: "/dashboard/content-ideas",
-    size: 80,
-    top: "28%",
-    left: "44%",
-    duration: 8,
-    opacity: 0.8,
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
         <path
           d="M9.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"
           stroke="currentColor"
@@ -154,6 +153,15 @@ const featureBubbles: FeatureBubble[] = [
     ),
   },
 ];
+
+const PLATFORM_LABELS: Record<string, string> = {
+  instagram: "Instagram",
+  youtube: "YouTube",
+  tiktok: "TikTok",
+  linkedin: "LinkedIn",
+  twitter: "Twitter/X",
+  facebook: "Facebook",
+};
 
 function readCachedBrief(): CachedBrief | null {
   try {
@@ -179,32 +187,82 @@ function readCachedBrief(): CachedBrief | null {
 }
 
 function writeCachedBrief(opportunities: string[]) {
-  const payload: CachedBrief = {
-    opportunities,
-    fetchedAt: Date.now(),
-  };
-  localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
+  localStorage.setItem(
+    CACHE_KEY,
+    JSON.stringify({ opportunities, fetchedAt: Date.now() }),
+  );
+}
+
+function CompletionRing({ percent }: { percent: number }) {
+  const radius = 42;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (percent / 100) * circumference;
+
+  return (
+    <div className="relative flex h-28 w-28 items-center justify-center">
+      <svg className="h-full w-full -rotate-90" viewBox="0 0 100 100">
+        <circle
+          cx="50"
+          cy="50"
+          r={radius}
+          fill="none"
+          stroke="rgba(255,255,255,0.08)"
+          strokeWidth="6"
+        />
+        <circle
+          cx="50"
+          cy="50"
+          r={radius}
+          fill="none"
+          stroke="url(#dash-dna-ring)"
+          strokeWidth="6"
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          className="transition-all duration-700 ease-out"
+        />
+        <defs>
+          <linearGradient id="dash-dna-ring" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#EC4899" />
+            <stop offset="100%" stopColor="#F97316" />
+          </linearGradient>
+        </defs>
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-xl font-bold text-white">{percent}%</span>
+        <span className="text-[10px] text-white/35">Complete</span>
+      </div>
+    </div>
+  );
 }
 
 function OpportunitySkeleton() {
   return (
-    <ul className="mt-6 space-y-4">
+    <div className="mt-8 space-y-4">
       {[0, 1, 2].map((index) => (
-        <li key={index} className="flex items-start gap-3">
-          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#EC4899]/30" />
-          <span className="h-4 flex-1 animate-pulse rounded bg-white/10" />
-        </li>
+        <div
+          key={index}
+          className="h-20 animate-pulse rounded-2xl border border-white/[0.08] bg-white/[0.03]"
+        />
       ))}
-    </ul>
+    </div>
   );
 }
 
 type DashboardHomeProps = {
   greeting: string;
   displayName: string;
+  creatorProfile: CreatorProfileSummary;
 };
 
-export function DashboardHome({ greeting, displayName }: DashboardHomeProps) {
+export function DashboardHome({
+  greeting,
+  displayName,
+  creatorProfile,
+}: DashboardHomeProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const slideRefs = useRef<(HTMLElement | null)[]>([]);
+  const [activeSlide, setActiveSlide] = useState(0);
   const [opportunities, setOpportunities] = useState<string[]>([]);
   const [isLoadingBrief, setIsLoadingBrief] = useState(true);
   const [isRefreshingBrief, setIsRefreshingBrief] = useState(false);
@@ -227,16 +285,14 @@ export function DashboardHome({ greeting, displayName }: DashboardHomeProps) {
 
     try {
       const response = await fetch("/api/daily-brief");
-      const data = (await response.json()) as {
-        opportunities?: string[];
-      };
+      const data = (await response.json()) as { opportunities?: string[] };
 
       if (response.ok && data.opportunities?.length) {
         setOpportunities(data.opportunities);
         writeCachedBrief(data.opportunities);
       }
     } catch {
-      // Keep existing or empty state on failure.
+      // Keep existing state on failure.
     } finally {
       setIsLoadingBrief(false);
       setIsRefreshingBrief(false);
@@ -247,122 +303,309 @@ export function DashboardHome({ greeting, displayName }: DashboardHomeProps) {
     void fetchBrief();
   }, [fetchBrief]);
 
+  useEffect(() => {
+    const root = scrollRef.current;
+    if (!root) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+        if (visible) {
+          const index = Number(visible.target.getAttribute("data-slide-index"));
+          if (!Number.isNaN(index)) {
+            setActiveSlide(index);
+          }
+        }
+      },
+      { root, threshold: [0.45, 0.6, 0.75] },
+    );
+
+    slideRefs.current.forEach((slide) => {
+      if (slide) observer.observe(slide);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  const scrollToSlide = (index: number) => {
+    slideRefs.current[index]?.scrollIntoView({ behavior: "smooth" });
+  };
+
   const handleRefreshBrief = () => {
     localStorage.removeItem(CACHE_KEY);
     void fetchBrief(true);
   };
 
+  const slideClass =
+    "relative flex h-[calc(100dvh-3.5rem)] shrink-0 snap-start snap-always flex-col justify-center px-6 py-12 sm:px-10 md:h-dvh md:px-14";
+
   return (
-    <div className="flex min-h-full flex-col">
+    <div className="relative h-[calc(100dvh-3.5rem)] md:h-dvh">
       <style>{`
-        @keyframes dash-bubble-float {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-20px); }
+        @keyframes dash-hero-float {
+          0%, 100% { transform: translateY(0) translateX(0); }
+          50% { transform: translateY(-24px) translateX(8px); }
+        }
+        @keyframes dash-orb-drift {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33% { transform: translate(24px, -18px) scale(1.04); }
+          66% { transform: translate(-16px, 12px) scale(0.96); }
         }
       `}</style>
 
-      <main className="dash-page-enter flex flex-1 flex-col px-6 py-10 sm:px-10 sm:py-12">
-        {/* Hero */}
-        <section className="dash-fade-in shrink-0">
-          <h1 className="text-3xl font-bold tracking-[-0.02em] text-white">
-            {greeting}, {displayName}
-          </h1>
-          <p className="mt-2 text-sm text-white/40">
-            What are you creating today?
-          </p>
-        </section>
+      {/* Background orbs — all slides */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        {backgroundOrbs.map((orb, index) => (
+          <div
+            key={index}
+            className="absolute rounded-full blur-3xl will-change-transform"
+            style={{
+              width: orb.size,
+              height: orb.size,
+              top: orb.top,
+              left: orb.left,
+              background: `radial-gradient(circle, ${orb.color} 0%, transparent 70%)`,
+              animation: `dash-orb-drift ${orb.duration}s ease-in-out infinite`,
+            }}
+          />
+        ))}
+      </div>
 
-        {/* Floating bubbles */}
-        <section className="relative mx-auto mt-10 w-full max-w-4xl flex-1 sm:mt-12">
-          <div className="relative min-h-[420px] w-full sm:min-h-[480px]">
-            {featureBubbles.map((bubble) => (
-              <Link
-                key={bubble.label}
-                href={bubble.href}
-                className="group absolute flex flex-col items-center justify-center will-change-transform"
-                style={{
-                  top: bubble.top,
-                  left: bubble.left,
-                  width: bubble.size,
-                  height: bubble.size,
-                  animation: `dash-bubble-float ${bubble.duration}s ease-in-out infinite`,
-                }}
-              >
-                <span
-                  className="flex h-full w-full flex-col items-center justify-center gap-2 rounded-full bg-gradient-to-br from-[#EC4899] to-[#F97316] text-white shadow-[0_8px_40px_-12px_rgba(236,72,153,0.55)] ring-1 ring-white/15 transition-transform duration-200 group-hover:scale-105"
-                  style={{ opacity: bubble.opacity }}
-                >
-                  {bubble.icon}
-                  <span
-                    className={`text-center font-semibold leading-tight text-white ${
-                      bubble.size === 120 ? "text-xs" : "text-[10px]"
-                    }`}
-                  >
-                    {bubble.label}
-                  </span>
-                </span>
-              </Link>
-            ))}
-          </div>
-        </section>
+      {/* Dot navigation */}
+      <nav
+        aria-label="Dashboard slides"
+        className="fixed right-3 top-1/2 z-20 flex -translate-y-1/2 flex-col gap-2 sm:right-4"
+      >
+        {Array.from({ length: SLIDE_COUNT }).map((_, index) => (
+          <button
+            key={index}
+            type="button"
+            onClick={() => scrollToSlide(index)}
+            aria-label={`Go to slide ${index + 1}`}
+            aria-current={activeSlide === index ? "true" : undefined}
+            className={`h-2 w-2 rounded-full transition-all duration-300 ${
+              activeSlide === index
+                ? "scale-125 bg-[#EC4899] shadow-[0_0_12px_#EC4899]"
+                : "bg-white/20 hover:bg-white/40"
+            }`}
+          />
+        ))}
+      </nav>
 
-        {/* Today's Opportunities */}
+      <div
+        ref={scrollRef}
+        className="relative h-full snap-y snap-mandatory overflow-y-auto scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {/* SLIDE 1 — Welcome */}
         <section
-          className="dash-fade-in mt-auto shrink-0 rounded-2xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-xl sm:p-8"
-          style={{ animationDelay: "0.15s" }}
+          ref={(el) => {
+            slideRefs.current[0] = el;
+          }}
+          data-slide-index={0}
+          className={slideClass}
         >
-          <div className="flex items-center justify-between gap-4">
-            <h2 className="font-heading text-lg font-bold tracking-[-0.02em] text-white sm:text-xl">
-              Today&apos;s Opportunities
-            </h2>
-            <button
-              type="button"
-              onClick={handleRefreshBrief}
-              disabled={isRefreshingBrief}
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/50 transition-colors hover:border-[#EC4899]/30 hover:text-[#FB923C] disabled:opacity-40"
-              aria-label="Refresh opportunities"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                className={`h-4 w-4 ${isRefreshingBrief ? "animate-spin" : ""}`}
-                aria-hidden
-              >
-                <path
-                  d="M20 12a8 8 0 1 1-2.34-5.66M20 4v6h-6"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-          </div>
+          <div className="relative mx-auto w-full max-w-3xl">
+            <h1 className="text-4xl font-bold tracking-[-0.03em] text-white">
+              {greeting}, {displayName}
+            </h1>
+            <p className="mt-3 text-white/40">Your creative OS is ready.</p>
 
-          {isLoadingBrief ? (
-            <OpportunitySkeleton />
-          ) : opportunities.length === 0 ? (
-            <p className="mt-6 text-sm text-white/40">
-              Opportunities will appear here once your daily brief is ready.
-            </p>
-          ) : (
-            <ul className="mt-6 space-y-4">
-              {opportunities.map((suggestion, index) => (
-                <li
-                  key={`${suggestion}-${index}`}
-                  className="flex items-start gap-3 text-[15px] leading-relaxed text-white/65"
-                >
-                  <span
-                    aria-hidden
-                    className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#EC4899]"
-                  />
-                  {suggestion}
-                </li>
+            <div className="pointer-events-none relative mt-16 h-64 sm:h-72">
+              {heroBubbles.map((bubble, index) => (
+                <div
+                  key={index}
+                  className="absolute rounded-full bg-gradient-to-br from-[#EC4899] to-[#F97316] opacity-80 shadow-[0_20px_60px_-20px_rgba(236,72,153,0.5)] will-change-transform"
+                  style={{
+                    width: bubble.size,
+                    height: bubble.size,
+                    top: bubble.top,
+                    left: bubble.left,
+                    animation: `dash-hero-float ${bubble.duration}s ease-in-out infinite`,
+                    animationDelay: `${bubble.delay}s`,
+                  }}
+                />
               ))}
-            </ul>
-          )}
+            </div>
+
+            <p className="mt-auto text-center text-sm text-white/25">
+              Scroll to explore →
+            </p>
+          </div>
         </section>
-      </main>
+
+        {/* SLIDE 2 — Tools */}
+        <section
+          ref={(el) => {
+            slideRefs.current[1] = el;
+          }}
+          data-slide-index={1}
+          className={slideClass}
+        >
+          <div className="mx-auto w-full max-w-4xl">
+            <h2 className="text-2xl font-bold tracking-[-0.02em] text-white">
+              Everything you need to create.
+            </h2>
+            <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {toolCards.map((tool) => (
+                <Link
+                  key={tool.title}
+                  href={tool.href}
+                  className="group rounded-2xl border border-white/[0.08] bg-white/[0.05] p-5 backdrop-blur-sm transition-all duration-200 hover:-translate-y-1 hover:border-[#EC4899]/35 hover:shadow-[0_12px_40px_-16px_rgba(236,72,153,0.45)]"
+                >
+                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-[#EC4899] to-[#F97316] text-white shadow-[0_0_24px_-8px_rgba(236,72,153,0.5)]">
+                    {tool.icon}
+                  </div>
+                  <h3 className="mt-4 font-bold text-white">{tool.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-white/40">
+                    {tool.description}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* SLIDE 3 — Opportunities */}
+        <section
+          ref={(el) => {
+            slideRefs.current[2] = el;
+          }}
+          data-slide-index={2}
+          className={slideClass}
+        >
+          <div className="mx-auto w-full max-w-3xl">
+            <div className="flex items-center justify-between gap-4">
+              <h2 className="flex items-center gap-2 text-2xl font-bold tracking-[-0.02em] text-white">
+                <span aria-hidden className="text-[#EC4899]">
+                  ✦
+                </span>
+                Today&apos;s Opportunities
+              </h2>
+              <button
+                type="button"
+                onClick={handleRefreshBrief}
+                disabled={isRefreshingBrief}
+                className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.05] text-white/50 transition-colors hover:border-[#EC4899]/30 hover:text-[#FB923C] disabled:opacity-40"
+                aria-label="Refresh opportunities"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className={`h-4 w-4 ${isRefreshingBrief ? "animate-spin" : ""}`}
+                  aria-hidden
+                >
+                  <path
+                    d="M20 12a8 8 0 1 1-2.34-5.66M20 4v6h-6"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {isLoadingBrief ? (
+              <OpportunitySkeleton />
+            ) : opportunities.length === 0 ? (
+              <p className="mt-8 text-sm text-white/40">
+                Opportunities will appear here once your daily brief is ready.
+              </p>
+            ) : (
+              <div className="mt-8 space-y-4">
+                {opportunities.slice(0, 3).map((item, index) => (
+                  <div
+                    key={`${item}-${index}`}
+                    className="rounded-2xl border border-white/[0.08] bg-white/[0.05] p-5 backdrop-blur-sm"
+                  >
+                    <div className="flex items-start gap-3">
+                      <span
+                        aria-hidden
+                        className="mt-2 h-2 w-2 shrink-0 rounded-full bg-[#EC4899]"
+                      />
+                      <p className="text-[15px] leading-relaxed text-white/75">
+                        {item}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* SLIDE 4 — Creator DNA */}
+        <section
+          ref={(el) => {
+            slideRefs.current[3] = el;
+          }}
+          data-slide-index={3}
+          className={slideClass}
+        >
+          <div className="mx-auto w-full max-w-3xl">
+            <h2 className="text-2xl font-bold tracking-[-0.02em] text-white">
+              Your Creator DNA
+            </h2>
+
+            <div className="mt-10 flex flex-col gap-10 lg:flex-row lg:items-center">
+              <CompletionRing percent={creatorProfile.completion} />
+
+              <div className="min-w-0 flex-1 space-y-6">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/30">
+                    Niche
+                  </p>
+                  {creatorProfile.niches.length > 0 ? (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {creatorProfile.niches.map((niche) => (
+                        <span
+                          key={niche}
+                          className="rounded-full border border-[#EC4899]/30 bg-[#EC4899]/10 px-3 py-1 text-sm font-medium text-pink-100"
+                        >
+                          {niche}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-2 text-sm text-white/40">Not set yet</p>
+                  )}
+                </div>
+
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/30">
+                    Platforms
+                  </p>
+                  {creatorProfile.platforms.length > 0 ? (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {creatorProfile.platforms.map((platform) => (
+                        <span
+                          key={platform}
+                          className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.05] px-3 py-1 text-sm text-white/70"
+                        >
+                          <span className="h-1.5 w-1.5 rounded-full bg-[#EC4899]" />
+                          {PLATFORM_LABELS[platform.toLowerCase()] ?? platform}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-2 text-sm text-white/40">Not set yet</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <Link
+              href="/dashboard/memory"
+              className="mt-10 inline-flex items-center gap-2 text-sm font-semibold text-[#FB923C] transition-colors hover:text-[#FECDD3]"
+            >
+              Update Profile →
+            </Link>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

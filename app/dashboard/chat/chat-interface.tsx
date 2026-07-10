@@ -1060,7 +1060,7 @@ export function ChatInterface({
         }
       `}</style>
       {/* Messages or welcome */}
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="min-h-0 flex-1 overflow-y-auto bg-[#080810]">
         {isLoadingSession ? (
           <div className="chat-session-loading flex h-full items-center justify-center px-6 py-12">
             <p className="text-sm text-white/40">Loading chat...</p>
@@ -1111,7 +1111,7 @@ export function ChatInterface({
                 {message.role === "user" ? (
                   <div className="flex justify-end">
                     <div className="flex max-w-[85%] flex-col items-end md:max-w-[85%]">
-                      <div className="rounded-2xl bg-gradient-to-br from-pink-500 to-orange-500 px-3 py-2 text-white shadow-[0_8px_32px_-12px_rgba(236,72,153,0.45)] md:px-4 md:py-3">
+                      <div className="rounded-2xl border border-pink-500/20 bg-gradient-to-r from-pink-500/15 to-orange-500/10 px-3 py-2 text-white md:px-4 md:py-3">
                         {message.attachment?.type === "image" && (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
@@ -1121,7 +1121,7 @@ export function ChatInterface({
                           />
                         )}
                         {message.attachment?.type === "pdf" && (
-                          <div className="mb-2 flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-sm">
+                          <div className="mb-2 flex items-center gap-2 rounded-lg border border-white/[0.06] bg-white/[0.04] px-3 py-2 text-sm">
                             <PdfIcon className="h-4 w-4 shrink-0" />
                             <span className="truncate">{message.attachment.name}</span>
                           </div>
@@ -1144,7 +1144,7 @@ export function ChatInterface({
                     <ChatAiAvatar thinking={isStreamingMessage} />
                     <div className="min-w-0 max-w-[85%] flex-1 md:max-w-none">
                       <div
-                        className={`rounded-2xl border border-white/8 bg-white/5 px-3 py-2 text-white/95 backdrop-blur-md md:px-4 md:py-3 ${
+                        className={`rounded-2xl border border-white/[0.06] bg-white/[0.04] px-3 py-2 text-white/90 md:px-4 md:py-3 ${
                           isStreamingMessage ? "chat-streaming-bubble" : ""
                         }`}
                       >
