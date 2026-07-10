@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
 import { calculateProfileCompletion } from "@/lib/memory/getCreatorContext";
-import { getDisplayName } from "@/lib/user-display-name";
 import { DashboardHome } from "./components/dashboard-home";
 
 function getTimeGreeting() {
@@ -8,6 +7,30 @@ function getTimeGreeting() {
   if (hour < 12) return "Good morning";
   if (hour < 17) return "Good afternoon";
   return "Good evening";
+}
+
+function resolveDisplayName(
+  user: {
+    user_metadata?: Record<string, unknown>;
+  } | null,
+  preferredName?: string | null,
+): string {
+  const trimmedPreferred = preferredName?.trim();
+  if (trimmedPreferred) return trimmedPreferred;
+
+  const meta = user?.user_metadata ?? {};
+  const fullName =
+    typeof meta.full_name === "string" ? meta.full_name.trim() : "";
+  if (fullName) {
+    return fullName.split(/\s+/)[0] || "Creator";
+  }
+
+  const name = typeof meta.name === "string" ? meta.name.trim() : "";
+  if (name) {
+    return name.split(/\s+/)[0] || "Creator";
+  }
+
+  return "Creator";
 }
 
 export default async function DashboardPage() {
@@ -18,11 +41,11 @@ export default async function DashboardPage() {
 
   const greeting = getTimeGreeting();
   let displayName = "Creator";
-  let creatorProfile = {
-    niches: [] as string[],
-    platforms: [] as string[],
-    completion: 0,
-  };
+  let creatorProfile: {
+    niches: string[];
+    platforms: string[];
+    completion: number;
+  } | null = null;
 
   if (user) {
     const { data: profile } = await supabase
@@ -31,7 +54,7 @@ export default async function DashboardPage() {
       .eq("user_id", user.id)
       .maybeSingle();
 
-    displayName = getDisplayName(user, profile?.preferred_name);
+    displayName = resolveDisplayName(user, profile?.preferred_name);
 
     if (profile) {
       creatorProfile = {

@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const CACHE_KEY = "clotter-daily-brief-v1";
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 
-type CreatorProfileSummary = {
+type CreatorProfileData = {
   niches: string[];
   platforms: string[];
   completion: number;
@@ -15,7 +15,7 @@ type CreatorProfileSummary = {
 type DashboardHomeProps = {
   greeting: string;
   displayName: string;
-  creatorProfile: CreatorProfileSummary;
+  creatorProfile: CreatorProfileData | null;
 };
 
 export function DashboardHome({
@@ -23,9 +23,6 @@ export function DashboardHome({
   displayName,
   creatorProfile,
 }: DashboardHomeProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const [activeSlide, setActiveSlide] = useState(0);
   const [opportunities, setOpportunities] = useState<string[]>([]);
   const [isLoadingOpportunities, setIsLoadingOpportunities] = useState(true);
 
@@ -83,309 +80,295 @@ export function DashboardHome({
     void fetchOpportunities();
   }, [fetchOpportunities]);
 
-  useEffect(() => {
-    const root = scrollRef.current;
-    if (!root) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-
-        if (visible) {
-          const index = Number(visible.target.getAttribute("data-slide-index"));
-          if (!Number.isNaN(index)) {
-            setActiveSlide(index);
-          }
-        }
-      },
-      { root, threshold: 0.55 },
-    );
-
-    slideRefs.current.forEach((slide) => {
-      if (slide) observer.observe(slide);
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
-  const scrollToSlide = (index: number) => {
-    slideRefs.current[index]?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const slideSnapStyle = { scrollSnapAlign: "start" as const };
+  const nicheTags = creatorProfile?.niches ?? [];
+  const platformTags = creatorProfile?.platforms ?? [];
 
   return (
-    <div
-      ref={scrollRef}
-      className="relative h-screen overflow-y-scroll scroll-smooth"
-      style={{ scrollSnapType: "y mandatory" }}
-    >
-      {/* Background orbs - fixed behind everything */}
-      <div className="pointer-events-none fixed inset-0 z-0">
+    <div className="relative min-h-screen overflow-x-hidden bg-[#0D0D1A]">
+      {/* AMBIENT BACKGROUND */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div
-          className="absolute bottom-0 right-0 h-96 w-96 rounded-full opacity-[0.04]"
           style={{
-            background: "radial-gradient(circle, #EC4899, #F97316)",
-            filter: "blur(80px)",
-            animation: "float1 20s ease-in-out infinite",
+            position: "absolute",
+            bottom: "-10%",
+            right: "-5%",
+            width: "500px",
+            height: "500px",
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgba(236,72,153,0.12) 0%, transparent 70%)",
+            filter: "blur(40px)",
+            animation: "ambientFloat1 15s ease-in-out infinite",
           }}
         />
         <div
-          className="absolute left-0 top-0 h-80 w-80 rounded-full opacity-[0.04]"
           style={{
-            background: "radial-gradient(circle, #F97316, #EC4899)",
-            filter: "blur(80px)",
-            animation: "float2 25s ease-in-out infinite",
+            position: "absolute",
+            top: "-10%",
+            left: "-5%",
+            width: "400px",
+            height: "400px",
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgba(249,115,22,0.08) 0%, transparent 70%)",
+            filter: "blur(40px)",
+            animation: "ambientFloat2 20s ease-in-out infinite",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            top: "40%",
+            right: "20%",
+            width: "300px",
+            height: "300px",
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgba(236,72,153,0.06) 0%, transparent 70%)",
+            filter: "blur(60px)",
+            animation: "ambientFloat3 25s ease-in-out infinite",
           }}
         />
       </div>
 
-      {/* SLIDE 1 - HERO */}
-      <div
-        ref={(el) => {
-          slideRefs.current[0] = el;
-        }}
-        data-slide-index={0}
-        className="relative z-10 flex h-screen flex-col justify-center px-6 py-8"
-        style={slideSnapStyle}
-      >
-        <p className="mb-2 text-sm font-medium text-white/40">{greeting}</p>
-        <h1 className="mb-4 text-4xl font-bold text-white md:text-6xl">
-          {displayName} 👋
-        </h1>
-        <p className="mb-12 text-base text-white/30">Your creative OS is ready.</p>
-
-        {/* 3 floating feature bubbles */}
-        <div className="mb-12 flex justify-center gap-6">
-          {[
-            { name: "AI Chat", href: "/dashboard/chat", icon: "💬" },
-            { name: "Captions", href: "/dashboard/captions", icon: "✍️" },
-            { name: "Hooks", href: "/dashboard/hooks", icon: "🎣" },
-          ].map((item, i) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className="group flex flex-col items-center gap-2"
+      <div className="relative z-10 mx-auto max-w-4xl space-y-16 px-6 py-10">
+        {/* SECTION 1 - HERO GREETING */}
+        <section className="pt-8">
+          <div className="mb-3 flex items-center gap-2">
+            <div
               style={{
-                animation: `float${i + 1} ${3 + i}s ease-in-out infinite`,
+                width: "8px",
+                height: "8px",
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, #EC4899, #F97316)",
+                animation: "pulse 2s ease-in-out infinite",
+              }}
+            />
+            <span className="text-xs font-medium uppercase tracking-widest text-white/30">
+              Clotter AI
+            </span>
+          </div>
+          <h1 className="mb-3 text-4xl font-bold leading-tight text-white md:text-6xl">
+            {greeting},<br />
+            <span
+              style={{
+                background: "linear-gradient(135deg, #EC4899, #F97316)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
               }}
             >
-              <div
-                className="flex h-20 w-20 items-center justify-center rounded-full text-2xl"
-                style={{
-                  background: "linear-gradient(135deg, #EC4899, #F97316)",
-                }}
+              {displayName}.
+            </span>
+          </h1>
+          <p className="text-base font-normal text-white/30">
+            Your creative OS is ready. What are we building today?
+          </p>
+        </section>
+
+        {/* SECTION 2 - QUICK ACTIONS */}
+        <section>
+          <p className="mb-4 text-xs font-medium uppercase tracking-widest text-white/20">
+            Quick Actions
+          </p>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+            {[
+              {
+                name: "New Chat",
+                desc: "Talk to your AI co-pilot",
+                href: "/dashboard/chat",
+                gradient: "from-pink-500 to-orange-500",
+              },
+              {
+                name: "Captions",
+                desc: "Write scroll-stopping captions",
+                href: "/dashboard/captions",
+                gradient: "from-pink-600 to-pink-400",
+              },
+              {
+                name: "Hooks",
+                desc: "Grab attention in 2 seconds",
+                href: "/dashboard/hooks",
+                gradient: "from-orange-500 to-pink-500",
+              },
+              {
+                name: "Scripts",
+                desc: "Viral short-form scripts",
+                href: "/dashboard/script",
+                gradient: "from-pink-500 to-rose-500",
+              },
+              {
+                name: "Trends",
+                desc: "Real-time trend intelligence",
+                href: "/dashboard/trends",
+                gradient: "from-orange-400 to-pink-500",
+              },
+              {
+                name: "Ideas",
+                desc: "Never run out of content",
+                href: "/dashboard/content-ideas",
+                gradient: "from-rose-500 to-orange-400",
+              },
+            ].map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className="group relative cursor-pointer overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.03] p-5 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.06]"
               >
-                {item.icon}
-              </div>
-              <span className="text-xs text-white/50 transition-colors group-hover:text-white/80">
-                {item.name}
-              </span>
-            </Link>
-          ))}
-        </div>
-
-        <p className="animate-bounce text-center text-xs text-white/20">
-          ↓ Explore
-        </p>
-      </div>
-
-      {/* SLIDE 2 - TOOLS */}
-      <div
-        ref={(el) => {
-          slideRefs.current[1] = el;
-        }}
-        data-slide-index={1}
-        className="relative z-10 flex h-screen flex-col justify-center px-6 py-8"
-        style={slideSnapStyle}
-      >
-        <h2 className="mb-2 text-2xl font-bold text-white">
-          Everything you need.
-        </h2>
-        <p className="mb-8 text-sm text-white/30">
-          All your creator tools in one place.
-        </p>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-          {[
-            {
-              name: "AI Chat",
-              desc: "Your creative co-pilot",
-              href: "/dashboard/chat",
-              icon: "💬",
-            },
-            {
-              name: "Captions",
-              desc: "Stop-the-scroll captions",
-              href: "/dashboard/captions",
-              icon: "✍️",
-            },
-            {
-              name: "Hooks",
-              desc: "Grab attention instantly",
-              href: "/dashboard/hooks",
-              icon: "🎣",
-            },
-            {
-              name: "Scripts",
-              desc: "Viral video scripts",
-              href: "/dashboard/script",
-              icon: "🎬",
-            },
-            {
-              name: "Trends",
-              desc: "Real-time trend data",
-              href: "/dashboard/trends",
-              icon: "📈",
-            },
-            {
-              name: "Ideas",
-              desc: "Never run out of ideas",
-              href: "/dashboard/content-ideas",
-              icon: "💡",
-            },
-          ].map((tool) => (
-            <Link
-              key={tool.name}
-              href={tool.href}
-              className="cursor-pointer rounded-2xl border border-white/8 bg-white/5 p-4 transition-all duration-200 hover:scale-[1.02] hover:border-pink-500/30 hover:bg-white/8"
-            >
-              <div
-                className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl text-lg"
-                style={{
-                  background: "linear-gradient(135deg, #EC4899, #F97316)",
-                }}
-              >
-                {tool.icon}
-              </div>
-              <p className="text-sm font-semibold text-white">{tool.name}</p>
-              <p className="mt-1 text-xs text-white/40">{tool.desc}</p>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* SLIDE 3 - TODAY'S OPPORTUNITIES */}
-      <div
-        ref={(el) => {
-          slideRefs.current[2] = el;
-        }}
-        data-slide-index={2}
-        className="relative z-10 flex h-screen flex-col justify-center px-6 py-8"
-        style={slideSnapStyle}
-      >
-        <h2 className="mb-2 text-2xl font-bold text-white">
-          Today&apos;s Opportunities ✦
-        </h2>
-        <p className="mb-6 text-sm text-white/30">AI-generated just for you.</p>
-        <div className="space-y-3">
-          {isLoadingOpportunities ? (
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
                 <div
-                  key={i}
-                  className="h-16 animate-pulse rounded-xl border border-white/8 bg-white/5 p-4"
-                />
-              ))}
-            </div>
-          ) : opportunities.length > 0 ? (
-            opportunities.slice(0, 3).map((opp, i) => (
-              <div
-                key={`${opp}-${i}`}
-                className="flex items-start gap-3 rounded-xl border border-white/8 bg-white/5 p-4"
-              >
-                <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-pink-400" />
-                <p className="text-sm text-white/80">{opp}</p>
-              </div>
-            ))
-          ) : (
-            <p className="text-sm text-white/40">
-              Opportunities will appear here once your daily brief is ready.
-            </p>
-          )}
-        </div>
-        <button
-          type="button"
-          onClick={() => {
-            localStorage.removeItem(CACHE_KEY);
-            void fetchOpportunities(true);
-          }}
-          className="mt-4 text-xs text-white/30 transition-colors hover:text-pink-400"
-        >
-          ↻ Refresh
-        </button>
-      </div>
+                  className={`mb-4 flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br ${item.gradient}`}
+                >
+                  <div className="h-4 w-4 rounded-sm bg-white/90" />
+                </div>
+                <p className="mb-1 text-[13px] font-semibold text-white">
+                  {item.name}
+                </p>
+                <p className="text-[11px] leading-relaxed text-white/35">
+                  {item.desc}
+                </p>
+                <div className="absolute bottom-4 right-4 text-lg text-white/10 transition-colors group-hover:text-white/30">
+                  →
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
 
-      {/* SLIDE 4 - CREATOR DNA */}
-      <div
-        ref={(el) => {
-          slideRefs.current[3] = el;
-        }}
-        data-slide-index={3}
-        className="relative z-10 flex h-screen flex-col justify-center px-6 py-8"
-        style={slideSnapStyle}
-      >
-        <h2 className="mb-2 text-2xl font-bold text-white">Your Creator DNA</h2>
-        <p className="mb-6 text-sm text-white/30">What Clotter knows about you.</p>
-        <div className="rounded-2xl border border-white/8 bg-white/5 p-6">
-          <div className="mb-4 flex flex-wrap gap-2">
-            {creatorProfile.niches.length > 0 ? (
-              creatorProfile.niches.map((n) => (
-                <span
-                  key={n}
-                  className="rounded-full px-3 py-1 text-xs font-medium text-white"
+        {/* SECTION 3 - TODAY'S OPPORTUNITIES */}
+        <section>
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <p className="mb-1 text-xs font-medium uppercase tracking-widest text-white/20">
+                Daily Intelligence
+              </p>
+              <h2 className="text-xl font-bold text-white">
+                Today&apos;s Opportunities
+              </h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                localStorage.removeItem(CACHE_KEY);
+                void fetchOpportunities(true);
+              }}
+              className="rounded-lg px-3 py-1.5 text-xs text-white/20 transition-colors hover:bg-white/5 hover:text-pink-400"
+            >
+              Refresh
+            </button>
+          </div>
+          <div className="space-y-3">
+            {!isLoadingOpportunities && opportunities.length > 0
+              ? opportunities.map((opp, i) => (
+                  <div
+                    key={`${opp}-${i}`}
+                    className="flex items-start gap-4 rounded-xl border border-white/[0.06] bg-white/[0.03] p-4 transition-all duration-200 hover:border-white/[0.10]"
+                  >
+                    <div
+                      className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #EC4899, #F97316)",
+                      }}
+                    />
+                    <p className="text-[13px] leading-relaxed text-white/65">
+                      {opp}
+                    </p>
+                  </div>
+                ))
+              : [1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="h-14 animate-pulse rounded-xl border border-white/[0.06] bg-white/[0.03]"
+                  />
+                ))}
+          </div>
+        </section>
+
+        {/* SECTION 4 - CREATOR PROFILE */}
+        <section className="pb-10">
+          <div className="mb-4">
+            <p className="mb-1 text-xs font-medium uppercase tracking-widest text-white/20">
+              Your Profile
+            </p>
+            <h2 className="text-xl font-bold text-white">Creator DNA</h2>
+          </div>
+          <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-6">
+            {creatorProfile ? (
+              <div className="space-y-4">
+                <div>
+                  <p className="mb-2 text-[10px] uppercase tracking-widest text-white/20">
+                    Niche
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {nicheTags.length > 0 ? (
+                      nicheTags.map((n) => (
+                        <span
+                          key={n}
+                          className="rounded-full px-3 py-1 text-[11px] font-medium text-white"
+                          style={{
+                            background:
+                              "linear-gradient(135deg, rgba(236,72,153,0.3), rgba(249,115,22,0.3))",
+                            border: "1px solid rgba(236,72,153,0.3)",
+                          }}
+                        >
+                          {n}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-sm text-white/30">
+                        No niche set yet
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {platformTags.length > 0 && (
+                  <div>
+                    <p className="mb-2 text-[10px] uppercase tracking-widest text-white/20">
+                      Platforms
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {platformTags.map((p) => (
+                        <span
+                          key={p}
+                          className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-white/50"
+                        >
+                          {p}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <Link
+                  href="/dashboard/memory"
+                  className="mt-2 inline-flex items-center gap-2 text-xs text-pink-400 transition-colors hover:text-pink-300"
+                >
+                  View full profile →
+                </Link>
+              </div>
+            ) : (
+              <div className="py-6 text-center">
+                <p className="mb-3 text-sm text-white/30">
+                  Complete your creator profile
+                </p>
+                <Link
+                  href="/dashboard/onboarding"
+                  className="rounded-xl px-4 py-2 text-xs font-medium text-white transition-all"
                   style={{
                     background: "linear-gradient(135deg, #EC4899, #F97316)",
                   }}
                 >
-                  {n}
-                </span>
-              ))
-            ) : (
-              <span className="text-sm text-white/30">No niche set yet</span>
+                  Set up profile →
+                </Link>
+              </div>
             )}
           </div>
-          <div className="mb-6 flex flex-wrap gap-2">
-            {creatorProfile.platforms.length > 0
-              ? creatorProfile.platforms.map((p) => (
-                  <span
-                    key={p}
-                    className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/60"
-                  >
-                    {p}
-                  </span>
-                ))
-              : null}
-          </div>
-          <Link
-            href="/dashboard/memory"
-            className="text-xs font-medium text-pink-400 transition-colors hover:text-pink-300"
-          >
-            Update Profile →
-          </Link>
-        </div>
-      </div>
-
-      {/* DOT NAVIGATION */}
-      <div className="fixed right-4 top-1/2 z-50 flex -translate-y-1/2 flex-col gap-2">
-        {[0, 1, 2, 3].map((i) => (
-          <button
-            key={i}
-            type="button"
-            aria-label={`Go to slide ${i + 1}`}
-            onClick={() => scrollToSlide(i)}
-            className={`h-2 w-2 rounded-full transition-all duration-200 ${
-              activeSlide === i ? "scale-125 bg-white" : "bg-white/20"
-            }`}
-          />
-        ))}
+        </section>
       </div>
 
       <style>{`
-        @keyframes float1 { 0%,100% { transform: translateY(0px) } 50% { transform: translateY(-20px) } }
-        @keyframes float2 { 0%,100% { transform: translateY(0px) } 50% { transform: translateY(-15px) } }
-        @keyframes float3 { 0%,100% { transform: translateY(0px) } 50% { transform: translateY(-25px) } }
+        @keyframes ambientFloat1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-20px,-20px)} }
+        @keyframes ambientFloat2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(20px,15px)} }
+        @keyframes ambientFloat3 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-15px,20px)} }
+        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.5)} }
       `}</style>
     </div>
   );
