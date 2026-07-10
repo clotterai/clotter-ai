@@ -1,253 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const CACHE_KEY = "clotter-daily-brief-v1";
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
-const SLIDE_COUNT = 4;
-
-type CachedBrief = {
-  opportunities: string[];
-  fetchedAt: number;
-};
 
 type CreatorProfileSummary = {
   niches: string[];
   platforms: string[];
   completion: number;
 };
-
-type ToolCard = {
-  title: string;
-  description: string;
-  href: string;
-  icon: ReactNode;
-};
-
-const heroBubbles = [
-  { size: 140, top: "18%", left: "12%", duration: 5, delay: 0 },
-  { size: 100, top: "55%", left: "68%", duration: 7, delay: 1 },
-  { size: 120, top: "35%", left: "78%", duration: 6, delay: 0.5 },
-];
-
-const backgroundOrbs = [
-  { size: 420, top: "8%", left: "-8%", color: "rgba(236,72,153,0.05)", duration: 18 },
-  { size: 320, top: "45%", left: "72%", color: "rgba(249,115,22,0.04)", duration: 22 },
-  { size: 280, top: "70%", left: "20%", color: "rgba(236,72,153,0.04)", duration: 20 },
-  { size: 360, top: "25%", left: "55%", color: "rgba(249,115,22,0.05)", duration: 24 },
-  { size: 240, top: "82%", left: "65%", color: "rgba(236,72,153,0.06)", duration: 16 },
-];
-
-const toolCards: ToolCard[] = [
-  {
-    title: "AI Chat",
-    description: "Brainstorm ideas and refine content with your co-pilot.",
-    href: "/dashboard/chat",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
-        <path
-          d="M8 10h8M8 14h5M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 0 1-4-.8L3 21l1.8-4.2A8.8 8.8 0 0 1 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8Z"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    title: "Caption Generator",
-    description: "Scroll-stopping captions tailored to your voice.",
-    href: "/dashboard/captions",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
-        <path
-          d="M4 6h16M4 12h12M4 18h8M20 18l-2 2-4-4"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    title: "Hook Generator",
-    description: "Grab attention in the first two seconds.",
-    href: "/dashboard/hooks",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
-        <path
-          d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    title: "Script Generator",
-    description: "Full video scripts optimized for retention.",
-    href: "/dashboard/script",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
-        <path
-          d="M8 4h8a2 2 0 0 1 2 2v14l-3-2-3 2-3-2-3 2V6a2 2 0 0 1 2-2Z"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    title: "Trend Analyzer",
-    description: "Spot rising topics before they peak.",
-    href: "/dashboard/trends",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
-        <path
-          d="M3 17l6-6 4 4 8-10"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M14 5h7v7"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    title: "Content Ideas",
-    description: "Fresh concepts aligned with your niche.",
-    href: "/dashboard/content-ideas",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
-        <path
-          d="M9.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        />
-        <path
-          d="M12 6v6l3 2"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
-      </svg>
-    ),
-  },
-];
-
-const PLATFORM_LABELS: Record<string, string> = {
-  instagram: "Instagram",
-  youtube: "YouTube",
-  tiktok: "TikTok",
-  linkedin: "LinkedIn",
-  twitter: "Twitter/X",
-  facebook: "Facebook",
-};
-
-function readCachedBrief(): CachedBrief | null {
-  try {
-    const raw = localStorage.getItem(CACHE_KEY);
-    if (!raw) return null;
-
-    const parsed = JSON.parse(raw) as CachedBrief;
-    if (
-      !Array.isArray(parsed.opportunities) ||
-      typeof parsed.fetchedAt !== "number"
-    ) {
-      return null;
-    }
-
-    if (Date.now() - parsed.fetchedAt > CACHE_TTL_MS) {
-      return null;
-    }
-
-    return parsed;
-  } catch {
-    return null;
-  }
-}
-
-function writeCachedBrief(opportunities: string[]) {
-  localStorage.setItem(
-    CACHE_KEY,
-    JSON.stringify({ opportunities, fetchedAt: Date.now() }),
-  );
-}
-
-function CompletionRing({ percent }: { percent: number }) {
-  const radius = 42;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (percent / 100) * circumference;
-
-  return (
-    <div className="relative flex h-28 w-28 items-center justify-center">
-      <svg className="h-full w-full -rotate-90" viewBox="0 0 100 100">
-        <circle
-          cx="50"
-          cy="50"
-          r={radius}
-          fill="none"
-          stroke="rgba(255,255,255,0.08)"
-          strokeWidth="6"
-        />
-        <circle
-          cx="50"
-          cy="50"
-          r={radius}
-          fill="none"
-          stroke="url(#dash-dna-ring)"
-          strokeWidth="6"
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          className="transition-all duration-700 ease-out"
-        />
-        <defs>
-          <linearGradient id="dash-dna-ring" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#EC4899" />
-            <stop offset="100%" stopColor="#F97316" />
-          </linearGradient>
-        </defs>
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-xl font-bold text-white">{percent}%</span>
-        <span className="text-[10px] text-white/35">Complete</span>
-      </div>
-    </div>
-  );
-}
-
-function OpportunitySkeleton() {
-  return (
-    <div className="mt-8 space-y-4">
-      {[0, 1, 2].map((index) => (
-        <div
-          key={index}
-          className="h-20 animate-pulse rounded-2xl border border-white/[0.08] bg-white/[0.03]"
-        />
-      ))}
-    </div>
-  );
-}
 
 type DashboardHomeProps = {
   greeting: string;
@@ -261,27 +24,37 @@ export function DashboardHome({
   creatorProfile,
 }: DashboardHomeProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const slideRefs = useRef<(HTMLElement | null)[]>([]);
+  const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [activeSlide, setActiveSlide] = useState(0);
   const [opportunities, setOpportunities] = useState<string[]>([]);
-  const [isLoadingBrief, setIsLoadingBrief] = useState(true);
-  const [isRefreshingBrief, setIsRefreshingBrief] = useState(false);
+  const [isLoadingOpportunities, setIsLoadingOpportunities] = useState(true);
 
-  const fetchBrief = useCallback(async (skipCache = false) => {
+  const fetchOpportunities = useCallback(async (skipCache = false) => {
     if (!skipCache) {
-      const cached = readCachedBrief();
-      if (cached?.opportunities.length) {
-        setOpportunities(cached.opportunities);
-        setIsLoadingBrief(false);
-        return;
+      try {
+        const raw = localStorage.getItem(CACHE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw) as {
+            opportunities?: string[];
+            fetchedAt?: number;
+          };
+          if (
+            Array.isArray(parsed.opportunities) &&
+            typeof parsed.fetchedAt === "number" &&
+            Date.now() - parsed.fetchedAt <= CACHE_TTL_MS &&
+            parsed.opportunities.length > 0
+          ) {
+            setOpportunities(parsed.opportunities);
+            setIsLoadingOpportunities(false);
+            return;
+          }
+        }
+      } catch {
+        // Ignore cache errors.
       }
     }
 
-    if (skipCache) {
-      setIsRefreshingBrief(true);
-    } else {
-      setIsLoadingBrief(true);
-    }
+    setIsLoadingOpportunities(true);
 
     try {
       const response = await fetch("/api/daily-brief");
@@ -289,19 +62,26 @@ export function DashboardHome({
 
       if (response.ok && data.opportunities?.length) {
         setOpportunities(data.opportunities);
-        writeCachedBrief(data.opportunities);
+        localStorage.setItem(
+          CACHE_KEY,
+          JSON.stringify({
+            opportunities: data.opportunities,
+            fetchedAt: Date.now(),
+          }),
+        );
+      } else {
+        setOpportunities([]);
       }
     } catch {
-      // Keep existing state on failure.
+      setOpportunities([]);
     } finally {
-      setIsLoadingBrief(false);
-      setIsRefreshingBrief(false);
+      setIsLoadingOpportunities(false);
     }
   }, []);
 
   useEffect(() => {
-    void fetchBrief();
-  }, [fetchBrief]);
+    void fetchOpportunities();
+  }, [fetchOpportunities]);
 
   useEffect(() => {
     const root = scrollRef.current;
@@ -320,7 +100,7 @@ export function DashboardHome({
           }
         }
       },
-      { root, threshold: [0.45, 0.6, 0.75] },
+      { root, threshold: 0.55 },
     );
 
     slideRefs.current.forEach((slide) => {
@@ -334,278 +114,279 @@ export function DashboardHome({
     slideRefs.current[index]?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleRefreshBrief = () => {
-    localStorage.removeItem(CACHE_KEY);
-    void fetchBrief(true);
-  };
-
-  const slideClass =
-    "relative flex h-[calc(100dvh-3.5rem)] shrink-0 snap-start snap-always flex-col justify-center px-6 py-12 sm:px-10 md:h-dvh md:px-14";
+  const slideSnapStyle = { scrollSnapAlign: "start" as const };
 
   return (
-    <div className="relative h-[calc(100dvh-3.5rem)] md:h-dvh">
-      <style>{`
-        @keyframes dash-hero-float {
-          0%, 100% { transform: translateY(0) translateX(0); }
-          50% { transform: translateY(-24px) translateX(8px); }
-        }
-        @keyframes dash-orb-drift {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(24px, -18px) scale(1.04); }
-          66% { transform: translate(-16px, 12px) scale(0.96); }
-        }
-      `}</style>
-
-      {/* Background orbs — all slides */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        {backgroundOrbs.map((orb, index) => (
-          <div
-            key={index}
-            className="absolute rounded-full blur-3xl will-change-transform"
-            style={{
-              width: orb.size,
-              height: orb.size,
-              top: orb.top,
-              left: orb.left,
-              background: `radial-gradient(circle, ${orb.color} 0%, transparent 70%)`,
-              animation: `dash-orb-drift ${orb.duration}s ease-in-out infinite`,
-            }}
-          />
-        ))}
+    <div
+      ref={scrollRef}
+      className="relative h-screen overflow-y-scroll scroll-smooth"
+      style={{ scrollSnapType: "y mandatory" }}
+    >
+      {/* Background orbs - fixed behind everything */}
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <div
+          className="absolute bottom-0 right-0 h-96 w-96 rounded-full opacity-[0.04]"
+          style={{
+            background: "radial-gradient(circle, #EC4899, #F97316)",
+            filter: "blur(80px)",
+            animation: "float1 20s ease-in-out infinite",
+          }}
+        />
+        <div
+          className="absolute left-0 top-0 h-80 w-80 rounded-full opacity-[0.04]"
+          style={{
+            background: "radial-gradient(circle, #F97316, #EC4899)",
+            filter: "blur(80px)",
+            animation: "float2 25s ease-in-out infinite",
+          }}
+        />
       </div>
 
-      {/* Dot navigation */}
-      <nav
-        aria-label="Dashboard slides"
-        className="fixed right-3 top-1/2 z-20 flex -translate-y-1/2 flex-col gap-2 sm:right-4"
-      >
-        {Array.from({ length: SLIDE_COUNT }).map((_, index) => (
-          <button
-            key={index}
-            type="button"
-            onClick={() => scrollToSlide(index)}
-            aria-label={`Go to slide ${index + 1}`}
-            aria-current={activeSlide === index ? "true" : undefined}
-            className={`h-2 w-2 rounded-full transition-all duration-300 ${
-              activeSlide === index
-                ? "scale-125 bg-[#EC4899] shadow-[0_0_12px_#EC4899]"
-                : "bg-white/20 hover:bg-white/40"
-            }`}
-          />
-        ))}
-      </nav>
-
+      {/* SLIDE 1 - HERO */}
       <div
-        ref={scrollRef}
-        className="relative h-full snap-y snap-mandatory overflow-y-auto scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        ref={(el) => {
+          slideRefs.current[0] = el;
+        }}
+        data-slide-index={0}
+        className="relative z-10 flex h-screen flex-col justify-center px-6 py-8"
+        style={slideSnapStyle}
       >
-        {/* SLIDE 1 — Welcome */}
-        <section
-          ref={(el) => {
-            slideRefs.current[0] = el;
-          }}
-          data-slide-index={0}
-          className={slideClass}
-        >
-          <div className="relative mx-auto w-full max-w-3xl">
-            <h1 className="text-4xl font-bold tracking-[-0.03em] text-white">
-              {greeting}, {displayName}
-            </h1>
-            <p className="mt-3 text-white/40">Your creative OS is ready.</p>
+        <p className="mb-2 text-sm font-medium text-white/40">{greeting}</p>
+        <h1 className="mb-4 text-4xl font-bold text-white md:text-6xl">
+          {displayName} 👋
+        </h1>
+        <p className="mb-12 text-base text-white/30">Your creative OS is ready.</p>
 
-            <div className="pointer-events-none relative mt-16 h-64 sm:h-72">
-              {heroBubbles.map((bubble, index) => (
+        {/* 3 floating feature bubbles */}
+        <div className="mb-12 flex justify-center gap-6">
+          {[
+            { name: "AI Chat", href: "/dashboard/chat", icon: "💬" },
+            { name: "Captions", href: "/dashboard/captions", icon: "✍️" },
+            { name: "Hooks", href: "/dashboard/hooks", icon: "🎣" },
+          ].map((item, i) => (
+            <Link
+              key={item.name}
+              href={item.href}
+              className="group flex flex-col items-center gap-2"
+              style={{
+                animation: `float${i + 1} ${3 + i}s ease-in-out infinite`,
+              }}
+            >
+              <div
+                className="flex h-20 w-20 items-center justify-center rounded-full text-2xl"
+                style={{
+                  background: "linear-gradient(135deg, #EC4899, #F97316)",
+                }}
+              >
+                {item.icon}
+              </div>
+              <span className="text-xs text-white/50 transition-colors group-hover:text-white/80">
+                {item.name}
+              </span>
+            </Link>
+          ))}
+        </div>
+
+        <p className="animate-bounce text-center text-xs text-white/20">
+          ↓ Explore
+        </p>
+      </div>
+
+      {/* SLIDE 2 - TOOLS */}
+      <div
+        ref={(el) => {
+          slideRefs.current[1] = el;
+        }}
+        data-slide-index={1}
+        className="relative z-10 flex h-screen flex-col justify-center px-6 py-8"
+        style={slideSnapStyle}
+      >
+        <h2 className="mb-2 text-2xl font-bold text-white">
+          Everything you need.
+        </h2>
+        <p className="mb-8 text-sm text-white/30">
+          All your creator tools in one place.
+        </p>
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+          {[
+            {
+              name: "AI Chat",
+              desc: "Your creative co-pilot",
+              href: "/dashboard/chat",
+              icon: "💬",
+            },
+            {
+              name: "Captions",
+              desc: "Stop-the-scroll captions",
+              href: "/dashboard/captions",
+              icon: "✍️",
+            },
+            {
+              name: "Hooks",
+              desc: "Grab attention instantly",
+              href: "/dashboard/hooks",
+              icon: "🎣",
+            },
+            {
+              name: "Scripts",
+              desc: "Viral video scripts",
+              href: "/dashboard/script",
+              icon: "🎬",
+            },
+            {
+              name: "Trends",
+              desc: "Real-time trend data",
+              href: "/dashboard/trends",
+              icon: "📈",
+            },
+            {
+              name: "Ideas",
+              desc: "Never run out of ideas",
+              href: "/dashboard/content-ideas",
+              icon: "💡",
+            },
+          ].map((tool) => (
+            <Link
+              key={tool.name}
+              href={tool.href}
+              className="cursor-pointer rounded-2xl border border-white/8 bg-white/5 p-4 transition-all duration-200 hover:scale-[1.02] hover:border-pink-500/30 hover:bg-white/8"
+            >
+              <div
+                className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl text-lg"
+                style={{
+                  background: "linear-gradient(135deg, #EC4899, #F97316)",
+                }}
+              >
+                {tool.icon}
+              </div>
+              <p className="text-sm font-semibold text-white">{tool.name}</p>
+              <p className="mt-1 text-xs text-white/40">{tool.desc}</p>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* SLIDE 3 - TODAY'S OPPORTUNITIES */}
+      <div
+        ref={(el) => {
+          slideRefs.current[2] = el;
+        }}
+        data-slide-index={2}
+        className="relative z-10 flex h-screen flex-col justify-center px-6 py-8"
+        style={slideSnapStyle}
+      >
+        <h2 className="mb-2 text-2xl font-bold text-white">
+          Today&apos;s Opportunities ✦
+        </h2>
+        <p className="mb-6 text-sm text-white/30">AI-generated just for you.</p>
+        <div className="space-y-3">
+          {isLoadingOpportunities ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
                 <div
-                  key={index}
-                  className="absolute rounded-full bg-gradient-to-br from-[#EC4899] to-[#F97316] opacity-80 shadow-[0_20px_60px_-20px_rgba(236,72,153,0.5)] will-change-transform"
-                  style={{
-                    width: bubble.size,
-                    height: bubble.size,
-                    top: bubble.top,
-                    left: bubble.left,
-                    animation: `dash-hero-float ${bubble.duration}s ease-in-out infinite`,
-                    animationDelay: `${bubble.delay}s`,
-                  }}
+                  key={i}
+                  className="h-16 animate-pulse rounded-xl border border-white/8 bg-white/5 p-4"
                 />
               ))}
             </div>
-
-            <p className="mt-auto text-center text-sm text-white/25">
-              Scroll to explore →
-            </p>
-          </div>
-        </section>
-
-        {/* SLIDE 2 — Tools */}
-        <section
-          ref={(el) => {
-            slideRefs.current[1] = el;
-          }}
-          data-slide-index={1}
-          className={slideClass}
-        >
-          <div className="mx-auto w-full max-w-4xl">
-            <h2 className="text-2xl font-bold tracking-[-0.02em] text-white">
-              Everything you need to create.
-            </h2>
-            <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {toolCards.map((tool) => (
-                <Link
-                  key={tool.title}
-                  href={tool.href}
-                  className="group rounded-2xl border border-white/[0.08] bg-white/[0.05] p-5 backdrop-blur-sm transition-all duration-200 hover:-translate-y-1 hover:border-[#EC4899]/35 hover:shadow-[0_12px_40px_-16px_rgba(236,72,153,0.45)]"
-                >
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-[#EC4899] to-[#F97316] text-white shadow-[0_0_24px_-8px_rgba(236,72,153,0.5)]">
-                    {tool.icon}
-                  </div>
-                  <h3 className="mt-4 font-bold text-white">{tool.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-white/40">
-                    {tool.description}
-                  </p>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* SLIDE 3 — Opportunities */}
-        <section
-          ref={(el) => {
-            slideRefs.current[2] = el;
-          }}
-          data-slide-index={2}
-          className={slideClass}
-        >
-          <div className="mx-auto w-full max-w-3xl">
-            <div className="flex items-center justify-between gap-4">
-              <h2 className="flex items-center gap-2 text-2xl font-bold tracking-[-0.02em] text-white">
-                <span aria-hidden className="text-[#EC4899]">
-                  ✦
-                </span>
-                Today&apos;s Opportunities
-              </h2>
-              <button
-                type="button"
-                onClick={handleRefreshBrief}
-                disabled={isRefreshingBrief}
-                className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.05] text-white/50 transition-colors hover:border-[#EC4899]/30 hover:text-[#FB923C] disabled:opacity-40"
-                aria-label="Refresh opportunities"
+          ) : opportunities.length > 0 ? (
+            opportunities.slice(0, 3).map((opp, i) => (
+              <div
+                key={`${opp}-${i}`}
+                className="flex items-start gap-3 rounded-xl border border-white/8 bg-white/5 p-4"
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className={`h-4 w-4 ${isRefreshingBrief ? "animate-spin" : ""}`}
-                  aria-hidden
-                >
-                  <path
-                    d="M20 12a8 8 0 1 1-2.34-5.66M20 4v6h-6"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-            </div>
-
-            {isLoadingBrief ? (
-              <OpportunitySkeleton />
-            ) : opportunities.length === 0 ? (
-              <p className="mt-8 text-sm text-white/40">
-                Opportunities will appear here once your daily brief is ready.
-              </p>
-            ) : (
-              <div className="mt-8 space-y-4">
-                {opportunities.slice(0, 3).map((item, index) => (
-                  <div
-                    key={`${item}-${index}`}
-                    className="rounded-2xl border border-white/[0.08] bg-white/[0.05] p-5 backdrop-blur-sm"
-                  >
-                    <div className="flex items-start gap-3">
-                      <span
-                        aria-hidden
-                        className="mt-2 h-2 w-2 shrink-0 rounded-full bg-[#EC4899]"
-                      />
-                      <p className="text-[15px] leading-relaxed text-white/75">
-                        {item}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-pink-400" />
+                <p className="text-sm text-white/80">{opp}</p>
               </div>
+            ))
+          ) : (
+            <p className="text-sm text-white/40">
+              Opportunities will appear here once your daily brief is ready.
+            </p>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            localStorage.removeItem(CACHE_KEY);
+            void fetchOpportunities(true);
+          }}
+          className="mt-4 text-xs text-white/30 transition-colors hover:text-pink-400"
+        >
+          ↻ Refresh
+        </button>
+      </div>
+
+      {/* SLIDE 4 - CREATOR DNA */}
+      <div
+        ref={(el) => {
+          slideRefs.current[3] = el;
+        }}
+        data-slide-index={3}
+        className="relative z-10 flex h-screen flex-col justify-center px-6 py-8"
+        style={slideSnapStyle}
+      >
+        <h2 className="mb-2 text-2xl font-bold text-white">Your Creator DNA</h2>
+        <p className="mb-6 text-sm text-white/30">What Clotter knows about you.</p>
+        <div className="rounded-2xl border border-white/8 bg-white/5 p-6">
+          <div className="mb-4 flex flex-wrap gap-2">
+            {creatorProfile.niches.length > 0 ? (
+              creatorProfile.niches.map((n) => (
+                <span
+                  key={n}
+                  className="rounded-full px-3 py-1 text-xs font-medium text-white"
+                  style={{
+                    background: "linear-gradient(135deg, #EC4899, #F97316)",
+                  }}
+                >
+                  {n}
+                </span>
+              ))
+            ) : (
+              <span className="text-sm text-white/30">No niche set yet</span>
             )}
           </div>
-        </section>
-
-        {/* SLIDE 4 — Creator DNA */}
-        <section
-          ref={(el) => {
-            slideRefs.current[3] = el;
-          }}
-          data-slide-index={3}
-          className={slideClass}
-        >
-          <div className="mx-auto w-full max-w-3xl">
-            <h2 className="text-2xl font-bold tracking-[-0.02em] text-white">
-              Your Creator DNA
-            </h2>
-
-            <div className="mt-10 flex flex-col gap-10 lg:flex-row lg:items-center">
-              <CompletionRing percent={creatorProfile.completion} />
-
-              <div className="min-w-0 flex-1 space-y-6">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/30">
-                    Niche
-                  </p>
-                  {creatorProfile.niches.length > 0 ? (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {creatorProfile.niches.map((niche) => (
-                        <span
-                          key={niche}
-                          className="rounded-full border border-[#EC4899]/30 bg-[#EC4899]/10 px-3 py-1 text-sm font-medium text-pink-100"
-                        >
-                          {niche}
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="mt-2 text-sm text-white/40">Not set yet</p>
-                  )}
-                </div>
-
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/30">
-                    Platforms
-                  </p>
-                  {creatorProfile.platforms.length > 0 ? (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {creatorProfile.platforms.map((platform) => (
-                        <span
-                          key={platform}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.05] px-3 py-1 text-sm text-white/70"
-                        >
-                          <span className="h-1.5 w-1.5 rounded-full bg-[#EC4899]" />
-                          {PLATFORM_LABELS[platform.toLowerCase()] ?? platform}
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="mt-2 text-sm text-white/40">Not set yet</p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <Link
-              href="/dashboard/memory"
-              className="mt-10 inline-flex items-center gap-2 text-sm font-semibold text-[#FB923C] transition-colors hover:text-[#FECDD3]"
-            >
-              Update Profile →
-            </Link>
+          <div className="mb-6 flex flex-wrap gap-2">
+            {creatorProfile.platforms.length > 0
+              ? creatorProfile.platforms.map((p) => (
+                  <span
+                    key={p}
+                    className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/60"
+                  >
+                    {p}
+                  </span>
+                ))
+              : null}
           </div>
-        </section>
+          <Link
+            href="/dashboard/memory"
+            className="text-xs font-medium text-pink-400 transition-colors hover:text-pink-300"
+          >
+            Update Profile →
+          </Link>
+        </div>
       </div>
+
+      {/* DOT NAVIGATION */}
+      <div className="fixed right-4 top-1/2 z-50 flex -translate-y-1/2 flex-col gap-2">
+        {[0, 1, 2, 3].map((i) => (
+          <button
+            key={i}
+            type="button"
+            aria-label={`Go to slide ${i + 1}`}
+            onClick={() => scrollToSlide(i)}
+            className={`h-2 w-2 rounded-full transition-all duration-200 ${
+              activeSlide === i ? "scale-125 bg-white" : "bg-white/20"
+            }`}
+          />
+        ))}
+      </div>
+
+      <style>{`
+        @keyframes float1 { 0%,100% { transform: translateY(0px) } 50% { transform: translateY(-20px) } }
+        @keyframes float2 { 0%,100% { transform: translateY(0px) } 50% { transform: translateY(-15px) } }
+        @keyframes float3 { 0%,100% { transform: translateY(0px) } 50% { transform: translateY(-25px) } }
+      `}</style>
     </div>
   );
 }

@@ -20,8 +20,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
-  --font-heading: var(--font-heading);
+  --font-sans: var(--font-jakarta);
+  --font-heading: var(--font-jakarta);
   --font-mono: var(--font-geist-mono);
 }
 
@@ -35,7 +35,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -48,14 +48,14 @@ h4,
 h5,
 h6,
 .font-heading {
-  font-family: var(--font-heading), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   font-weight: 700;
   letter-spacing: -0.02em;
 }
 
 .dash-shell {
   letter-spacing: -0.011em;
-  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
 }
 
 /* ── Animated floating orbs ── */
@@ -718,7 +718,7 @@ h6,
 }
 
 .dash-label {
-  font-family: var(--font-heading), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -758,7 +758,7 @@ h6,
 }
 
 .dash-title-page {
-  font-family: var(--font-heading), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   font-size: 2.125rem;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -767,7 +767,7 @@ h6,
 }
 
 .dash-title-section {
-  font-family: var(--font-heading), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -2142,7 +2142,7 @@ h6,
 }
 
 .script-section-label {
-  font-family: var(--font-heading), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -2841,7 +2841,7 @@ h6,
 .premium-feature-title {
   margin-top: 0.75rem;
   max-width: 48rem;
-  font-family: var(--font-heading), sans-serif;
+  font-family: var(--font-jakarta), sans-serif;
   font-size: 1.875rem;
   font-weight: 700;
   line-height: 1.1;
@@ -3062,7 +3062,7 @@ h6,
 }
 
 .premium-loading-label {
-  font-family: var(--font-heading), sans-serif;
+  font-family: var(--font-jakarta), sans-serif;
   font-size: 1.125rem;
   font-weight: 700;
   color: #ffffff;
