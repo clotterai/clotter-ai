@@ -46,15 +46,23 @@ export type UserPreferences = {
 };
 
 export type OnboardingPayload = {
-  niche: string;
+  /** Primary niche(s) — joined to `niche` text column */
+  niches?: string[];
+  niche?: string;
   subNiche?: string;
   platforms: string[];
-  audienceAge: string;
-  audienceLocation: string;
-  audienceGender: string;
-  contentStyle: string;
-  biggestGoal: string;
-  postingFrequency: string;
+  audienceAges?: string[];
+  audienceAge?: string;
+  audienceLocations?: string[];
+  audienceLocation?: string;
+  audienceGenders?: string[];
+  audienceGender?: string;
+  contentStyles?: string[];
+  contentStyle?: string;
+  biggestGoals?: string[];
+  biggestGoal?: string;
+  postingFrequencies?: string[];
+  postingFrequency?: string;
   uniqueAngle: string;
   name?: string;
 };

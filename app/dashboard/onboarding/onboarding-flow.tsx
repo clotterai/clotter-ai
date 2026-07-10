@@ -1,13 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 
 const TOTAL_STEPS = 7;
 
 const niches = [
   "Fitness",
   "Fashion",
+  "Beauty",
   "Tech",
   "Food",
   "Travel",
@@ -18,20 +19,40 @@ const niches = [
   "Lifestyle",
   "Gaming",
   "Finance",
+  "Music",
+  "Dance",
+  "Art & Design",
+  "Photography",
+  "Sports",
+  "Health & Wellness",
+  "Parenting",
+  "Pets",
+  "DIY & Crafts",
+  "Cooking",
+  "Motivation",
+  "Relationships",
+  "True Crime",
+  "News",
+  "Real Estate",
+  "Crypto",
+  "Cars",
+  "Architecture",
+  "Books",
+  "Movies & TV",
+  "Skincare",
+  "Mental Health",
+  "Sustainability",
+  "Science",
+  "History",
+  "Politics",
+  "Personal Finance",
   "Other",
 ];
 
-const platforms = [
-  "Instagram",
-  "YouTube",
-  "TikTok",
-  "LinkedIn",
-];
-
+const platforms = ["Instagram", "YouTube", "TikTok", "LinkedIn"];
 const ageRanges = ["13-17", "18-24", "25-34", "35-44", "45+"];
 const locations = ["India", "USA", "UK", "Global", "Other"];
 const genders = ["Mostly female", "Mostly male", "Mixed"];
-
 const contentStyles = [
   "Educational",
   "Entertaining",
@@ -40,7 +61,6 @@ const contentStyles = [
   "Funny",
   "Controversial",
 ];
-
 const goals = [
   "Grow to 10k",
   "Grow to 100k",
@@ -48,13 +68,49 @@ const goals = [
   "Sell my products",
   "Build personal brand",
 ];
-
 const frequencies = ["Daily", "3-4x week", "1-2x week", "Monthly"];
 
-const optionGridClass = "grid grid-cols-2 md:grid-cols-3 gap-3 w-full";
-const optionButtonClass =
-  "memory-onboarding-card text-sm md:text-base py-3 px-4";
-const pillButtonClass = "captions-tone-pill text-sm md:text-base py-3 px-4";
+type StepConfig = {
+  title: string;
+  subtitle: string;
+};
+
+const STEP_CONFIG: StepConfig[] = [
+  {
+    title: "What's your creator niche?",
+    subtitle: "Select all that apply — you can pick more than one.",
+  },
+  {
+    title: "What platforms do you create for?",
+    subtitle: "Select every platform you publish on.",
+  },
+  {
+    title: "Who is your audience?",
+    subtitle: "Select all age ranges, locations, and genders that fit.",
+  },
+  {
+    title: "What's your content style?",
+    subtitle: "Pick every style that sounds like you.",
+  },
+  {
+    title: "What are your biggest goals?",
+    subtitle: "Select all goals you're working toward right now.",
+  },
+  {
+    title: "How often do you post?",
+    subtitle: "Select all frequencies that match your rhythm.",
+  },
+  {
+    title: "What makes your content unique?",
+    subtitle: "Your angle, perspective, or secret sauce — this is your superpower.",
+  },
+];
+
+function toggleInList(list: string[], value: string): string[] {
+  return list.includes(value)
+    ? list.filter((item) => item !== value)
+    : [...list, value];
+}
 
 function Confetti() {
   return (
@@ -67,10 +123,132 @@ function Confetti() {
             left: `${(i * 17) % 100}%`,
             animationDelay: `${(i % 8) * 0.08}s`,
             background:
-              i % 3 === 0 ? "#6366F1" : i % 3 === 1 ? "#A855F7" : "#C084FC",
+              i % 3 === 0 ? "#EC4899" : i % 3 === 1 ? "#F97316" : "#FB923C",
           }}
         />
       ))}
+    </div>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg viewBox="0 0 12 12" fill="none" className="h-2.5 w-2.5" aria-hidden>
+      <path
+        d="M2.5 6l2.5 2.5 4.5-5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function OptionPill({
+  label,
+  selected,
+  onToggle,
+}: {
+  label: string;
+  selected: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-pressed={selected}
+      className={`onboarding-v2-pill${selected ? " onboarding-v2-pill--selected" : ""}`}
+    >
+      {selected && (
+        <span className="onboarding-v2-pill-check" aria-hidden>
+          <CheckIcon />
+        </span>
+      )}
+      {label}
+    </button>
+  );
+}
+
+function OptionGrid({
+  options,
+  selected,
+  onToggle,
+}: {
+  options: string[];
+  selected: string[];
+  onToggle: (value: string) => void;
+}) {
+  return (
+    <div className="grid w-full grid-cols-2 gap-3 md:grid-cols-3">
+      {options.map((option) => (
+        <OptionPill
+          key={option}
+          label={option}
+          selected={selected.includes(option)}
+          onToggle={() => onToggle(option)}
+        />
+      ))}
+    </div>
+  );
+}
+
+function ProgressHeader({ step, progress }: { step: number; progress: number }) {
+  return (
+    <div className="onboarding-v2-progress-wrap">
+      <div className="mx-auto w-full max-w-2xl">
+        <div className="onboarding-v2-progress-track">
+          <div
+            className="onboarding-v2-progress-fill"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <div className="onboarding-v2-step-dots" aria-hidden>
+          {Array.from({ length: TOTAL_STEPS }).map((_, index) => (
+            <span
+              key={index}
+              className={`onboarding-v2-step-dot${
+                index === step
+                  ? " onboarding-v2-step-dot--active"
+                  : index < step
+                    ? " onboarding-v2-step-dot--done"
+                    : ""
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StepSection({
+  label,
+  options,
+  selected,
+  onToggle,
+}: {
+  label: string;
+  options: string[];
+  selected: string[];
+  onToggle: (value: string) => void;
+}) {
+  return (
+    <div className="space-y-3">
+      <p className="text-xs font-semibold uppercase tracking-wider text-white/40">
+        {label}
+      </p>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+        {options.map((option) => (
+          <OptionPill
+            key={option}
+            label={option}
+            selected={selected.includes(option)}
+            onToggle={() => onToggle(option)}
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -83,33 +261,83 @@ export function OnboardingFlow() {
   const [showConfetti, setShowConfetti] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [niche, setNiche] = useState("");
+  const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
   const [subNiche, setSubNiche] = useState("");
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
-  const [audienceAge, setAudienceAge] = useState("");
-  const [audienceLocation, setAudienceLocation] = useState("");
-  const [audienceGender, setAudienceGender] = useState("");
-  const [contentStyle, setContentStyle] = useState("");
-  const [biggestGoal, setBiggestGoal] = useState("");
-  const [postingFrequency, setPostingFrequency] = useState("");
+  const [selectedAudienceAges, setSelectedAudienceAges] = useState<string[]>([]);
+  const [selectedAudienceLocations, setSelectedAudienceLocations] = useState<
+    string[]
+  >([]);
+  const [selectedAudienceGenders, setSelectedAudienceGenders] = useState<
+    string[]
+  >([]);
+  const [selectedContentStyles, setSelectedContentStyles] = useState<string[]>(
+    [],
+  );
+  const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
+  const [selectedFrequencies, setSelectedFrequencies] = useState<string[]>([]);
   const [uniqueAngle, setUniqueAngle] = useState("");
 
   const progress = ((step + 1) / TOTAL_STEPS) * 100;
+  const stepConfig = STEP_CONFIG[step];
+
+  const selectionCount = useMemo(() => {
+    switch (step) {
+      case 0:
+        return selectedNiches.length;
+      case 1:
+        return selectedPlatforms.length;
+      case 2:
+        return (
+          selectedAudienceAges.length +
+          selectedAudienceLocations.length +
+          selectedAudienceGenders.length
+        );
+      case 3:
+        return selectedContentStyles.length;
+      case 4:
+        return selectedGoals.length;
+      case 5:
+        return selectedFrequencies.length;
+      case 6:
+        return uniqueAngle.trim().length > 10 ? 1 : 0;
+      default:
+        return 0;
+    }
+  }, [
+    step,
+    selectedNiches,
+    selectedPlatforms,
+    selectedAudienceAges,
+    selectedAudienceLocations,
+    selectedAudienceGenders,
+    selectedContentStyles,
+    selectedGoals,
+    selectedFrequencies,
+    uniqueAngle,
+  ]);
 
   const canContinue = useMemo(() => {
     switch (step) {
       case 0:
-        return niche.length > 0 && (niche !== "Other" || subNiche.trim().length > 0);
+        return (
+          selectedNiches.length > 0 &&
+          (!selectedNiches.includes("Other") || subNiche.trim().length > 0)
+        );
       case 1:
         return selectedPlatforms.length > 0;
       case 2:
-        return audienceAge && audienceLocation && audienceGender;
+        return (
+          selectedAudienceAges.length > 0 ||
+          selectedAudienceLocations.length > 0 ||
+          selectedAudienceGenders.length > 0
+        );
       case 3:
-        return contentStyle.length > 0;
+        return selectedContentStyles.length > 0;
       case 4:
-        return biggestGoal.length > 0;
+        return selectedGoals.length > 0;
       case 5:
-        return postingFrequency.length > 0;
+        return selectedFrequencies.length > 0;
       case 6:
         return uniqueAngle.trim().length > 10;
       default:
@@ -117,25 +345,17 @@ export function OnboardingFlow() {
     }
   }, [
     step,
-    niche,
+    selectedNiches,
     subNiche,
     selectedPlatforms,
-    audienceAge,
-    audienceLocation,
-    audienceGender,
-    contentStyle,
-    biggestGoal,
-    postingFrequency,
+    selectedAudienceAges,
+    selectedAudienceLocations,
+    selectedAudienceGenders,
+    selectedContentStyles,
+    selectedGoals,
+    selectedFrequencies,
     uniqueAngle,
   ]);
-
-  function togglePlatform(platform: string) {
-    setSelectedPlatforms((prev) =>
-      prev.includes(platform)
-        ? prev.filter((p) => p !== platform)
-        : [...prev, platform],
-    );
-  }
 
   function goNext() {
     if (!canContinue) return;
@@ -159,15 +379,15 @@ export function OnboardingFlow() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          niche,
-          subNiche: niche === "Other" ? subNiche : undefined,
+          niches: selectedNiches,
+          subNiche: selectedNiches.includes("Other") ? subNiche : undefined,
           platforms: selectedPlatforms,
-          audienceAge,
-          audienceLocation,
-          audienceGender,
-          contentStyle,
-          biggestGoal,
-          postingFrequency,
+          audienceAges: selectedAudienceAges,
+          audienceLocations: selectedAudienceLocations,
+          audienceGenders: selectedAudienceGenders,
+          contentStyles: selectedContentStyles,
+          biggestGoals: selectedGoals,
+          postingFrequencies: selectedFrequencies,
           uniqueAngle,
         }),
       });
@@ -189,30 +409,138 @@ export function OnboardingFlow() {
     }
   }
 
+  function renderStepContent(): ReactNode {
+    switch (step) {
+      case 0:
+        return (
+          <>
+            <OptionGrid
+              options={niches}
+              selected={selectedNiches}
+              onToggle={(value) =>
+                setSelectedNiches((prev) => toggleInList(prev, value))
+              }
+            />
+            {selectedNiches.includes("Other") && (
+              <input
+                type="text"
+                value={subNiche}
+                onChange={(e) => setSubNiche(e.target.value)}
+                placeholder="Describe your niche..."
+                className="onboarding-input mt-5 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 text-base text-white placeholder-white/30 focus:border-pink-500/50 focus:outline-none focus:shadow-[0_0_20px_-5px_rgba(236,72,153,0.3)]"
+              />
+            )}
+          </>
+        );
+      case 1:
+        return (
+          <OptionGrid
+            options={platforms}
+            selected={selectedPlatforms}
+            onToggle={(value) =>
+              setSelectedPlatforms((prev) => toggleInList(prev, value))
+            }
+          />
+        );
+      case 2:
+        return (
+          <div className="space-y-8">
+            <StepSection
+              label="Age range"
+              options={ageRanges}
+              selected={selectedAudienceAges}
+              onToggle={(value) =>
+                setSelectedAudienceAges((prev) => toggleInList(prev, value))
+              }
+            />
+            <StepSection
+              label="Location"
+              options={locations}
+              selected={selectedAudienceLocations}
+              onToggle={(value) =>
+                setSelectedAudienceLocations((prev) => toggleInList(prev, value))
+              }
+            />
+            <StepSection
+              label="Gender"
+              options={genders}
+              selected={selectedAudienceGenders}
+              onToggle={(value) =>
+                setSelectedAudienceGenders((prev) => toggleInList(prev, value))
+              }
+            />
+          </div>
+        );
+      case 3:
+        return (
+          <OptionGrid
+            options={contentStyles}
+            selected={selectedContentStyles}
+            onToggle={(value) =>
+              setSelectedContentStyles((prev) => toggleInList(prev, value))
+            }
+          />
+        );
+      case 4:
+        return (
+          <OptionGrid
+            options={goals}
+            selected={selectedGoals}
+            onToggle={(value) =>
+              setSelectedGoals((prev) => toggleInList(prev, value))
+            }
+          />
+        );
+      case 5:
+        return (
+          <OptionGrid
+            options={frequencies}
+            selected={selectedFrequencies}
+            onToggle={(value) =>
+              setSelectedFrequencies((prev) => toggleInList(prev, value))
+            }
+          />
+        );
+      case 6:
+        return (
+          <textarea
+            value={uniqueAngle}
+            onChange={(e) => setUniqueAngle(e.target.value)}
+            rows={6}
+            placeholder="e.g. I break down complex AI tools for non-technical creators in under 60 seconds..."
+            className="onboarding-input w-full resize-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 text-base text-white placeholder-white/30 focus:border-pink-500/50 focus:outline-none focus:shadow-[0_0_20px_-5px_rgba(236,72,153,0.3)]"
+          />
+        );
+      default:
+        return null;
+    }
+  }
+
+  const continueLabel =
+    step < TOTAL_STEPS - 1
+      ? selectionCount > 0
+        ? `Continue (${selectionCount} selected)`
+        : "Continue"
+      : isSubmitting
+        ? "Building your DNA..."
+        : "Complete setup";
+
   return (
     <div
-      className="onboarding-flow relative fixed inset-0 z-[200] min-h-screen overflow-y-auto bg-[#0D0D1A] text-white"
+      className="onboarding-flow relative fixed inset-0 z-[200] flex min-h-screen flex-col overflow-hidden bg-[#0D0D1A] text-white"
       style={{ backgroundColor: "#0D0D1A", color: "#ffffff" }}
     >
       {showConfetti && <Confetti />}
 
-      <div className="relative z-10 flex min-h-screen flex-col">
-        <div className="memory-onboarding-progress relative z-10">
-          <div
-            className="memory-onboarding-progress-fill"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
+      <ProgressHeader step={step} progress={progress} />
 
-        <div className="relative z-10 flex min-h-screen w-full flex-col items-center justify-start px-4 py-6 md:py-16">
-          <div className="relative z-10 mb-8 w-full max-w-2xl text-center md:mb-10">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6366F1]">
-              Step {step + 1} of {TOTAL_STEPS}
-            </p>
-            <h1 className="font-heading mt-3 text-xl font-bold tracking-[-0.02em] text-white md:text-3xl">
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-y-auto">
+        <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 pb-4 pt-6 md:px-6 md:pt-8">
+          <div className="mb-8 text-center md:mb-10">
+            <h1 className="font-heading text-xl font-bold tracking-[-0.02em] text-white md:text-2xl">
               Let&apos;s build your Creator DNA
             </h1>
-            <p className="mt-3 max-w-lg text-base text-white/45">
+            <p className="mt-2 text-sm text-white/40">
               Clotter learns who you are — so every script, caption, and idea
               feels like it came from you.
             </p>
@@ -220,264 +548,57 @@ export function OnboardingFlow() {
 
           <div
             key={step}
-            className={`memory-onboarding-step relative z-10 w-full max-w-2xl ${
+            className={`onboarding-v2-step w-full flex-1 ${
               direction === "next"
-                ? "memory-onboarding-step--next"
-                : "memory-onboarding-step--back"
+                ? "onboarding-v2-step--next"
+                : "onboarding-v2-step--back"
             }`}
           >
-            {step === 0 && (
-              <section className="relative z-10">
-                <h2 className="font-heading text-xl font-bold tracking-[-0.02em] text-white md:text-3xl">
-                  What&apos;s your creator niche?
-                </h2>
-                <div className={`mt-6 ${optionGridClass}`}>
-                  {niches.map((option) => (
-                    <button
-                      key={option}
-                      type="button"
-                      onClick={() => setNiche(option)}
-                      className={`${optionButtonClass}${
-                        niche === option ? " memory-onboarding-card--active" : ""
-                      }`}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-                {niche === "Other" && (
-                  <input
-                    type="text"
-                    value={subNiche}
-                    onChange={(e) => setSubNiche(e.target.value)}
-                    placeholder="Describe your niche..."
-                    className="captions-textarea onboarding-input relative z-10 mt-4 !min-h-0 !py-3.5 text-base"
-                  />
-                )}
-              </section>
-            )}
-
-            {step === 1 && (
-              <section className="relative z-10">
-                <h2 className="font-heading text-xl font-bold tracking-[-0.02em] text-white md:text-3xl">
-                  What platforms do you create for?
-                </h2>
-                <p className="mt-2 text-base text-white/40">Select all that apply</p>
-                <div className={`mt-6 ${optionGridClass}`}>
-                  {platforms.map((platform) => (
-                    <button
-                      key={platform}
-                      type="button"
-                      onClick={() => togglePlatform(platform)}
-                      className={`${optionButtonClass} memory-onboarding-card--platform${
-                        selectedPlatforms.includes(platform)
-                          ? " memory-onboarding-card--active"
-                          : ""
-                      }`}
-                    >
-                      {platform}
-                    </button>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {step === 2 && (
-              <section className="relative z-10 space-y-6">
-                <div>
-                  <h2 className="font-heading text-xl font-bold tracking-[-0.02em] text-white md:text-3xl">
-                    Who is your audience?
-                  </h2>
-                  <p className="mt-2 text-sm font-semibold uppercase tracking-[0.1em] text-white/35 md:text-base">
-                    Age range
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {ageRanges.map((option) => (
-                      <button
-                        key={option}
-                        type="button"
-                        onClick={() => setAudienceAge(option)}
-                        className={`${pillButtonClass}${
-                          audienceAge === option ? " captions-tone-pill--active" : ""
-                        }`}
-                      >
-                        {option}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.1em] text-white/35 md:text-base">
-                    Location
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {locations.map((option) => (
-                      <button
-                        key={option}
-                        type="button"
-                        onClick={() => setAudienceLocation(option)}
-                        className={`${pillButtonClass}${
-                          audienceLocation === option
-                            ? " captions-tone-pill--active"
-                            : ""
-                        }`}
-                      >
-                        {option}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.1em] text-white/35 md:text-base">
-                    Gender
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {genders.map((option) => (
-                      <button
-                        key={option}
-                        type="button"
-                        onClick={() => setAudienceGender(option)}
-                        className={`${pillButtonClass}${
-                          audienceGender === option
-                            ? " captions-tone-pill--active"
-                            : ""
-                        }`}
-                      >
-                        {option}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {step === 3 && (
-              <section className="relative z-10">
-                <h2 className="font-heading text-xl font-bold tracking-[-0.02em] text-white md:text-3xl">
-                  What&apos;s your content style?
-                </h2>
-                <div className={`mt-6 ${optionGridClass}`}>
-                  {contentStyles.map((option) => (
-                    <button
-                      key={option}
-                      type="button"
-                      onClick={() => setContentStyle(option)}
-                      className={`${optionButtonClass}${
-                        contentStyle === option
-                          ? " memory-onboarding-card--active"
-                          : ""
-                      }`}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {step === 4 && (
-              <section className="relative z-10">
-                <h2 className="font-heading text-xl font-bold tracking-[-0.02em] text-white md:text-3xl">
-                  What&apos;s your biggest goal right now?
-                </h2>
-                <div className={`mt-6 ${optionGridClass}`}>
-                  {goals.map((option) => (
-                    <button
-                      key={option}
-                      type="button"
-                      onClick={() => setBiggestGoal(option)}
-                      className={`${optionButtonClass}${
-                        biggestGoal === option
-                          ? " memory-onboarding-card--active"
-                          : ""
-                      }`}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {step === 5 && (
-              <section className="relative z-10">
-                <h2 className="font-heading text-xl font-bold tracking-[-0.02em] text-white md:text-3xl">
-                  How often do you post?
-                </h2>
-                <div className="mt-6 flex flex-wrap gap-2">
-                  {frequencies.map((option) => (
-                    <button
-                      key={option}
-                      type="button"
-                      onClick={() => setPostingFrequency(option)}
-                      className={`${pillButtonClass}${
-                        postingFrequency === option
-                          ? " captions-tone-pill--active"
-                          : ""
-                      }`}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {step === 6 && (
-              <section className="relative z-10">
-                <h2 className="font-heading text-xl font-bold tracking-[-0.02em] text-white md:text-3xl">
-                  What makes your content unique?
-                </h2>
-                <p className="mt-2 text-base text-white/40">
-                  Your angle, perspective, or secret sauce — this is your superpower.
-                </p>
-                <textarea
-                  value={uniqueAngle}
-                  onChange={(e) => setUniqueAngle(e.target.value)}
-                  rows={5}
-                  placeholder="e.g. I break down complex AI tools for non-technical creators in under 60 seconds..."
-                  className="captions-textarea onboarding-input relative z-10 mt-6 w-full resize-none text-base"
-                />
-              </section>
-            )}
+            <h2 className="font-heading mb-2 text-2xl font-bold tracking-[-0.02em] text-white md:text-3xl">
+              {stepConfig.title}
+            </h2>
+            <p className="mb-6 text-sm text-white/40">{stepConfig.subtitle}</p>
+            {renderStepContent()}
           </div>
 
           {error && (
-            <p className="relative z-10 mt-6 w-full max-w-2xl rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-4 text-base text-red-300">
+            <p className="mt-6 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-4 text-sm text-red-300">
               {error}
             </p>
           )}
+        </div>
+      </div>
 
-          <div className="relative z-10 mt-auto flex w-full max-w-2xl flex-col-reverse gap-3 pt-10 md:flex-row md:items-center md:justify-between md:gap-4">
+      <div className="onboarding-v2-sticky-footer">
+        <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <button
+            type="button"
+            onClick={goBack}
+            disabled={step === 0 || isSubmitting}
+            className="onboarding-v2-back-btn md:max-w-[140px]"
+          >
+            Back
+          </button>
+
+          {step < TOTAL_STEPS - 1 ? (
             <button
               type="button"
-              onClick={goBack}
-              disabled={step === 0 || isSubmitting}
-              className="script-action-btn w-full text-base md:w-auto disabled:opacity-40"
+              onClick={goNext}
+              disabled={!canContinue}
+              className="onboarding-v2-continue-btn md:flex-1"
             >
-              Back
+              {continueLabel}
             </button>
-
-            {step < TOTAL_STEPS - 1 ? (
-              <button
-                type="button"
-                onClick={goNext}
-                disabled={!canContinue}
-                className="script-action-btn script-action-btn--primary w-full text-base md:w-auto disabled:opacity-40"
-              >
-                Continue
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => void completeOnboarding()}
-                disabled={!canContinue || isSubmitting}
-                className="script-action-btn script-action-btn--primary w-full text-base md:w-auto disabled:opacity-40"
-              >
-                {isSubmitting ? "Building your DNA..." : "Complete setup"}
-              </button>
-            )}
-          </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => void completeOnboarding()}
+              disabled={!canContinue || isSubmitting}
+              className="onboarding-v2-continue-btn md:flex-1"
+            >
+              {continueLabel}
+            </button>
+          )}
         </div>
       </div>
     </div>
