@@ -1312,8 +1312,8 @@ export function ChatInterface({
               </svg>
             </button>
           </div>
-          <p className="px-6 pb-2 py-2 text-center text-[11px] text-white/20">
-            Clotter AI can make mistakes.
+          <p className="px-8 py-3 text-center text-[12px] tracking-wide text-white/25">
+            Clotter AI can make mistakes — always double-check important information.
           </p>
         </div>
       </div>

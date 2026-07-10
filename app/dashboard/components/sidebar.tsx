@@ -23,7 +23,7 @@ export type SidebarUser = {
   initials: string;
 };
 
-const navIconClass = "h-[18px] w-[18px]";
+const navIconClass = "h-5 w-5";
 
 const dashboardNavItem = {
   label: "Dashboard",
@@ -204,12 +204,12 @@ type ChatSessionSummary = {
 const CHAT_HREF = "/dashboard/chat";
 
 const navLinkBase =
-  "dash-nav-item dash-nav-stagger group relative flex min-h-[44px] items-center gap-3 overflow-hidden rounded-xl border-l-2 px-3 py-2.5 text-[13px] font-medium transition-all duration-200 ease-out";
+  "dash-nav-item dash-nav-stagger group relative flex min-h-[44px] items-center gap-3 overflow-hidden rounded-xl border-l-2 px-3 py-2.5 text-[14px] font-semibold transition-all duration-200 ease-out";
 
 function navLinkClass(active: boolean) {
   return active
-    ? `${navLinkBase} border-pink-500 bg-pink-500/10 text-white`
-    : `${navLinkBase} border-transparent text-white/45 hover:translate-x-0.5 hover:bg-pink-500/5 hover:text-white/80`;
+    ? `${navLinkBase} border-pink-500 bg-pink-500/10 font-bold text-white`
+    : `${navLinkBase} border-transparent text-white/55 hover:translate-x-0.5 hover:bg-pink-500/5 hover:text-white/80`;
 }
 
 function chatItemClass(active: boolean) {
@@ -446,7 +446,7 @@ function SidebarNavLink({
     >
       <span
         className={`relative z-[1] shrink-0 transition-all duration-200 ${
-          active ? "text-pink-500" : "text-white/45 group-hover:text-white/80"
+          active ? "text-pink-500" : "text-white/55 group-hover:text-white/80"
         }`}
       >
         {item.icon}
@@ -658,7 +658,7 @@ const ChatNavSection = memo(function ChatNavSection({
       <Link
         href={CHAT_HREF}
         onClick={onClose}
-        className="dash-new-chat-btn dash-chat-rise-in flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-pink-500 to-orange-500 px-3 py-2.5 text-sm font-semibold text-white shadow-[0_0_24px_-8px_rgba(236,72,153,0.5)] transition-all duration-150 hover:shadow-[0_0_32px_-6px_rgba(236,72,153,0.65)]"
+        className="dash-new-chat-btn dash-chat-rise-in flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-pink-500 to-orange-500 px-3 py-2.5 text-[14px] font-semibold text-white shadow-[0_0_24px_-8px_rgba(236,72,153,0.5)] transition-all duration-150 hover:shadow-[0_0_32px_-6px_rgba(236,72,153,0.65)]"
         style={{ "--history-index": 0 } as React.CSSProperties}
       >
         + New Chat
@@ -1036,9 +1036,9 @@ export function DashboardSidebar({
               />
 
               {navGroups.map((group, groupIndex) => (
-                <div key={group.label} className="mt-5">
+                <div key={group.label} className="mt-6">
                   <p
-                    className="dash-nav-group-label mb-2 px-3 text-[9px] font-semibold uppercase tracking-[0.2em] text-white/25"
+                    className="dash-nav-group-label mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.15em] text-white/30"
                     style={{ "--group-index": groupIndex } as React.CSSProperties}
                   >
                     {group.label}
