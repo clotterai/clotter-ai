@@ -191,16 +191,10 @@ export function OnboardingFlow() {
 
   return (
     <div
-      className="onboarding-flow fixed inset-0 z-[200] min-h-screen overflow-y-auto bg-[#0D0D1A] text-white"
+      className="onboarding-flow relative fixed inset-0 z-[200] min-h-screen overflow-y-auto bg-[#0D0D1A] text-white"
       style={{ backgroundColor: "#0D0D1A", color: "#ffffff" }}
     >
       {showConfetti && <Confetti />}
-
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 z-0 bg-[#0D0D1A]"
-        style={{ backgroundColor: "#0D0D1A" }}
-      />
 
       <div className="relative z-10 flex min-h-screen flex-col">
         <div className="memory-onboarding-progress relative z-10">
