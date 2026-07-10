@@ -13,6 +13,7 @@ import {
   PremiumTextarea,
 } from "@/app/dashboard/components/premium-ui";
 import { useToast } from "@/app/dashboard/components/toast-provider";
+import { AddToPlannerButton } from "@/app/dashboard/components/add-to-planner-button";
 
 const tones = [
   { id: "funny", label: "Funny" },
@@ -152,6 +153,9 @@ export function CaptionGenerator() {
                   <p className="text-[0.9375rem] leading-[1.75] tracking-[-0.014em] text-white/85 sm:text-base">
                     {caption}
                   </p>
+                  <div className="mt-3">
+                    <AddToPlannerButton contentType="caption" contentText={caption} />
+                  </div>
                 </PremiumResultCard>
               ))}
             </ul>

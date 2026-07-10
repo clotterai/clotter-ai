@@ -2,6 +2,10 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import {
+  QUICK_PROMPT_KEY_BY_LABEL,
+  QUICK_PROMPT_LABELS,
+} from "@/lib/chat-quick-prompts";
 
 const CACHE_KEY = "clotter-daily-brief-v1";
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
@@ -394,6 +398,30 @@ export function DashboardHome({ greeting, firstName }: DashboardHomeProps) {
               ))}
             </ul>
           )}
+        </section>
+
+        <section className="dash-fade-in" style={{ animationDelay: "0.52s" }}>
+          <div>
+            <h3 className="font-heading text-xl font-bold tracking-[-0.02em] text-white sm:text-2xl">
+              Quick prompts
+            </h3>
+            <p className="mt-2 text-[15px] leading-relaxed tracking-[-0.01em] text-white/45">
+              One tap — Clotter sends a personalized prompt for your niche
+            </p>
+          </div>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            {QUICK_PROMPT_LABELS.map((label, index) => (
+              <Link
+                key={label}
+                href={`/dashboard/chat?prompt=${QUICK_PROMPT_KEY_BY_LABEL[label]}`}
+                className="dash-fade-in rounded-full border border-[#EC4899]/25 bg-[#EC4899]/10 px-4 py-2.5 text-sm font-medium text-white/80 transition-all duration-300 hover:border-[#EC4899]/45 hover:bg-[#EC4899]/20 hover:text-white"
+                style={{ animationDelay: `${0.58 + index * 0.04}s` }}
+              >
+                {label}
+              </Link>
+            ))}
+          </div>
         </section>
 
         <section className="dash-fade-in" style={{ animationDelay: "0.4s" }}>

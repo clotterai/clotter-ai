@@ -13,6 +13,7 @@ import {
   PremiumTextarea,
 } from "@/app/dashboard/components/premium-ui";
 import { useToast } from "@/app/dashboard/components/toast-provider";
+import { AddToPlannerButton } from "@/app/dashboard/components/add-to-planner-button";
 
 const platforms = [
   { id: "instagram", label: "Instagram" },
@@ -156,6 +157,9 @@ export function ContentIdeasGenerator() {
                   <p className="text-[0.9375rem] leading-[1.75] tracking-[-0.014em] text-white/85 sm:text-base">
                     {idea}
                   </p>
+                  <div className="mt-3">
+                    <AddToPlannerButton contentType="idea" contentText={idea} />
+                  </div>
                 </PremiumResultCard>
               ))}
             </ul>

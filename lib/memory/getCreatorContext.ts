@@ -108,32 +108,44 @@ export async function hasCreatorProfile(
   return Boolean(data);
 }
 
+export const PROFILE_COMPLETION_FIELDS = [
+  { key: "niche", label: "Niche" },
+  { key: "platforms", label: "Platforms" },
+  { key: "audience_age", label: "Audience size" },
+  { key: "content_style", label: "Content style" },
+  { key: "biggest_goal", label: "Goals" },
+  { key: "posting_frequency", label: "Posting frequency" },
+  { key: "unique_angle", label: "Unique angle" },
+] as const;
+
+function isProfileFieldFilled(value: unknown): boolean {
+  if (Array.isArray(value)) return value.length > 0;
+  return typeof value === "string" && value.trim().length > 0;
+}
+
 export function calculateProfileCompletion(
   profile: Record<string, unknown> | null,
 ): number {
   if (!profile) return 0;
 
-  const fields = [
-    "name",
-    "niche",
-    "sub_niche",
-    "audience_age",
-    "audience_location",
-    "audience_gender",
-    "platforms",
-    "content_style",
-    "posting_frequency",
-    "current_followers",
-    "biggest_goal",
-    "brand_name",
-    "unique_angle",
-  ];
+  const filled = PROFILE_COMPLETION_FIELDS.filter((field) =>
+    isProfileFieldFilled(profile[field.key]),
+  );
 
-  const filled = fields.filter((field) => {
-    const value = profile[field];
-    if (Array.isArray(value)) return value.length > 0;
-    return typeof value === "string" && value.trim().length > 0;
-  });
+  return Math.round((filled.length / PROFILE_COMPLETION_FIELDS.length) * 100);
+}
 
-  return Math.round((filled.length / fields.length) * 100);
+export function getMissingProfileFields(
+  profile: Record<string, unknown> | null,
+): { key: string; label: string }[] {
+  if (!profile) {
+    return PROFILE_COMPLETION_FIELDS.map((field) => ({
+      key: field.key,
+      label: field.label,
+    }));
+  }
+
+  return PROFILE_COMPLETION_FIELDS.filter(
+    (field) => !isProfileFieldFilled(profile[field.key]),
+  ).map((field) => ({ key: field.key, label: field.label }));
 }

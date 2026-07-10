@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import type { ContentHistoryItem, CreatorProfile } from "@/lib/memory/types";
+import { getMissingProfileFields } from "@/lib/memory/getCreatorContext";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 type Tab = "profile" | "history" | "preferences";
@@ -49,7 +51,7 @@ const PROFILE_FIELDS: {
   { key: "content_style", label: "Content style" },
   { key: "posting_frequency", label: "Posting frequency" },
   { key: "current_followers", label: "Followers" },
-  { key: "biggest_goal", label: "Biggest goal" },
+  { key: "biggest_goal", label: "Goals" },
   { key: "brand_name", label: "Brand name" },
   { key: "unique_angle", label: "Unique angle", type: "textarea" },
 ];
@@ -119,9 +121,14 @@ function typeLabel(type: string) {
   return labels[type] ?? type;
 }
 
-function isFieldFilled(value: unknown): boolean {
-  if (Array.isArray(value)) return value.length > 0;
-  return typeof value === "string" && value.trim().length > 0;
+function formatProfileValue(value: unknown): string {
+  if (Array.isArray(value)) {
+    return value.length > 0 ? value.join(", ") : "Not set";
+  }
+  if (typeof value === "string" && value.trim()) {
+    return value.trim();
+  }
+  return "Not set";
 }
 
 export function MemoryDashboard() {
@@ -219,6 +226,11 @@ export function MemoryDashboard() {
     });
     return groups;
   }, [filteredHistory]);
+
+  const missingFields = useMemo(
+    () => getMissingProfileFields(profile as Record<string, unknown> | null),
+    [profile],
+  );
 
   async function saveProfileField(key: string, value: unknown) {
     setSaving(true);
@@ -374,20 +386,57 @@ export function MemoryDashboard() {
           <div className="mb-10 flex flex-col items-start gap-8 lg:flex-row lg:items-center">
             <CompletionRing percent={completion} />
             <div>
-              <p className="font-heading text-xl font-bold text-white">
-                Your AI gets smarter as you add more
-              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <p className="font-heading text-xl font-bold text-white">
+                  Your AI gets smarter as you add more
+                </p>
+                {completion === 100 && (
+                  <span className="rounded-full border border-emerald-400/35 bg-emerald-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-emerald-200">
+                    Profile Complete
+                  </span>
+                )}
+              </div>
               <p className="mt-2 max-w-md text-sm leading-relaxed text-white/45">
                 Every field you complete helps Clotter personalize scripts, captions,
                 hooks, and ideas to match your voice and audience.
               </p>
+              {missingFields.length > 0 && (
+                <div className="mt-5 rounded-xl border border-[#EC4899]/25 bg-[#EC4899]/10 px-4 py-4">
+                  <p className="text-sm font-semibold text-white/90">
+                    Complete your profile
+                  </p>
+                  <p className="mt-1 text-xs text-white/45">
+                    {missingFields.length} field{missingFields.length !== 1 ? "s" : ""}{" "}
+                    remaining for 100% AI memory
+                  </p>
+                  <ul className="mt-3 flex flex-wrap gap-2">
+                    {missingFields.map((field) => (
+                      <li
+                        key={field.key}
+                        className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/60"
+                      >
+                        {field.label}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    href="/dashboard/onboarding"
+                    className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-[#FB923C] transition-colors hover:text-[#FECDD3]"
+                  >
+                    Complete your profile →
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             {PROFILE_FIELDS.map(({ key, label, type }) => {
               const value = profile?.[key];
-              const filled = isFieldFilled(value);
+              const filled =
+                Array.isArray(value)
+                  ? value.length > 0
+                  : typeof value === "string" && value.trim().length > 0;
               const isEditing = editingField === key;
 
               return (
@@ -419,9 +468,7 @@ export function MemoryDashboard() {
                         )
                       ) : (
                         <p className="mt-2 text-[15px] leading-relaxed text-white/85">
-                          {Array.isArray(value)
-                            ? value.join(", ") || "Not set"
-                            : (value as string) || "Not set"}
+                          {formatProfileValue(value)}
                         </p>
                       )}
                     </div>

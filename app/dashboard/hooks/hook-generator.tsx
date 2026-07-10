@@ -13,6 +13,7 @@ import {
   PremiumTextarea,
 } from "@/app/dashboard/components/premium-ui";
 import { useToast } from "@/app/dashboard/components/toast-provider";
+import { AddToPlannerButton } from "@/app/dashboard/components/add-to-planner-button";
 
 const platforms = [
   { id: "reels", label: "Reels" },
@@ -152,6 +153,9 @@ export function HookGenerator() {
                   <p className="text-[0.9375rem] leading-[1.75] tracking-[-0.014em] text-white/85 sm:text-base">
                     {hook}
                   </p>
+                  <div className="mt-3">
+                    <AddToPlannerButton contentType="hook" contentText={hook} />
+                  </div>
                 </PremiumResultCard>
               ))}
             </ul>

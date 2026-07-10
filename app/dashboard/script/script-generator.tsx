@@ -14,6 +14,7 @@ import {
   PremiumTextarea,
 } from "@/app/dashboard/components/premium-ui";
 import { useToast } from "@/app/dashboard/components/toast-provider";
+import { AddToPlannerButton } from "@/app/dashboard/components/add-to-planner-button";
 
 const platforms = [
   {
@@ -328,6 +329,10 @@ export function ScriptGenerator() {
               >
                 Regenerate
               </button>
+              <AddToPlannerButton
+                contentType="script"
+                contentText={buildFullScript(script)}
+              />
             </div>
 
             <ScriptSectionCard

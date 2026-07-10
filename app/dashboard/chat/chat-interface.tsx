@@ -8,6 +8,13 @@ import { BubbleIcon } from "@/app/dashboard/bubble/bubble-icon";
 import { createClient } from "@/lib/supabase/client";
 import { dispatchChatSessionsUpdated } from "@/lib/chat-sessions-events";
 import { generateSmartChatTitle } from "@/lib/generate-chat-title";
+import {
+  DEFAULT_NICHE,
+  expandQuickPrompt,
+  pickRandomPromptLabels,
+  resolvePromptFromKey,
+  extractPrimaryNiche,
+} from "@/lib/chat-quick-prompts";
 
 type BrowserSpeechRecognition = {
   continuous: boolean;
@@ -177,22 +184,6 @@ const sendButtonClass =
   "chat-send-btn inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-pink-500 to-orange-500 text-white shadow-[0_0_24px_-8px_rgba(236,72,153,0.55)] ring-1 ring-white/10 transition-all duration-150 hover:scale-[1.03] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:scale-100";
 
 type MessageFeedback = "like" | "dislike";
-
-const promptPool = [
-  "Give me reel ideas",
-  "Write a caption",
-  "Find trending topics",
-  "Write a hook",
-  "Give me script ideas",
-  "What's viral right now?",
-  "Help me grow on Instagram",
-  "Give me 5 content ideas",
-];
-
-function pickRandomPrompts(count: number) {
-  const shuffled = [...promptPool].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, count);
-}
 
 function generateTitle(firstMessage: string) {
   return generateSmartChatTitle(firstMessage);
@@ -477,14 +468,18 @@ function UserMessageActions({
 export function ChatInterface({
   selectedModel = "Clotter Lite",
   sessionId = null,
+  initialPromptKey = null,
 }: {
   selectedModel?: string;
   sessionId?: string | null;
+  initialPromptKey?: string | null;
 }) {
   const router = useRouter();
   const { showToast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
-  const [suggestedPrompts] = useState(() => pickRandomPrompts(4));
+  const [suggestedPrompts] = useState(() => pickRandomPromptLabels(4));
+  const [creatorNiche, setCreatorNiche] = useState(DEFAULT_NICHE);
+  const [nicheLoaded, setNicheLoaded] = useState(false);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingSession, setIsLoadingSession] = useState(false);
@@ -505,8 +500,30 @@ export function ChatInterface({
   const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const locallyActiveSessionRef = useRef<string | null>(null);
   const loadGenerationRef = useRef(0);
+  const initialPromptSentRef = useRef(false);
 
   const isEmpty = messages.length === 0;
+
+  useEffect(() => {
+    async function loadCreatorNiche() {
+      try {
+        const response = await fetch("/api/memory/profile");
+        if (!response.ok) return;
+
+        const data = (await response.json()) as {
+          profile?: { niche?: string | null };
+        };
+
+        setCreatorNiche(extractPrimaryNiche(data.profile?.niche));
+      } catch {
+        // Keep default niche on failure.
+      } finally {
+        setNicheLoaded(true);
+      }
+    }
+
+    void loadCreatorNiche();
+  }, []);
 
   useEffect(() => {
     if (sessionId === null) {
@@ -580,6 +597,48 @@ export function ChatInterface({
 
     void loadSession();
   }, [sessionId]);
+
+  function handleQuickPrompt(label: string) {
+    const expanded = expandQuickPrompt(label, creatorNiche);
+    setInput(expanded);
+    void sendMessage(expanded);
+  }
+
+  useEffect(() => {
+    if (
+      !initialPromptKey ||
+      initialPromptSentRef.current ||
+      sessionId ||
+      isLoadingSession ||
+      isLoading ||
+      messages.length > 0 ||
+      !nicheLoaded
+    ) {
+      return;
+    }
+
+    const expanded = resolvePromptFromKey(initialPromptKey, creatorNiche);
+    if (!expanded) return;
+
+    initialPromptSentRef.current = true;
+    setInput(expanded);
+    void sendMessage(expanded);
+
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("prompt");
+      router.replace(`${url.pathname}${url.search}`, { scroll: false });
+    }
+  }, [
+    initialPromptKey,
+    creatorNiche,
+    nicheLoaded,
+    sessionId,
+    isLoadingSession,
+    isLoading,
+    messages.length,
+    router,
+  ]);
 
   async function persistMessages(
     activeSessionId: string,
@@ -1025,7 +1084,7 @@ export function ChatInterface({
                 <button
                   key={prompt}
                   type="button"
-                  onClick={() => void sendMessage(prompt)}
+                  onClick={() => handleQuickPrompt(prompt)}
                   disabled={isLoading}
                   className="chat-prompt-chip"
                   style={{ "--chip-delay": `${0.55 + index * 0.1}s` } as React.CSSProperties}

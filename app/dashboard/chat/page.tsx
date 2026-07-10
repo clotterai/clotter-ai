@@ -8,6 +8,7 @@ import { ChatInterface } from "./chat-interface";
 function ChatPageContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session");
+  const promptKey = searchParams.get("prompt");
 
   return (
     <div className="relative flex h-[calc(100dvh-3.5rem)] min-h-0 flex-col overflow-hidden md:h-screen">
@@ -30,7 +31,11 @@ function ChatPageContent() {
         </div>
       </header>
 
-      <ChatInterface selectedModel="Clotter Lite" sessionId={sessionId} />
+      <ChatInterface
+        selectedModel="Clotter Lite"
+        sessionId={sessionId}
+        initialPromptKey={promptKey}
+      />
     </div>
   );
 }
