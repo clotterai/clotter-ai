@@ -31,27 +31,20 @@ type ToolCard = {
   icon: ReactNode;
 };
 
-const heroBubbles = [
-  { size: 140, top: "18%", left: "12%", duration: 5, delay: 0 },
-  { size: 100, top: "55%", left: "68%", duration: 7, delay: 1 },
-  { size: 120, top: "35%", left: "78%", duration: 6, delay: 0.5 },
-];
+type HeroBubble = {
+  label: string;
+  href: string;
+  duration: number;
+  icon: ReactNode;
+};
 
-const backgroundOrbs = [
-  { size: 420, top: "8%", left: "-8%", color: "rgba(236,72,153,0.05)", duration: 18 },
-  { size: 320, top: "45%", left: "72%", color: "rgba(249,115,22,0.04)", duration: 22 },
-  { size: 280, top: "70%", left: "20%", color: "rgba(236,72,153,0.04)", duration: 20 },
-  { size: 360, top: "25%", left: "55%", color: "rgba(249,115,22,0.05)", duration: 24 },
-  { size: 240, top: "82%", left: "65%", color: "rgba(236,72,153,0.06)", duration: 16 },
-];
-
-const toolCards: ToolCard[] = [
+const heroBubbles: HeroBubble[] = [
   {
-    title: "AI Chat",
-    description: "Brainstorm ideas and refine content with your co-pilot.",
+    label: "AI Chat",
     href: "/dashboard/chat",
+    duration: 3,
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7" aria-hidden>
         <path
           d="M8 10h8M8 14h5M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 0 1-4-.8L3 21l1.8-4.2A8.8 8.8 0 0 1 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8Z"
           stroke="currentColor"
@@ -63,11 +56,11 @@ const toolCards: ToolCard[] = [
     ),
   },
   {
-    title: "Caption Generator",
-    description: "Scroll-stopping captions tailored to your voice.",
+    label: "Captions",
     href: "/dashboard/captions",
+    duration: 4,
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7" aria-hidden>
         <path
           d="M4 6h16M4 12h12M4 18h8M20 18l-2 2-4-4"
           stroke="currentColor"
@@ -79,11 +72,86 @@ const toolCards: ToolCard[] = [
     ),
   },
   {
-    title: "Hook Generator",
-    description: "Grab attention in the first two seconds.",
+    label: "Hooks",
+    href: "/dashboard/hooks",
+    duration: 5,
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7" aria-hidden>
+        <path
+          d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
+];
+
+const backgroundOrbs = [
+  {
+    size: 480,
+    bottom: "-12%",
+    right: "-10%",
+    color: "rgba(236,72,153,0.05)",
+    duration: 28,
+  },
+  {
+    size: 420,
+    top: "-8%",
+    left: "-12%",
+    color: "rgba(249,115,22,0.04)",
+    duration: 24,
+  },
+  {
+    size: 360,
+    top: "38%",
+    left: "38%",
+    color: "rgba(236,72,153,0.04)",
+    duration: 22,
+  },
+];
+
+const toolCards: ToolCard[] = [
+  {
+    title: "AI Chat",
+    description: "Brainstorm and refine with your co-pilot.",
+    href: "/dashboard/chat",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+        <path
+          d="M8 10h8M8 14h5M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 0 1-4-.8L3 21l1.8-4.2A8.8 8.8 0 0 1 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8Z"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    title: "Captions",
+    description: "Scroll-stopping captions for every post.",
+    href: "/dashboard/captions",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+        <path
+          d="M4 6h16M4 12h12M4 18h8M20 18l-2 2-4-4"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    title: "Hooks",
+    description: "Grab attention in two seconds.",
     href: "/dashboard/hooks",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
         <path
           d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"
           stroke="currentColor"
@@ -95,11 +163,11 @@ const toolCards: ToolCard[] = [
     ),
   },
   {
-    title: "Script Generator",
-    description: "Full video scripts optimized for retention.",
+    title: "Scripts",
+    description: "Full scripts built for retention.",
     href: "/dashboard/script",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
         <path
           d="M8 4h8a2 2 0 0 1 2 2v14l-3-2-3 2-3-2-3 2V6a2 2 0 0 1 2-2Z"
           stroke="currentColor"
@@ -110,11 +178,11 @@ const toolCards: ToolCard[] = [
     ),
   },
   {
-    title: "Trend Analyzer",
-    description: "Spot rising topics before they peak.",
+    title: "Trends",
+    description: "Spot what's rising before it peaks.",
     href: "/dashboard/trends",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
         <path
           d="M3 17l6-6 4 4 8-10"
           stroke="currentColor"
@@ -134,10 +202,10 @@ const toolCards: ToolCard[] = [
   },
   {
     title: "Content Ideas",
-    description: "Fresh concepts aligned with your niche.",
+    description: "Fresh concepts for your niche.",
     href: "/dashboard/content-ideas",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
         <path
           d="M9.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"
           stroke="currentColor"
@@ -199,7 +267,7 @@ function CompletionRing({ percent }: { percent: number }) {
   const offset = circumference - (percent / 100) * circumference;
 
   return (
-    <div className="relative flex h-28 w-28 items-center justify-center">
+    <div className="relative flex h-28 w-28 shrink-0 items-center justify-center">
       <svg className="h-full w-full -rotate-90" viewBox="0 0 100 100">
         <circle
           cx="50"
@@ -238,11 +306,11 @@ function CompletionRing({ percent }: { percent: number }) {
 
 function OpportunitySkeleton() {
   return (
-    <div className="mt-8 space-y-4">
+    <div className="space-y-3">
       {[0, 1, 2].map((index) => (
         <div
           key={index}
-          className="h-20 animate-pulse rounded-2xl border border-white/[0.08] bg-white/[0.03]"
+          className="h-16 animate-pulse rounded-xl border border-white/[0.08] bg-white/[0.03]"
         />
       ))}
     </div>
@@ -320,7 +388,7 @@ export function DashboardHome({
           }
         }
       },
-      { root, threshold: [0.45, 0.6, 0.75] },
+      { root, threshold: 0.55 },
     );
 
     slideRefs.current.forEach((slide) => {
@@ -340,24 +408,26 @@ export function DashboardHome({
   };
 
   const slideClass =
-    "relative flex h-[calc(100dvh-3.5rem)] shrink-0 snap-start snap-always flex-col justify-center px-6 py-12 sm:px-10 md:h-dvh md:px-14";
+    "relative flex h-screen w-full shrink-0 snap-start snap-always flex-col justify-center px-6 py-8";
 
   return (
-    <div className="relative h-[calc(100dvh-3.5rem)] md:h-dvh">
+    <div className="fixed inset-x-0 bottom-0 top-14 z-[1] md:left-[17.5rem] md:top-0">
       <style>{`
-        @keyframes dash-hero-float {
-          0%, 100% { transform: translateY(0) translateX(0); }
-          50% { transform: translateY(-24px) translateX(8px); }
+        @keyframes dash-hero-bubble-float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-15px); }
         }
-        @keyframes dash-orb-drift {
+        @keyframes dash-bg-orb-float {
           0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(24px, -18px) scale(1.04); }
-          66% { transform: translate(-16px, 12px) scale(0.96); }
+          50% { transform: translate(20px, -24px) scale(1.05); }
         }
       `}</style>
 
-      {/* Background orbs — all slides */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      {/* Background orbs */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 overflow-hidden"
+      >
         {backgroundOrbs.map((orb, index) => (
           <div
             key={index}
@@ -366,9 +436,11 @@ export function DashboardHome({
               width: orb.size,
               height: orb.size,
               top: orb.top,
+              bottom: orb.bottom,
               left: orb.left,
+              right: orb.right,
               background: `radial-gradient(circle, ${orb.color} 0%, transparent 70%)`,
-              animation: `dash-orb-drift ${orb.duration}s ease-in-out infinite`,
+              animation: `dash-bg-orb-float ${orb.duration}s ease-in-out infinite`,
             }}
           />
         ))}
@@ -377,7 +449,7 @@ export function DashboardHome({
       {/* Dot navigation */}
       <nav
         aria-label="Dashboard slides"
-        className="fixed right-3 top-1/2 z-20 flex -translate-y-1/2 flex-col gap-2 sm:right-4"
+        className="fixed right-4 top-1/2 z-20 flex -translate-y-1/2 flex-col gap-2.5 md:right-6"
       >
         {Array.from({ length: SLIDE_COUNT }).map((_, index) => (
           <button
@@ -388,18 +460,19 @@ export function DashboardHome({
             aria-current={activeSlide === index ? "true" : undefined}
             className={`h-2 w-2 rounded-full transition-all duration-300 ${
               activeSlide === index
-                ? "scale-125 bg-[#EC4899] shadow-[0_0_12px_#EC4899]"
+                ? "scale-125 bg-white"
                 : "bg-white/20 hover:bg-white/40"
             }`}
           />
         ))}
       </nav>
 
+      {/* Scroll container */}
       <div
         ref={scrollRef}
-        className="relative h-full snap-y snap-mandatory overflow-y-auto scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        className="relative h-full snap-y snap-mandatory overflow-y-scroll scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
       >
-        {/* SLIDE 1 — Welcome */}
+        {/* SLIDE 1 — Hero */}
         <section
           ref={(el) => {
             slideRefs.current[0] = el;
@@ -407,31 +480,38 @@ export function DashboardHome({
           data-slide-index={0}
           className={slideClass}
         >
-          <div className="relative mx-auto w-full max-w-3xl">
-            <h1 className="text-4xl font-bold tracking-[-0.03em] text-white">
-              {greeting}, {displayName}
-            </h1>
-            <p className="mt-3 text-white/40">Your creative OS is ready.</p>
+          <div className="relative mx-auto flex h-full w-full max-w-xl flex-col">
+            <div>
+              <h1 className="text-3xl font-bold tracking-[-0.03em] text-white md:text-5xl">
+                {greeting}, {displayName}
+              </h1>
+              <p className="mt-2 text-base text-white/40">
+                Your creative OS is ready.
+              </p>
+            </div>
 
-            <div className="pointer-events-none relative mt-16 h-64 sm:h-72">
-              {heroBubbles.map((bubble, index) => (
-                <div
-                  key={index}
-                  className="absolute rounded-full bg-gradient-to-br from-[#EC4899] to-[#F97316] opacity-80 shadow-[0_20px_60px_-20px_rgba(236,72,153,0.5)] will-change-transform"
+            <div className="flex flex-1 items-center justify-center gap-8 sm:gap-12">
+              {heroBubbles.map((bubble) => (
+                <Link
+                  key={bubble.label}
+                  href={bubble.href}
+                  className="group flex flex-col items-center gap-2 will-change-transform"
                   style={{
-                    width: bubble.size,
-                    height: bubble.size,
-                    top: bubble.top,
-                    left: bubble.left,
-                    animation: `dash-hero-float ${bubble.duration}s ease-in-out infinite`,
-                    animationDelay: `${bubble.delay}s`,
+                    animation: `dash-hero-bubble-float ${bubble.duration}s ease-in-out infinite`,
                   }}
-                />
+                >
+                  <span className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-[#EC4899] to-[#F97316] text-white shadow-[0_12px_40px_-16px_rgba(236,72,153,0.55)] transition-transform duration-200 group-hover:scale-105">
+                    {bubble.icon}
+                  </span>
+                  <span className="text-xs font-medium text-white/50 group-hover:text-white/75">
+                    {bubble.label}
+                  </span>
+                </Link>
               ))}
             </div>
 
-            <p className="mt-auto text-center text-sm text-white/25">
-              Scroll to explore →
+            <p className="pb-2 text-center text-xs text-white/20 animate-bounce">
+              ↓ Explore
             </p>
           </div>
         </section>
@@ -445,23 +525,23 @@ export function DashboardHome({
           className={slideClass}
         >
           <div className="mx-auto w-full max-w-4xl">
-            <h2 className="text-2xl font-bold tracking-[-0.02em] text-white">
-              Everything you need to create.
+            <h2 className="mb-6 text-2xl font-bold text-white">
+              Everything you need.
             </h2>
-            <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
               {toolCards.map((tool) => (
                 <Link
                   key={tool.title}
                   href={tool.href}
-                  className="group rounded-2xl border border-white/[0.08] bg-white/[0.05] p-5 backdrop-blur-sm transition-all duration-200 hover:-translate-y-1 hover:border-[#EC4899]/35 hover:shadow-[0_12px_40px_-16px_rgba(236,72,153,0.45)]"
+                  className="rounded-2xl border border-white/[0.08] bg-white/[0.05] p-4 transition-all duration-200 hover:scale-[1.02] hover:border-pink-500/30"
                 >
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-[#EC4899] to-[#F97316] text-white shadow-[0_0_24px_-8px_rgba(236,72,153,0.5)]">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#EC4899] to-[#F97316] text-white">
                     {tool.icon}
                   </div>
-                  <h3 className="mt-4 font-bold text-white">{tool.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-white/40">
-                    {tool.description}
-                  </p>
+                  <h3 className="mt-3 text-sm font-semibold text-white">
+                    {tool.title}
+                  </h3>
+                  <p className="mt-1 text-xs text-white/40">{tool.description}</p>
                 </Link>
               ))}
             </div>
@@ -476,57 +556,40 @@ export function DashboardHome({
           data-slide-index={2}
           className={slideClass}
         >
-          <div className="mx-auto w-full max-w-3xl">
-            <div className="flex items-center justify-between gap-4">
-              <h2 className="flex items-center gap-2 text-2xl font-bold tracking-[-0.02em] text-white">
-                <span aria-hidden className="text-[#EC4899]">
-                  ✦
-                </span>
-                Today&apos;s Opportunities
+          <div className="mx-auto w-full max-w-2xl">
+            <div className="mb-4 flex items-center justify-between gap-4">
+              <h2 className="text-2xl font-bold text-white">
+                Today&apos;s Opportunities ✦
               </h2>
               <button
                 type="button"
                 onClick={handleRefreshBrief}
                 disabled={isRefreshingBrief}
-                className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.05] text-white/50 transition-colors hover:border-[#EC4899]/30 hover:text-[#FB923C] disabled:opacity-40"
-                aria-label="Refresh opportunities"
+                className="text-xs text-white/30 transition-colors hover:text-pink-400 disabled:opacity-40"
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className={`h-4 w-4 ${isRefreshingBrief ? "animate-spin" : ""}`}
-                  aria-hidden
-                >
-                  <path
-                    d="M20 12a8 8 0 1 1-2.34-5.66M20 4v6h-6"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                {isRefreshingBrief ? "Refreshing..." : "Refresh"}
               </button>
             </div>
 
             {isLoadingBrief ? (
               <OpportunitySkeleton />
             ) : opportunities.length === 0 ? (
-              <p className="mt-8 text-sm text-white/40">
+              <p className="text-sm text-white/40">
                 Opportunities will appear here once your daily brief is ready.
               </p>
             ) : (
-              <div className="mt-8 space-y-4">
+              <div>
                 {opportunities.slice(0, 3).map((item, index) => (
                   <div
                     key={`${item}-${index}`}
-                    className="rounded-2xl border border-white/[0.08] bg-white/[0.05] p-5 backdrop-blur-sm"
+                    className="mb-3 rounded-xl border border-white/[0.08] bg-white/[0.05] p-4"
                   >
                     <div className="flex items-start gap-3">
                       <span
                         aria-hidden
-                        className="mt-2 h-2 w-2 shrink-0 rounded-full bg-[#EC4899]"
+                        className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#EC4899]"
                       />
-                      <p className="text-[15px] leading-relaxed text-white/75">
+                      <p className="text-sm leading-relaxed text-white/80">
                         {item}
                       </p>
                     </div>
@@ -545,21 +608,21 @@ export function DashboardHome({
           data-slide-index={3}
           className={slideClass}
         >
-          <div className="mx-auto w-full max-w-3xl">
-            <h2 className="text-2xl font-bold tracking-[-0.02em] text-white">
+          <div className="mx-auto w-full max-w-2xl">
+            <h2 className="mb-4 text-2xl font-bold text-white">
               Your Creator DNA
             </h2>
 
-            <div className="mt-10 flex flex-col gap-10 lg:flex-row lg:items-center">
+            <div className="flex flex-col gap-8 sm:flex-row sm:items-start">
               <CompletionRing percent={creatorProfile.completion} />
 
-              <div className="min-w-0 flex-1 space-y-6">
+              <div className="min-w-0 flex-1 space-y-5">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/30">
+                  <p className="text-xs font-semibold uppercase tracking-[0.1em] text-white/30">
                     Niche
                   </p>
                   {creatorProfile.niches.length > 0 ? (
-                    <div className="mt-3 flex flex-wrap gap-2">
+                    <div className="mt-2 flex flex-wrap gap-2">
                       {creatorProfile.niches.map((niche) => (
                         <span
                           key={niche}
@@ -575,17 +638,16 @@ export function DashboardHome({
                 </div>
 
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/30">
+                  <p className="text-xs font-semibold uppercase tracking-[0.1em] text-white/30">
                     Platforms
                   </p>
                   {creatorProfile.platforms.length > 0 ? (
-                    <div className="mt-3 flex flex-wrap gap-2">
+                    <div className="mt-2 flex flex-wrap gap-2">
                       {creatorProfile.platforms.map((platform) => (
                         <span
                           key={platform}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.05] px-3 py-1 text-sm text-white/70"
+                          className="rounded-full border border-white/[0.08] bg-white/[0.05] px-3 py-1 text-sm text-white/70"
                         >
-                          <span className="h-1.5 w-1.5 rounded-full bg-[#EC4899]" />
                           {PLATFORM_LABELS[platform.toLowerCase()] ?? platform}
                         </span>
                       ))}
@@ -599,9 +661,9 @@ export function DashboardHome({
 
             <Link
               href="/dashboard/memory"
-              className="mt-10 inline-flex items-center gap-2 text-sm font-semibold text-[#FB923C] transition-colors hover:text-[#FECDD3]"
+              className="mt-8 inline-flex rounded-xl border border-white/[0.08] bg-white/[0.05] px-4 py-2.5 text-sm font-semibold text-white/80 transition-colors hover:border-pink-500/30 hover:text-white"
             >
-              Update Profile →
+              Update Profile
             </Link>
           </div>
         </section>
