@@ -1,6 +1,17 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
+import {
+  Brain,
+  Calendar,
+  ChevronDown,
+  FileText,
+  LayoutDashboard,
+  Lightbulb,
+  MessageSquare,
+  TrendingUp,
+  Type,
+  Zap,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, memo, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
@@ -23,21 +34,17 @@ export type SidebarUser = {
   initials: string;
 };
 
-const navIconClass = "h-5 w-5";
+const NAV_ICON_SIZE = 18;
+const NAV_ICON_PROPS = {
+  size: NAV_ICON_SIZE,
+  strokeWidth: 1.75,
+  "aria-hidden": true,
+} as const;
 
 const dashboardNavItem = {
   label: "Dashboard",
   href: "/dashboard",
-  icon: (
-    <svg viewBox="0 0 24 24" fill="none" className={navIconClass} aria-hidden>
-      <path
-        d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5Z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-      />
-    </svg>
-  ),
+  icon: <LayoutDashboard {...NAV_ICON_PROPS} />,
 };
 
 const navGroups = [
@@ -47,52 +54,17 @@ const navGroups = [
       {
         label: "Caption Generator",
         href: "/dashboard/captions",
-        icon: (
-          <svg viewBox="0 0 24 24" fill="none" className={navIconClass} aria-hidden>
-            <path
-              d="M4 6h16M4 12h12M4 18h8M20 18l-2 2-4-4"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        ),
+        icon: <Type {...NAV_ICON_PROPS} />,
       },
       {
         label: "Hook Generator",
         href: "/dashboard/hooks",
-        icon: (
-          <svg viewBox="0 0 24 24" fill="none" className={navIconClass} aria-hidden>
-            <path
-              d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        ),
+        icon: <Zap {...NAV_ICON_PROPS} />,
       },
       {
         label: "Script Generator",
         href: "/dashboard/script",
-        icon: (
-          <svg viewBox="0 0 24 24" fill="none" className={navIconClass} aria-hidden>
-            <path
-              d="M8 4h8a2 2 0 0 1 2 2v14l-3-2-3 2-3-2-3 2V6a2 2 0 0 1 2-2Z"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M10 8h4M10 12h4M10 16h2"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
-        ),
+        icon: <FileText {...NAV_ICON_PROPS} />,
       },
     ],
   },
@@ -102,36 +74,12 @@ const navGroups = [
       {
         label: "Content Ideas",
         href: "/dashboard/content-ideas",
-        icon: (
-          <svg viewBox="0 0 24 24" fill="none" className={navIconClass} aria-hidden>
-            <path
-              d="M9.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            />
-            <path
-              d="M12 6v6l3 2"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
-        ),
+        icon: <Lightbulb {...NAV_ICON_PROPS} />,
       },
       {
         label: "Content Planner",
         href: "/dashboard/planner",
-        icon: (
-          <svg viewBox="0 0 24 24" fill="none" className={navIconClass} aria-hidden>
-            <path
-              d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        ),
+        icon: <Calendar {...NAV_ICON_PROPS} />,
       },
     ],
   },
@@ -141,24 +89,7 @@ const navGroups = [
       {
         label: "Trend Analyzer",
         href: "/dashboard/trends",
-        icon: (
-          <svg viewBox="0 0 24 24" fill="none" className={navIconClass} aria-hidden>
-            <path
-              d="M3 17l6-6 4 4 8-10"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M14 5h7v7"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        ),
+        icon: <TrendingUp {...NAV_ICON_PROPS} />,
       },
     ],
   },
@@ -168,22 +99,7 @@ const navGroups = [
       {
         label: "AI Memory",
         href: "/dashboard/memory",
-        icon: (
-          <svg viewBox="0 0 24 24" fill="none" className={navIconClass} aria-hidden>
-            <path
-              d="M9.5 2A2.5 2.5 0 0 0 7 4.5v.5A2.5 2.5 0 0 0 5 7.5 2.5 2.5 0 0 0 2.5 10v1A2.5 2.5 0 0 0 5 13.5 2.5 2.5 0 0 0 7 15.5v.5A2.5 2.5 0 0 0 9.5 18h1A2.5 2.5 0 0 0 13 15.5v-.5a2.5 2.5 0 0 0 2-2.45V12a2.5 2.5 0 0 0-2-2.45V9A2.5 2.5 0 0 0 13 6.5V6A2.5 2.5 0 0 0 10.5 3.5h-1Z"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M12 6v12M9 9.5c.5-.5 1.5-.75 3-.75s2.5.25 3 .75M9 14.5c.5.5 1.5.75 3 .75s2.5-.25 3-.75"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
-        ),
+        icon: <Brain {...NAV_ICON_PROPS} />,
       },
     ],
   },
@@ -221,7 +137,51 @@ function chatItemClass(active: boolean) {
 }
 
 const historyActionIconClass =
-  "flex h-7 w-7 items-center justify-center rounded-lg text-white/30 transition-opacity duration-150 hover:text-white/70 disabled:opacity-40";
+  "flex h-7 w-7 items-center justify-center rounded-lg text-white/25 transition-colors duration-150 hover:text-white/70";
+
+const historyDeleteIconClass =
+  "flex h-7 w-7 items-center justify-center rounded-lg text-white/25 transition-colors duration-150 hover:text-red-400/70";
+
+function ChatEditIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+    </svg>
+  );
+}
+
+function ChatTrashIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+      <path d="M10 11v6" />
+      <path d="M14 11v6" />
+      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+    </svg>
+  );
+}
 
 type DeletedSessionSnapshot = {
   title: string;
@@ -256,6 +216,9 @@ const ChatHistoryItem = memo(function ChatHistoryItem({
   onClose,
   onRename,
   onDelete,
+  pendingDeleteId,
+  onRequestDelete,
+  onCancelDelete,
 }: {
   session: ChatSessionSummary;
   index: number;
@@ -264,6 +227,9 @@ const ChatHistoryItem = memo(function ChatHistoryItem({
   onClose: () => void;
   onRename: (id: string, title: string) => Promise<boolean>;
   onDelete: (id: string) => Promise<boolean>;
+  pendingDeleteId: string | null;
+  onRequestDelete: (id: string) => void;
+  onCancelDelete: () => void;
 }) {
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(session.title);
@@ -317,13 +283,22 @@ const ChatHistoryItem = memo(function ChatHistoryItem({
     void saveRename();
   }
 
-  async function handleDelete(event: React.MouseEvent) {
+  async function confirmDelete(event: React.MouseEvent) {
     event.preventDefault();
     event.stopPropagation();
     setIsFadingOut(true);
     await new Promise((resolve) => setTimeout(resolve, 150));
     await onDelete(session.id);
+    onCancelDelete();
   }
+
+  function handleDeleteClick(event: React.MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    onRequestDelete(session.id);
+  }
+
+  const isDeletePending = pendingDeleteId === session.id;
 
   return (
     <li
@@ -371,44 +346,56 @@ const ChatHistoryItem = memo(function ChatHistoryItem({
             </span>
           </Link>
 
-          <div className="pointer-events-none absolute right-1.5 top-1/2 flex -translate-y-1/2 items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100">
+          <div className="dash-chat-history-actions pointer-events-none absolute right-1.5 top-1/2 flex -translate-y-1/2 items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100">
             <button
               type="button"
               onClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
+                onCancelDelete();
                 setRenameValue(session.title);
                 setIsRenaming(true);
               }}
               className={historyActionIconClass}
               aria-label={`Rename ${session.title}`}
             >
-              <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4" aria-hidden>
-                <path
-                  d="M11.5 2.5 13.5 4.5 5.5 12.5H3.5V10.5L11.5 2.5Z"
-                  stroke="currentColor"
-                  strokeWidth="1.25"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <ChatEditIcon />
             </button>
             <button
               type="button"
-              onClick={(event) => void handleDelete(event)}
-              className={`${historyActionIconClass} hover:text-red-400`}
+              onClick={handleDeleteClick}
+              className={historyDeleteIconClass}
               aria-label={`Delete ${session.title}`}
             >
-              <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4" aria-hidden>
-                <path
-                  d="M3.5 5.5h9M6 5.5V4.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1m1.5 0v7a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-7"
-                  stroke="currentColor"
-                  strokeWidth="1.25"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <ChatTrashIcon />
             </button>
           </div>
+
+          {isDeletePending && (
+            <div className="dash-chat-rise-in px-3 pb-2 pt-1">
+              <p className="text-xs text-white/50">Delete this chat?</p>
+              <div className="mt-1.5 flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={(event) => void confirmDelete(event)}
+                  className="text-xs text-red-400 transition-colors hover:text-red-300"
+                >
+                  Yes, delete
+                </button>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    onCancelDelete();
+                  }}
+                  className="text-xs text-white/30 transition-colors hover:text-white/50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </li>
@@ -471,6 +458,7 @@ const ChatNavSection = memo(function ChatNavSection({
 
   const [sessions, setSessions] = useState<ChatSessionSummary[]>([]);
   const [isChatsExpanded, setIsChatsExpanded] = useState(true);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const [undoDelete, setUndoDelete] = useState<DeletedSessionSnapshot | null>(
     null,
@@ -658,10 +646,11 @@ const ChatNavSection = memo(function ChatNavSection({
       <Link
         href={CHAT_HREF}
         onClick={onClose}
-        className="dash-new-chat-btn dash-chat-rise-in flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-pink-500 to-orange-500 px-3 py-2.5 text-[14px] font-semibold text-white shadow-[0_0_24px_-8px_rgba(236,72,153,0.5)] transition-all duration-150 hover:shadow-[0_0_32px_-6px_rgba(236,72,153,0.65)]"
+        className="dash-new-chat-btn dash-chat-rise-in flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-pink-500 to-orange-500 px-3 py-2.5 text-[14px] font-semibold text-white shadow-[0_0_24px_-8px_rgba(236,72,153,0.5)] transition-all duration-150 hover:shadow-[0_0_32px_-6px_rgba(236,72,153,0.65)]"
         style={{ "--history-index": 0 } as React.CSSProperties}
       >
-        + New Chat
+        <MessageSquare size={NAV_ICON_SIZE} strokeWidth={1.75} aria-hidden />
+        New Chat
       </Link>
 
       {isChatPage && (
@@ -708,6 +697,9 @@ const ChatNavSection = memo(function ChatNavSection({
                     onClose={onClose}
                     onRename={handleRenameSession}
                     onDelete={handleDeleteSession}
+                    pendingDeleteId={pendingDeleteId}
+                    onRequestDelete={setPendingDeleteId}
+                    onCancelDelete={() => setPendingDeleteId(null)}
                   />
                 ))}
               </ul>
