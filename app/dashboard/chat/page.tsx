@@ -25,8 +25,8 @@ function ChatPageContent() {
               Creative co-pilot
             </h1>
           </div>
-          <span className="hidden shrink-0 rounded-full border border-[#EC4899]/50 bg-gradient-to-r from-[#EC4899] to-[#F97316] px-3 py-1 text-[10px] font-semibold tracking-[-0.01em] text-white shadow-[0_0_24px_-6px_#EC4899] md:inline-flex md:px-4 md:py-2 md:text-xs sm:px-5 sm:text-sm">
-            ⚡ Clotter Lite
+          <span className="hidden shrink-0 text-[12px] font-medium tracking-wide text-white/35 md:inline">
+            Clotter 2.5
           </span>
         </div>
       </header>
