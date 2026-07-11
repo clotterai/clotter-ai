@@ -177,12 +177,22 @@ function PdfIcon({ className }: { className?: string }) {
 const CHAT_INPUT_LINE_HEIGHT = 20;
 const CHAT_INPUT_MAX_LINES = 4;
 
-const WATERFALL_STREAKS = Array.from({ length: 20 }, (_, index) => ({
+const WATERFALL_WIDTHS = [50, 70, 45, 65, 55, 75, 40, 60, 50];
+
+const WATERFALL_STREAMS = WATERFALL_WIDTHS.map((width, index) => ({
+  id: index,
+  width,
+  left: `${4 + (index / Math.max(WATERFALL_WIDTHS.length - 1, 1)) * 78 + Math.random() * 6}%`,
+  duration: `${1.5 + Math.random() * 1}s`,
+  delay: `${Math.random() * 0.6}s`,
+}));
+
+const WATERFALL_SPRAY = Array.from({ length: 28 }, (_, index) => ({
   id: index,
   left: `${Math.random() * 100}%`,
-  duration: `${0.5 + Math.random() * 1}s`,
-  delay: `${Math.random() * 2}s`,
-  opacity: 0.35 + Math.random() * 0.45,
+  bottom: `${Math.random() * 48}px`,
+  delay: `${Math.random() * 1.8}s`,
+  size: 2 + Math.random() * 4,
 }));
 
 const nakedIconButtonClass =
@@ -890,7 +900,7 @@ export function ChatInterface({
       waterfallTimeoutRef.current = setTimeout(() => {
         setShowWaterfall(false);
         waterfallTimeoutRef.current = null;
-      }, 3000);
+      }, 4000);
 
       return;
     }
@@ -1092,19 +1102,37 @@ export function ChatInterface({
   return (
     <div className="relative z-10 flex min-h-0 flex-1 flex-col">
       {showWaterfall && (
-        <div className="pointer-events-none absolute inset-0 z-50 overflow-hidden bg-[#050510]/90">
-          {WATERFALL_STREAKS.map((streak) => (
+        <div className="chat-waterfall-overlay pointer-events-none absolute inset-0 z-50 overflow-hidden bg-[#050510]/85">
+          {WATERFALL_STREAMS.map((stream) => (
             <div
-              key={streak.id}
-              className="absolute top-0 w-px"
+              key={stream.id}
+              className="absolute top-0"
               style={{
-                left: streak.left,
-                height: "120px",
+                left: stream.left,
+                width: `${stream.width}px`,
+                height: "110%",
+                borderRadius: "40% 60% 60% 40%",
                 background:
-                  "linear-gradient(to bottom, transparent, rgba(34,211,238,0.85), rgba(59,130,246,0.65), transparent)",
-                opacity: streak.opacity,
-                animation: `chat-waterfall-fall ${streak.duration} linear infinite`,
-                animationDelay: streak.delay,
+                  "linear-gradient(180deg, rgba(147,197,253,0.8), rgba(255,255,255,0.9), rgba(96,165,250,0.6))",
+                filter: "blur(2px)",
+                animation: `chat-waterfall-fall ${stream.duration} linear infinite`,
+                animationDelay: stream.delay,
+              }}
+            />
+          ))}
+
+          <div className="chat-waterfall-mist absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-white/50 via-white/25 to-transparent" />
+
+          {WATERFALL_SPRAY.map((particle) => (
+            <div
+              key={particle.id}
+              className="chat-waterfall-spray absolute rounded-full bg-white/70"
+              style={{
+                left: particle.left,
+                bottom: particle.bottom,
+                width: particle.size,
+                height: particle.size,
+                animationDelay: particle.delay,
               }}
             />
           ))}
@@ -1114,6 +1142,35 @@ export function ChatInterface({
         @keyframes chat-waterfall-fall {
           from { transform: translateY(-100%); }
           to { transform: translateY(100vh); }
+        }
+
+        @keyframes chat-waterfall-overlay-fade {
+          0%, 75% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+
+        @keyframes chat-waterfall-mist {
+          0%, 100% { opacity: 0.35; transform: scaleY(1); }
+          50% { opacity: 0.65; transform: scaleY(1.08); }
+        }
+
+        @keyframes chat-waterfall-spray {
+          0% { opacity: 0; transform: translateY(8px) scale(0.6); }
+          25% { opacity: 0.85; }
+          100% { opacity: 0; transform: translateY(-18px) scale(1); }
+        }
+
+        .chat-waterfall-overlay {
+          animation: chat-waterfall-overlay-fade 4s ease forwards;
+        }
+
+        .chat-waterfall-mist {
+          filter: blur(24px);
+          animation: chat-waterfall-mist 2.4s ease-in-out infinite;
+        }
+
+        .chat-waterfall-spray {
+          animation: chat-waterfall-spray 1.2s ease-out infinite;
         }
 
         @keyframes chat-planet-spin {
