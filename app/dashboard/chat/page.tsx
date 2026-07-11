@@ -16,10 +16,10 @@ function ChatPageContent() {
       <style>{`
         @keyframes electricPulse {
           0%, 100% {
-            box-shadow: 0 0 6px -2px rgba(236,72,153,0.3);
+            box-shadow: 0 0 8px -2px rgba(236,72,153,0.6), 0 0 16px -4px rgba(249,115,22,0.4);
           }
           50% {
-            box-shadow: 0 0 12px -2px rgba(236,72,153,0.5);
+            box-shadow: 0 0 16px -2px rgba(236,72,153,0.9), 0 0 30px -4px rgba(249,115,22,0.7);
           }
         }
       `}</style>
