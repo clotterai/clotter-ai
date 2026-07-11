@@ -1,6 +1,6 @@
 "use client";
 
-import { Square } from "lucide-react";
+import { Plus, Square } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ClotterLogo } from "@/app/dashboard/components/clotter-logo";
@@ -1305,7 +1305,7 @@ export function ChatInterface({
               }`}
               aria-label="Attach image or PDF"
             >
-              <PaperclipIcon className="h-4 w-4" />
+              <Plus size={20} />
             </button>
             <textarea
               ref={textareaRef}
