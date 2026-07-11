@@ -1,5 +1,6 @@
 "use client";
 
+import { Zap } from "lucide-react";
 import { useState } from "react";
 import { FeatureEmptyState } from "@/app/dashboard/components/feature-empty-state";
 import {
@@ -10,6 +11,7 @@ import {
   PremiumPillGroup,
   PremiumResultCard,
   PremiumResultsHeader,
+  PremiumResultText,
   PremiumTextarea,
 } from "@/app/dashboard/components/premium-ui";
 import { useToast } from "@/app/dashboard/components/toast-provider";
@@ -79,7 +81,6 @@ export function HookGenerator() {
 
   return (
     <div className="premium-feature-body">
-      <div className="mx-auto w-full max-w-2xl">
         <section className="premium-form-section">
           <div>
             <PremiumFieldLabel htmlFor="hook-topic">Video topic</PremiumFieldLabel>
@@ -115,28 +116,18 @@ export function HookGenerator() {
 
         {error && <PremiumError message={error} />}
 
-        {isLoading && <PremiumLoadingSkeleton count={5} />}
+        {isLoading && <PremiumLoadingSkeleton />}
 
         {!isLoading && hooks.length === 0 && !error && (
           <FeatureEmptyState
-            icon={
-              <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8" aria-hidden>
-                <path
-                  d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            }
+            icon={<Zap size={24} strokeWidth={1.75} />}
             title="Attention-grabbing hooks"
             description="Enter your video topic and platform — get scroll-stopping openers that grab viewers in the first two seconds."
           />
         )}
 
         {hooks.length > 0 && !isLoading && (
-          <section className="mt-12">
+          <section>
             <PremiumResultsHeader
               title="Your hooks"
               subtitle={`${hooks.length} scroll-stopping openers ready to copy`}
@@ -150,9 +141,7 @@ export function HookGenerator() {
                   copied={copiedIndex === index}
                   delay={index * 0.06}
                 >
-                  <p className="text-[0.9375rem] leading-[1.75] tracking-[-0.014em] text-white/85 sm:text-base">
-                    {hook}
-                  </p>
+                  <PremiumResultText>{hook}</PremiumResultText>
                   <div className="mt-3">
                     <AddToPlannerButton contentType="hook" contentText={hook} />
                   </div>
@@ -161,7 +150,6 @@ export function HookGenerator() {
             </ul>
           </section>
         )}
-      </div>
     </div>
   );
 }

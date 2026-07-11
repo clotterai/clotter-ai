@@ -1,5 +1,6 @@
 "use client";
 
+import { TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { FeatureEmptyState } from "@/app/dashboard/components/feature-empty-state";
 import {
@@ -10,6 +11,7 @@ import {
   PremiumLoadingSkeleton,
   PremiumPillGroup,
   PremiumResultsHeader,
+  PremiumResultText,
   PremiumTextarea,
 } from "@/app/dashboard/components/premium-ui";
 import { useToast } from "@/app/dashboard/components/toast-provider";
@@ -107,7 +109,6 @@ export function TrendAnalyzer() {
 
   return (
     <div className="premium-feature-body">
-      <div className="mx-auto w-full max-w-2xl">
         <section className="premium-form-section">
           <div>
             <PremiumFieldLabel htmlFor="trend-niche">Your niche</PremiumFieldLabel>
@@ -143,40 +144,23 @@ export function TrendAnalyzer() {
 
         {error && <PremiumError message={error} />}
 
-        {isLoading && <PremiumLoadingSkeleton count={5} />}
+        {isLoading && <PremiumLoadingSkeleton />}
 
         {!isLoading && trends.length === 0 && !error && (
           <FeatureEmptyState
-            icon={
-              <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8" aria-hidden>
-                <path
-                  d="M3 17l6-6 4 4 8-10"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M14 5h7v7"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            }
+            icon={<TrendingUp size={24} strokeWidth={1.75} />}
             title="Trend intelligence"
             description="Enter your niche and platform — Clotter scans what's trending and gives you angles with viral potential scores."
           />
         )}
 
         {trends.length > 0 && !isLoading && (
-          <section className="mt-12">
+          <section>
             <PremiumResultsHeader
               title="Trending now"
               subtitle={`${trends.length} topics analyzed for your niche`}
             />
-            <ul className="space-y-4">
+            <ul className="space-y-3">
               {trends.map((trend, index) => (
                 <li
                   key={index}
@@ -186,14 +170,14 @@ export function TrendAnalyzer() {
                   <PremiumCopyButton
                     onClick={() => void copyTrend(trend, index)}
                     copied={copiedIndex === index}
-                    className="absolute right-4 top-4"
+                    className="absolute right-5 top-5"
                   />
-                  <div className="flex items-start gap-3 border-b border-white/8 px-5 py-4 sm:px-6">
+                  <div className="flex items-start gap-3 border-b border-white/[0.06] px-5 py-4">
                     <span className="premium-result-badge shrink-0">
                       {index + 1}
                     </span>
                     <div className="min-w-0 flex-1 pr-8">
-                      <h3 className="text-base font-semibold leading-snug tracking-[-0.02em] text-white sm:text-[1.0625rem]">
+                      <h3 className="text-base font-semibold leading-snug tracking-[-0.02em] text-white">
                         {trend.topic}
                       </h3>
                       <span
@@ -204,20 +188,20 @@ export function TrendAnalyzer() {
                     </div>
                   </div>
 
-                  <div className="space-y-4 px-5 py-4 sm:px-6">
+                  <div className="space-y-4 px-5 py-4">
                     <div>
                       <p className="premium-script-section-label">
                         Why it&apos;s trending
                       </p>
-                      <p className="mt-1.5 text-sm leading-relaxed text-white/70">
-                        {trend.whyTrending}
-                      </p>
+                      <div className="mt-1.5">
+                        <PremiumResultText>{trend.whyTrending}</PremiumResultText>
+                      </div>
                     </div>
                     <div>
                       <p className="premium-script-section-label">Content angle</p>
-                      <p className="mt-1.5 text-sm leading-relaxed text-white/70">
-                        {trend.contentAngle}
-                      </p>
+                      <div className="mt-1.5">
+                        <PremiumResultText>{trend.contentAngle}</PremiumResultText>
+                      </div>
                     </div>
                   </div>
                 </li>
@@ -225,7 +209,6 @@ export function TrendAnalyzer() {
             </ul>
           </section>
         )}
-      </div>
     </div>
   );
 }

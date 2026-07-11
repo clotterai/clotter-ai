@@ -1,5 +1,6 @@
 "use client";
 
+import { Lightbulb } from "lucide-react";
 import { useState } from "react";
 import { FeatureEmptyState } from "@/app/dashboard/components/feature-empty-state";
 import {
@@ -10,6 +11,7 @@ import {
   PremiumPillGroup,
   PremiumResultCard,
   PremiumResultsHeader,
+  PremiumResultText,
   PremiumTextarea,
 } from "@/app/dashboard/components/premium-ui";
 import { useToast } from "@/app/dashboard/components/toast-provider";
@@ -79,7 +81,6 @@ export function ContentIdeasGenerator() {
 
   return (
     <div className="premium-feature-body">
-      <div className="mx-auto w-full max-w-2xl">
         <section className="premium-form-section">
           <div>
             <PremiumFieldLabel htmlFor="content-niche">Your niche</PremiumFieldLabel>
@@ -115,32 +116,18 @@ export function ContentIdeasGenerator() {
 
         {error && <PremiumError message={error} />}
 
-        {isLoading && <PremiumLoadingSkeleton count={5} />}
+        {isLoading && <PremiumLoadingSkeleton />}
 
         {!isLoading && ideas.length === 0 && !error && (
           <FeatureEmptyState
-            icon={
-              <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8" aria-hidden>
-                <path
-                  d="M9.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                />
-                <path
-                  d="M12 6v6l3 2"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
-              </svg>
-            }
+            icon={<Lightbulb size={24} strokeWidth={1.75} />}
             title="Fresh content ideas"
             description="Tell Clotter your niche and platform — get 20 viral content concepts you haven't seen a hundred times before."
           />
         )}
 
         {ideas.length > 0 && !isLoading && (
-          <section className="mt-12">
+          <section>
             <PremiumResultsHeader
               title="Your content ideas"
               subtitle={`${ideas.length} viral concepts ready to copy`}
@@ -154,9 +141,7 @@ export function ContentIdeasGenerator() {
                   copied={copiedIndex === index}
                   delay={Math.min(index * 0.04, 0.6)}
                 >
-                  <p className="text-[0.9375rem] leading-[1.75] tracking-[-0.014em] text-white/85 sm:text-base">
-                    {idea}
-                  </p>
+                  <PremiumResultText>{idea}</PremiumResultText>
                   <div className="mt-3">
                     <AddToPlannerButton contentType="idea" contentText={idea} />
                   </div>
@@ -165,7 +150,6 @@ export function ContentIdeasGenerator() {
             </ul>
           </section>
         )}
-      </div>
     </div>
   );
 }

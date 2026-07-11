@@ -1,5 +1,6 @@
 "use client";
 
+import { MessageSquareText } from "lucide-react";
 import { useState } from "react";
 import { FeatureEmptyState } from "@/app/dashboard/components/feature-empty-state";
 import {
@@ -10,6 +11,7 @@ import {
   PremiumPillGroup,
   PremiumResultCard,
   PremiumResultsHeader,
+  PremiumResultText,
   PremiumTextarea,
 } from "@/app/dashboard/components/premium-ui";
 import { useToast } from "@/app/dashboard/components/toast-provider";
@@ -79,7 +81,6 @@ export function CaptionGenerator() {
 
   return (
     <div className="premium-feature-body">
-      <div className="mx-auto w-full max-w-2xl">
         <section className="premium-form-section">
           <div>
             <PremiumFieldLabel htmlFor="topic">Post topic</PremiumFieldLabel>
@@ -115,28 +116,18 @@ export function CaptionGenerator() {
 
         {error && <PremiumError message={error} />}
 
-        {isLoading && <PremiumLoadingSkeleton count={5} />}
+        {isLoading && <PremiumLoadingSkeleton />}
 
         {!isLoading && captions.length === 0 && !error && (
           <FeatureEmptyState
-            icon={
-              <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8" aria-hidden>
-                <path
-                  d="M4 6h16M4 12h12M4 18h8M20 18l-2 2-4-4"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            }
+            icon={<MessageSquareText size={24} strokeWidth={1.75} />}
             title="Scroll-stopping captions"
             description="Describe your post topic and tone — Clotter AI will generate five unique captions tailored to your voice."
           />
         )}
 
         {captions.length > 0 && !isLoading && (
-          <section className="mt-12">
+          <section>
             <PremiumResultsHeader
               title="Your captions"
               subtitle={`${captions.length} options ready to copy`}
@@ -150,9 +141,7 @@ export function CaptionGenerator() {
                   copied={copiedIndex === index}
                   delay={index * 0.06}
                 >
-                  <p className="text-[0.9375rem] leading-[1.75] tracking-[-0.014em] text-white/85 sm:text-base">
-                    {caption}
-                  </p>
+                  <PremiumResultText>{caption}</PremiumResultText>
                   <div className="mt-3">
                     <AddToPlannerButton contentType="caption" contentText={caption} />
                   </div>
@@ -161,7 +150,6 @@ export function CaptionGenerator() {
             </ul>
           </section>
         )}
-      </div>
     </div>
   );
 }

@@ -259,7 +259,7 @@ export function ContentPlanner() {
   return (
     <>
       <div className="premium-feature-body">
-        <div className="mx-auto mb-8 flex max-w-[1400px] flex-wrap items-center gap-3">
+        <div className="mb-8 flex flex-wrap items-center gap-3">
           <button
             type="button"
             onClick={goToPrevWeek}
@@ -304,8 +304,8 @@ export function ContentPlanner() {
           </button>
         </div>
 
-      <div className="relative z-10 flex-1 overflow-x-auto pb-16">
-        <div className="mx-auto min-w-[720px] max-w-[1400px]">
+      <div className="relative z-10 flex-1 overflow-x-auto pb-8">
+        <div className="min-w-[720px]">
           <div className="grid grid-cols-7 gap-3 sm:gap-4">
             {weekDays.map(({ name, date }, index) => {
               const dateKey = toDateKey(date);
@@ -533,12 +533,9 @@ export function ContentPlanner() {
               </ul>
             )}
 
-            <div className="mt-6 space-y-5 border-t border-pink-500/30 pt-6">
+            <div className="mt-6 space-y-5 border-t border-white/[0.06] pt-6">
               <div>
-                <label
-                  htmlFor="planner-idea"
-                  className="text-xs font-semibold uppercase tracking-[0.1em] text-white/35"
-                >
+                <label htmlFor="planner-idea" className="premium-field-label">
                   Content idea
                 </label>
                 <textarea
@@ -547,22 +544,20 @@ export function ContentPlanner() {
                   onChange={(e) => setIdea(e.target.value)}
                   placeholder="What's the content about?"
                   rows={3}
-                  className="premium-input mt-2 w-full resize-none text-sm"
+                  className="premium-input premium-textarea mt-2 w-full text-sm"
                 />
               </div>
 
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.1em] text-white/35">
-                  Platform
-                </p>
+                <p className="premium-field-label">Platform</p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {PLATFORMS.map((p) => (
                     <button
                       key={p.id}
                       type="button"
                       onClick={() => setPlatform(p.id)}
-                      className={`captions-tone-pill text-xs${
-                        platform === p.id ? " captions-tone-pill--active" : ""
+                      className={`premium-pill${
+                        platform === p.id ? " premium-pill--active" : ""
                       }`}
                     >
                       {p.label}
@@ -572,17 +567,15 @@ export function ContentPlanner() {
               </div>
 
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.1em] text-white/35">
-                  Content type
-                </p>
+                <p className="premium-field-label">Content type</p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {CONTENT_TYPES.map((t) => (
                     <button
                       key={t.id}
                       type="button"
                       onClick={() => setContentType(t.id)}
-                      className={`captions-tone-pill text-xs${
-                        contentType === t.id ? " captions-tone-pill--active" : ""
+                      className={`premium-pill${
+                        contentType === t.id ? " premium-pill--active" : ""
                       }`}
                     >
                       {t.label}
@@ -592,17 +585,15 @@ export function ContentPlanner() {
               </div>
 
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.1em] text-white/35">
-                  Status
-                </p>
+                <p className="premium-field-label">Status</p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {STATUSES.map((s) => (
                     <button
                       key={s.id}
                       type="button"
                       onClick={() => setStatus(s.id)}
-                      className={`captions-tone-pill text-xs${
-                        status === s.id ? " captions-tone-pill--active" : ""
+                      className={`premium-pill${
+                        status === s.id ? " premium-pill--active" : ""
                       }`}
                     >
                       {s.label}
@@ -615,9 +606,9 @@ export function ContentPlanner() {
                 type="button"
                 onClick={addItem}
                 disabled={!idea.trim()}
-                className="premium-generate-btn planner-add-btn disabled:!opacity-40"
+                className="premium-generate-btn disabled:!opacity-40"
               >
-                <span className="relative z-[1]">Add to calendar</span>
+                Add to calendar
               </button>
             </div>
           </div>

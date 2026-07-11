@@ -1,5 +1,6 @@
 "use client";
 
+import { FileText } from "lucide-react";
 import { useState } from "react";
 import { FeatureEmptyState } from "@/app/dashboard/components/feature-empty-state";
 import {
@@ -121,9 +122,7 @@ function ScriptSectionCard({
         </div>
         <PremiumCopyButton onClick={onCopy} copied={copied} />
       </div>
-      <p className="mt-4 whitespace-pre-wrap text-[0.9375rem] leading-[1.8] tracking-[-0.014em] text-white/88 sm:text-base">
-        {content}
-      </p>
+      <p className="premium-result-text mt-4 whitespace-pre-wrap">{content}</p>
     </article>
   );
 }
@@ -187,7 +186,6 @@ export function ScriptGenerator() {
 
   return (
     <div className="premium-feature-body">
-      <div className="mx-auto w-full max-w-3xl">
         <section className="premium-form-section">
           <div>
             <PremiumFieldLabel htmlFor="script-topic">Video topic</PremiumFieldLabel>
@@ -283,33 +281,18 @@ export function ScriptGenerator() {
 
         {error && <PremiumError message={error} />}
 
-        {isLoading && <PremiumLoadingSkeleton count={4} />}
+        {isLoading && <PremiumLoadingSkeleton />}
 
         {!isLoading && !script && !error && (
           <FeatureEmptyState
-            icon={
-              <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8" aria-hidden>
-                <path
-                  d="M8 4h8a2 2 0 0 1 2 2v14l-3-2-3 2-3-2-3 2V6a2 2 0 0 1 2-2Z"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M10 8h4M10 12h4M10 16h2"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
-              </svg>
-            }
+            icon={<FileText size={24} strokeWidth={1.75} />}
             title="Viral video scripts"
             description="Describe your topic, platform, and tone — Clotter AI builds a full script with hook, sections, and CTA optimized for retention."
           />
         )}
 
         {script && !isLoading && (
-          <section className="mt-12 space-y-6">
+          <section className="space-y-6">
             <PremiumResultsHeader
               title="Your script"
               subtitle={`${script.wordCount > 0 ? `${script.wordCount} words` : ""}${script.wordCount > 0 && script.speakingTime ? " · " : ""}${script.speakingTime ? `~${script.speakingTime}` : ""}`}
@@ -376,7 +359,6 @@ export function ScriptGenerator() {
             />
           </section>
         )}
-      </div>
     </div>
   );
 }

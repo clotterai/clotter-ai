@@ -7,6 +7,7 @@ type FeaturePageShellProps = {
   subtitle: string;
   children: ReactNode;
   headerExtra?: ReactNode;
+  wide?: boolean;
 };
 
 export function FeaturePageShell({
@@ -15,20 +16,27 @@ export function FeaturePageShell({
   subtitle,
   children,
   headerExtra,
+  wide = false,
 }: FeaturePageShellProps) {
   return (
-    <div className="premium-feature-page relative flex min-h-screen flex-col overflow-hidden bg-[#0D0D1A]">
+    <div className="premium-feature-page relative flex min-h-screen flex-col overflow-hidden bg-[#09090B]">
       <PremiumBackground variant="feature" />
 
-      <header className="premium-feature-header relative z-10 shrink-0 px-6 pb-4 pt-10 sm:px-10 sm:pt-14">
-        <p className="premium-feature-label">{label}</p>
-        <h1 className="premium-feature-title">{title}</h1>
-        <div aria-hidden className="premium-feature-title-underline" />
-        <p className="premium-feature-subtitle">{subtitle}</p>
-        {headerExtra}
-      </header>
+      <div
+        className={`relative z-10 mx-auto flex w-full flex-1 flex-col px-4 py-6 sm:px-6 sm:py-8 ${
+          wide ? "max-w-[1400px]" : "max-w-2xl"
+        }`}
+      >
+        <header className="premium-feature-header shrink-0">
+          <p className="premium-feature-label">{label}</p>
+          <div aria-hidden className="premium-feature-title-underline" />
+          <h1 className="premium-feature-title">{title}</h1>
+          <p className="premium-feature-subtitle">{subtitle}</p>
+          {headerExtra}
+        </header>
 
-      {children}
+        <div className="mt-8 flex min-h-0 flex-1 flex-col">{children}</div>
+      </div>
     </div>
   );
 }

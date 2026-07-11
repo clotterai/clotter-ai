@@ -83,6 +83,32 @@ export function PremiumPillGroup({
   );
 }
 
+function PremiumSpinner({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg
+      className={`premium-spinner ${className}`}
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden
+    >
+      <circle
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeOpacity="0.25"
+      />
+      <path
+        d="M12 2a10 10 0 0 1 10 10"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export function PremiumGenerateButton({
   children,
   loading = false,
@@ -102,12 +128,8 @@ export function PremiumGenerateButton({
     >
       {loading ? (
         <span className="flex items-center justify-center gap-2">
+          <PremiumSpinner />
           {loadingLabel}
-          <span className="premium-loading-dots" aria-hidden>
-            <span>.</span>
-            <span>.</span>
-            <span>.</span>
-          </span>
         </span>
       ) : (
         children
@@ -133,7 +155,7 @@ export function PremiumCopyButton({
       aria-label={copied ? "Copied" : "Copy"}
     >
       {copied ? (
-        <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4" aria-hidden>
+        <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5" aria-hidden>
           <path
             d="M3.5 8.5l3 3 6-6"
             stroke="currentColor"
@@ -143,7 +165,7 @@ export function PremiumCopyButton({
           />
         </svg>
       ) : (
-        <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4" aria-hidden>
+        <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5" aria-hidden>
           <rect
             x="5"
             y="5"
@@ -162,6 +184,10 @@ export function PremiumCopyButton({
       )}
     </button>
   );
+}
+
+export function PremiumResultText({ children }: { children: ReactNode }) {
+  return <p className="premium-result-text">{children}</p>;
 }
 
 export function PremiumResultCard({
@@ -195,16 +221,8 @@ export function PremiumResultCard({
 
 export function PremiumLoadingSkeleton({ count = 3 }: { count?: number }) {
   return (
-    <section className="mt-12">
-      <p className="premium-loading-label">
-        Generating
-        <span className="premium-loading-dots" aria-hidden>
-          <span>.</span>
-          <span>.</span>
-          <span>.</span>
-        </span>
-      </p>
-      <ul className="mt-6 space-y-3">
+    <section className="premium-loading-section">
+      <ul className="space-y-3">
         {Array.from({ length: count }, (_, index) => (
           <li
             key={index}
@@ -219,7 +237,7 @@ export function PremiumLoadingSkeleton({ count = 3 }: { count?: number }) {
 
 export function PremiumError({ message }: { message: string }) {
   return (
-    <p className="premium-error mt-8">{message}</p>
+    <p className="premium-error">{message}</p>
   );
 }
 
@@ -232,10 +250,10 @@ export function PremiumResultsHeader({
 }) {
   return (
     <div className="mb-6">
-      <h2 className="font-heading text-lg font-bold tracking-[-0.02em] text-white sm:text-xl">
+      <h2 className="text-base font-semibold tracking-[-0.02em] text-white">
         {title}
       </h2>
-      <p className="mt-1 text-sm text-white/40">{subtitle}</p>
+      <p className="mt-1 text-xs text-white/35">{subtitle}</p>
     </div>
   );
 }
