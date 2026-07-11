@@ -774,18 +774,16 @@ export function ChatInterface({
 
   const handleCameraCapture = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      stream.getTracks().forEach((track) => track.stop());
       const input = document.createElement("input");
       input.type = "file";
       input.accept = "image/*";
-      input.capture = "environment";
+      input.capture = "user";
       input.onchange = (e) => handleFileSelect(e as any);
+      document.body.appendChild(input);
       input.click();
+      document.body.removeChild(input);
     } catch {
-      alert(
-        "Please allow camera access in your browser settings to take photos",
-      );
+      alert("Camera not available. Please use Upload File instead.");
     }
   };
 
