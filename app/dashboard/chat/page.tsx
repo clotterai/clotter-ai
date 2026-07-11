@@ -1,5 +1,6 @@
 "use client";
 
+import { Zap } from "lucide-react";
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { ChatBackground } from "./chat-background";
@@ -12,6 +13,16 @@ function ChatPageContent() {
 
   return (
     <div className="relative flex h-[calc(100dvh-3.5rem)] min-h-0 flex-col overflow-hidden md:h-screen">
+      <style>{`
+        @keyframes electricPulse {
+          0%, 100% {
+            box-shadow: 0 0 8px -2px rgba(236,72,153,0.6), 0 0 16px -4px rgba(249,115,22,0.4);
+          }
+          50% {
+            box-shadow: 0 0 16px -2px rgba(236,72,153,0.9), 0 0 30px -4px rgba(249,115,22,0.7);
+          }
+        }
+      `}</style>
       <ChatBackground />
 
       <header className="relative z-10 shrink-0 overflow-hidden border-b border-[#EC4899]/10 bg-[#05050f]/40 px-4 py-2 backdrop-blur-xl md:px-8 md:py-4 sm:px-10">
@@ -26,11 +37,13 @@ function ChatPageContent() {
             </h1>
           </div>
           <span
-            className="hidden shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold text-white md:inline-flex"
+            className="hidden shrink-0 items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold text-white md:inline-flex"
             style={{
-              background: "linear-gradient(135deg, #7C3AED, #A855F7)",
+              background: "linear-gradient(135deg, #EC4899, #F97316)",
+              animation: "electricPulse 2s ease-in-out infinite",
             }}
           >
+            <Zap size={12} fill="white" />
             Clotter 2.5
           </span>
         </div>
