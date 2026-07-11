@@ -177,6 +177,14 @@ function PdfIcon({ className }: { className?: string }) {
 const CHAT_INPUT_LINE_HEIGHT = 20;
 const CHAT_INPUT_MAX_LINES = 4;
 
+const WATERFALL_STREAKS = Array.from({ length: 20 }, (_, index) => ({
+  id: index,
+  left: `${Math.random() * 100}%`,
+  duration: `${0.5 + Math.random() * 1}s`,
+  delay: `${Math.random() * 2}s`,
+  opacity: 0.35 + Math.random() * 0.45,
+}));
+
 const nakedIconButtonClass =
   "inline-flex shrink-0 items-center justify-center text-white/40 transition-colors duration-150 hover:text-white/70 disabled:cursor-not-allowed disabled:opacity-40";
 
@@ -509,6 +517,7 @@ export function ChatInterface({
   const [selectedAttachment, setSelectedAttachment] =
     useState<MessageAttachment | null>(null);
   const [isRecording, setIsRecording] = useState(false);
+  const [showWaterfall, setShowWaterfall] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -519,8 +528,17 @@ export function ChatInterface({
   const loadGenerationRef = useRef(0);
   const initialPromptSentRef = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const waterfallTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isEmpty = messages.length === 0;
+
+  useEffect(() => {
+    return () => {
+      if (waterfallTimeoutRef.current) {
+        clearTimeout(waterfallTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     async function loadCreatorNiche() {
@@ -861,6 +879,22 @@ export function ChatInterface({
 
     if ((!trimmed && !attachment) || isLoading || isLoadingSession) return;
 
+    if (trimmed.toLowerCase() === "waterfall" && !attachment) {
+      setInput("");
+      setShowWaterfall(true);
+
+      if (waterfallTimeoutRef.current) {
+        clearTimeout(waterfallTimeoutRef.current);
+      }
+
+      waterfallTimeoutRef.current = setTimeout(() => {
+        setShowWaterfall(false);
+        waterfallTimeoutRef.current = null;
+      }, 3000);
+
+      return;
+    }
+
     let activeSessionId = sessionId;
     let assistantId = "";
     let streamedContent = "";
@@ -1057,7 +1091,31 @@ export function ChatInterface({
 
   return (
     <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+      {showWaterfall && (
+        <div className="pointer-events-none absolute inset-0 z-50 overflow-hidden bg-[#050510]/90">
+          {WATERFALL_STREAKS.map((streak) => (
+            <div
+              key={streak.id}
+              className="absolute top-0 w-px"
+              style={{
+                left: streak.left,
+                height: "120px",
+                background:
+                  "linear-gradient(to bottom, transparent, rgba(34,211,238,0.85), rgba(59,130,246,0.65), transparent)",
+                opacity: streak.opacity,
+                animation: `chat-waterfall-fall ${streak.duration} linear infinite`,
+                animationDelay: streak.delay,
+              }}
+            />
+          ))}
+        </div>
+      )}
       <style>{`
+        @keyframes chat-waterfall-fall {
+          from { transform: translateY(-100%); }
+          to { transform: translateY(100vh); }
+        }
+
         @keyframes chat-planet-spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
