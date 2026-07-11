@@ -772,21 +772,6 @@ export function ChatInterface({
     setSelectedAttachment(null);
   }
 
-  const handleCameraCapture = async () => {
-    try {
-      const input = document.createElement("input");
-      input.type = "file";
-      input.accept = "image/*";
-      input.capture = "user";
-      input.onchange = (e) => handleFileSelect(e as any);
-      document.body.appendChild(input);
-      input.click();
-      document.body.removeChild(input);
-    } catch {
-      alert("Camera not available. Please use Upload File instead.");
-    }
-  };
-
   function toggleVoiceInput() {
     const SpeechRecognitionConstructor =
       window.SpeechRecognition ?? window.webkitSpeechRecognition;
