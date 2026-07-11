@@ -772,6 +772,23 @@ export function ChatInterface({
     setSelectedAttachment(null);
   }
 
+  const handleCameraCapture = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      stream.getTracks().forEach((track) => track.stop());
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.capture = "environment";
+      input.onchange = (e) => handleFileSelect(e as any);
+      input.click();
+    } catch {
+      alert(
+        "Please allow camera access in your browser settings to take photos",
+      );
+    }
+  };
+
   function toggleVoiceInput() {
     const SpeechRecognitionConstructor =
       window.SpeechRecognition ?? window.webkitSpeechRecognition;
