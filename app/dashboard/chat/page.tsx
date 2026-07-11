@@ -25,8 +25,17 @@ function ChatPageContent() {
               Creative co-pilot
             </h1>
           </div>
-          <span className="hidden shrink-0 text-[12px] font-medium tracking-wide text-white/35 md:inline">
-            Clotter 2.5
+          <span className="hidden shrink-0 rounded-full border border-white/[0.08] bg-white/[0.06] px-3 py-1 shadow-[0_0_12px_-4px_rgba(236,72,153,0.3)] md:inline">
+            <span
+              className="text-[11px] font-semibold tracking-wider"
+              style={{
+                background: "linear-gradient(135deg, #EC4899, #F97316)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              Clotter 2.5
+            </span>
           </span>
         </div>
       </header>

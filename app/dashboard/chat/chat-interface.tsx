@@ -5,7 +5,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ClotterLogo } from "@/app/dashboard/components/clotter-logo";
 import { useToast } from "@/app/dashboard/components/toast-provider";
-import { BubbleIcon } from "@/app/dashboard/bubble/bubble-icon";
 import { createClient } from "@/lib/supabase/client";
 import { dispatchChatSessionsUpdated } from "@/lib/chat-sessions-events";
 import { generateSmartChatTitle } from "@/lib/generate-chat-title";
@@ -332,12 +331,49 @@ function MessageText({ content }: { content: string }) {
   );
 }
 
-function ChatAiAvatar({ thinking = false }: { thinking?: boolean }) {
+function ChatPlanetLogo({
+  size = 28,
+  thinking = false,
+}: {
+  size?: 28 | 64;
+  thinking?: boolean;
+}) {
+  const orbitSize = Math.round(size * 1.35);
+
   return (
     <div
-      className={`chat-ai-logo mt-0.5 shrink-0${thinking ? " chat-ai-logo--thinking" : ""}`}
+      className="relative inline-flex shrink-0 items-center justify-center"
+      style={{ width: orbitSize, height: orbitSize }}
     >
-      <ClotterLogo size={28} />
+      <div className="chat-planet-orbit pointer-events-none absolute inset-0 flex items-center justify-center">
+        <div
+          className="chat-planet-orbit-ring rounded-full border border-white/10"
+          style={{ width: orbitSize, height: orbitSize }}
+        />
+      </div>
+      <div
+        className={`chat-planet-orb relative flex items-center justify-center${
+          thinking ? " chat-planet-orb--thinking" : ""
+        }`}
+      >
+        <ClotterLogo size={size} />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 h-[1.5px] bg-white/20"
+          style={{
+            top: "50%",
+            transform: "translateY(-50%) rotate(-15deg)",
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function ChatAiAvatar({ thinking = false }: { thinking?: boolean }) {
+  return (
+    <div className="mt-0.5 shrink-0">
+      <ChatPlanetLogo size={28} thinking={thinking} />
     </div>
   );
 }
@@ -1043,6 +1079,28 @@ export function ChatInterface({
   return (
     <div className="relative z-10 flex min-h-0 flex-1 flex-col">
       <style>{`
+        @keyframes chat-planet-spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
+        @keyframes chat-planet-orbit-spin {
+          from { transform: rotate(0deg) scaleY(0.3); }
+          to { transform: rotate(-360deg) scaleY(0.3); }
+        }
+
+        .chat-planet-orb {
+          animation: chat-planet-spin 8s linear infinite;
+        }
+
+        .chat-planet-orb--thinking {
+          animation: chat-ai-logo-spin 1s linear infinite;
+        }
+
+        .chat-planet-orbit-ring {
+          animation: chat-planet-orbit-spin 12s linear infinite;
+        }
+
         @keyframes chat-ai-logo-spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
@@ -1125,7 +1183,7 @@ export function ChatInterface({
               className="chat-welcome-title"
               style={{ animationDelay: "0.05s" }}
             >
-              <BubbleIcon size={64} />
+              <ChatPlanetLogo size={64} />
             </div>
             <h2 className="font-heading chat-welcome-title mt-8 text-center text-[2rem] font-bold leading-[1.12] tracking-[-0.02em] text-white sm:text-[2.75rem]">
               What are we creating today?
