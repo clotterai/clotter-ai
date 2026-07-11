@@ -397,7 +397,7 @@ function AssistantMessageActions({
   const isDisliked = feedback === "dislike";
 
   return (
-    <div className="chat-actions-fade-in">
+    <div className="chat-actions-fade-in mt-2">
       <div className="flex items-center justify-between gap-2 py-2">
         <div className="flex items-center gap-1">
           <button
@@ -1235,7 +1235,7 @@ export function ChatInterface({
             </div>
           </div>
         ) : (
-          <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-3 py-4 pb-4 md:gap-6 md:px-6 md:py-10 md:pb-4">
+          <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-3 py-4 pb-4 md:px-6 md:py-10 md:pb-4">
             {messages.map((message, index) => {
               const isStreamingMessage =
                 isLoading &&
@@ -1251,7 +1251,7 @@ export function ChatInterface({
                 {message.role === "user" ? (
                   <div className="flex justify-end">
                     <div className="flex max-w-[85%] flex-col items-end md:max-w-[85%]">
-                      <div className="rounded-2xl border border-pink-500/20 bg-gradient-to-r from-pink-500/15 to-orange-500/10 px-3 py-2 text-white md:px-4 md:py-3">
+                      <div className="rounded-2xl border border-pink-500/20 bg-gradient-to-r from-pink-500/15 to-orange-500/10 px-5 py-4 text-white">
                         {message.attachment?.type === "image" && (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
@@ -1284,7 +1284,7 @@ export function ChatInterface({
                     <ChatAiAvatar thinking={isStreamingMessage} />
                     <div className="min-w-0 max-w-[85%] flex-1 md:max-w-none">
                       <div
-                        className={`rounded-2xl border border-white/[0.06] bg-white/[0.04] px-3 py-2 text-white/90 md:px-4 md:py-3 ${
+                        className={`rounded-2xl border border-white/[0.06] bg-white/[0.04] px-5 py-4 text-white/90 ${
                           isStreamingMessage ? "chat-streaming-bubble" : ""
                         }`}
                       >
