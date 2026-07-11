@@ -200,13 +200,20 @@ export async function POST(request: Request) {
   if (user) {
     const { data: profile } = await supabase
       .from("creator_profiles")
-      .select("preferred_name")
+      .select("preferred_name, preferred_language")
       .eq("user_id", user.id)
       .maybeSingle();
 
     const preferredName = profile?.preferred_name?.trim();
     if (preferredName) {
       systemPrompt += `\n\nThe user wants to be called ${preferredName}. Always address them by this name.`;
+    }
+
+    const preferredLanguage = profile?.preferred_language?.trim() || "English";
+    systemPrompt += `\n\nIMPORTANT: Always respond in ${preferredLanguage}.`;
+    if (preferredLanguage === "Hinglish") {
+      systemPrompt +=
+        " If preferred_language is Hinglish, mix Hindi and English naturally.";
     }
   }
 

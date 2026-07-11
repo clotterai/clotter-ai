@@ -3,14 +3,18 @@
 import {
   Brain,
   Calendar,
+  Camera,
   ChevronDown,
   FileText,
+  Globe,
   LayoutDashboard,
   Lightbulb,
   MessageSquare,
   TrendingUp,
   Type,
+  User,
   Zap,
+  type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -40,6 +44,43 @@ const NAV_ICON_PROPS = {
   strokeWidth: 1.75,
   "aria-hidden": true,
 } as const;
+
+const PREFERRED_LANGUAGES = [
+  "English",
+  "Hindi",
+  "Hinglish",
+  "Spanish",
+  "French",
+  "Arabic",
+  "Portuguese",
+  "Indonesian",
+  "German",
+  "Italian",
+  "Japanese",
+  "Korean",
+  "Turkish",
+] as const;
+
+const settingsLabelClass =
+  "mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-white/30";
+
+const settingsInputClass =
+  "w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none transition-colors placeholder:text-white/30 focus:border-pink-500/40 disabled:opacity-50";
+
+function SettingsLabel({
+  icon: Icon,
+  children,
+}: {
+  icon?: LucideIcon;
+  children: ReactNode;
+}) {
+  return (
+    <p className={settingsLabelClass}>
+      {Icon ? <Icon size={14} className="text-white/40" strokeWidth={1.75} /> : null}
+      {children}
+    </p>
+  );
+}
 
 const dashboardNavItem = {
   label: "Dashboard",
@@ -738,6 +779,8 @@ function SidebarProfileSection({ user: initialUser }: { user: SidebarUser }) {
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [preferredLanguage, setPreferredLanguage] = useState("English");
+  const [isSavingLanguage, setIsSavingLanguage] = useState(false);
 
   useEffect(() => {
     setDisplayName(initialUser.displayName);
@@ -745,6 +788,28 @@ function SidebarProfileSection({ user: initialUser }: { user: SidebarUser }) {
     setAvatarUrl(initialUser.avatarUrl);
     setEditValue(initialUser.preferredName ?? "");
   }, [initialUser.displayName, initialUser.preferredName, initialUser.avatarUrl]);
+
+  useEffect(() => {
+    async function loadPreferredLanguage() {
+      try {
+        const response = await fetch("/api/memory/profile");
+        if (!response.ok) return;
+
+        const data = (await response.json()) as {
+          profile?: { preferred_language?: string | null };
+        };
+
+        const saved = data.profile?.preferred_language?.trim();
+        if (saved && PREFERRED_LANGUAGES.includes(saved as (typeof PREFERRED_LANGUAGES)[number])) {
+          setPreferredLanguage(saved);
+        }
+      } catch {
+        // Keep default language on failure.
+      }
+    }
+
+    void loadPreferredLanguage();
+  }, []);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -859,6 +924,27 @@ function SidebarProfileSection({ user: initialUser }: { user: SidebarUser }) {
     }
   }
 
+  async function savePreferredLanguage(language: string) {
+    setPreferredLanguage(language);
+    setIsSavingLanguage(true);
+
+    try {
+      const response = await fetch("/api/memory/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ preferred_language: language }),
+      });
+
+      if (!response.ok) return;
+
+      showToast("Language updated");
+    } catch {
+      // Save silently on failure.
+    } finally {
+      setIsSavingLanguage(false);
+    }
+  }
+
   async function handleSignOut() {
     setIsSigningOut(true);
     const supabase = createClient();
@@ -933,113 +1019,130 @@ function SidebarProfileSection({ user: initialUser }: { user: SidebarUser }) {
 
       {menuOpen && (
         <div className="absolute bottom-[calc(100%+8px)] left-0 right-0 z-50 overflow-hidden rounded-xl border border-white/10 bg-[#13131f]/98 shadow-[0_16px_48px_-12px_rgba(0,0,0,0.65)] backdrop-blur-xl">
-          <div className="border-b border-white/8 px-4 py-3">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30">
-              Full name
-            </p>
-            <p className="mt-1 truncate text-sm text-white/85">
-              {initialUser.fullName}
-            </p>
+          <div className="flex flex-col gap-4 px-4 py-4">
+            <div>
+              <SettingsLabel>Full name</SettingsLabel>
+              <p className="truncate text-sm text-white/85">{initialUser.fullName}</p>
+            </div>
+            <div>
+              <SettingsLabel>Email</SettingsLabel>
+              <p className="truncate text-sm text-white/85">{initialUser.email}</p>
+            </div>
           </div>
 
-          <div className="border-b border-white/8 px-4 py-3">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30">
-              Email
-            </p>
-            <p className="mt-1 truncate text-sm text-white/85">
-              {initialUser.email}
-            </p>
-          </div>
+          <div className="border-t border-white/5" />
 
-          <div className="flex items-center gap-3 border-b border-white/8 px-4 py-3">
-            {avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={avatarUrl}
-                alt=""
-                loading="lazy"
-                className="h-10 w-10 shrink-0 rounded-full object-cover ring-1 ring-white/10"
-              />
-            ) : (
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-pink-500/30 to-orange-500/20 text-xs font-semibold text-white/90 ring-1 ring-white/10">
-                {initialUser.initials}
-              </div>
-            )}
-            <button
-              type="button"
-              onClick={() => avatarInputRef.current?.click()}
-              disabled={isUploadingAvatar}
-              className="rounded-lg border border-white/10 px-3 py-2 text-xs font-medium text-white/75 transition-colors hover:border-white/20 hover:bg-white/[0.04] hover:text-white disabled:opacity-50"
-            >
-              {isUploadingAvatar ? "Uploading..." : "Change Photo"}
-            </button>
-          </div>
-
-          {isEditing ? (
-            <div className="space-y-3 border-b border-white/8 px-4 py-3">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30">
-                Display name
-              </p>
-              <input
-                type="text"
-                value={editValue}
-                onChange={(event) => setEditValue(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    event.preventDefault();
-                    void savePreferredName();
-                  }
-                  if (event.key === "Escape") {
-                    setEditValue(preferredName ?? "");
-                    setIsEditing(false);
-                  }
-                }}
-                placeholder={initialUser.fallbackFirstName}
-                disabled={isSaving}
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none placeholder:text-white/30 disabled:opacity-50"
-                autoFocus
-              />
-              <div className="flex gap-2">
+          <div className="flex flex-col gap-4 px-4 py-4">
+            <div>
+              <SettingsLabel icon={Camera}>Photo</SettingsLabel>
+              <div className="mt-1 flex items-center gap-3">
+                {avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={avatarUrl}
+                    alt=""
+                    loading="lazy"
+                    className="h-10 w-10 shrink-0 rounded-full object-cover ring-1 ring-white/10"
+                  />
+                ) : (
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-pink-500/30 to-orange-500/20 text-xs font-semibold text-white/90 ring-1 ring-white/10">
+                    {initialUser.initials}
+                  </div>
+                )}
                 <button
                   type="button"
-                  onClick={() => void savePreferredName()}
-                  disabled={isSaving}
-                  className="flex-1 rounded-lg bg-gradient-to-r from-pink-500 to-orange-500 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50"
+                  onClick={() => avatarInputRef.current?.click()}
+                  disabled={isUploadingAvatar}
+                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/75 transition-colors hover:border-white/20 hover:bg-white/[0.08] hover:text-white disabled:opacity-50"
                 >
-                  {isSaving ? "Saving..." : "Save"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditValue(preferredName ?? "");
-                    setIsEditing(false);
-                  }}
-                  className="rounded-lg border border-white/10 px-3 py-2 text-xs text-white/50 hover:text-white/80"
-                >
-                  Cancel
+                  {isUploadingAvatar ? "Uploading..." : "Change Photo"}
                 </button>
               </div>
             </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => {
-                setEditValue(preferredName ?? "");
-                setIsEditing(true);
-              }}
-              className="flex w-full items-center gap-2 border-b border-white/8 px-4 py-3 text-left text-sm text-white/75 transition-colors hover:bg-white/[0.04] hover:text-white"
-            >
-              <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4 text-white/40" aria-hidden>
-                <path
-                  d="M11.5 2.5 13.5 4.5 5.5 12.5H3.5V10.5L11.5 2.5Z"
-                  stroke="currentColor"
-                  strokeWidth="1.25"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              Edit Display Name
-            </button>
-          )}
+
+            <div>
+              <SettingsLabel icon={User}>Display Name</SettingsLabel>
+              {isEditing ? (
+                <div className="flex flex-col gap-3">
+                  <input
+                    type="text"
+                    value={editValue}
+                    onChange={(event) => setEditValue(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        void savePreferredName();
+                      }
+                      if (event.key === "Escape") {
+                        setEditValue(preferredName ?? "");
+                        setIsEditing(false);
+                      }
+                    }}
+                    placeholder={initialUser.fallbackFirstName}
+                    disabled={isSaving}
+                    className={settingsInputClass}
+                    autoFocus
+                  />
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => void savePreferredName()}
+                      disabled={isSaving}
+                      className="rounded-xl bg-gradient-to-r from-pink-500 to-orange-500 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                    >
+                      {isSaving ? "Saving..." : "Save"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditValue(preferredName ?? "");
+                        setIsEditing(false);
+                      }}
+                      className="text-sm text-white/30 transition-colors hover:text-white/50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between gap-3">
+                  <p className="truncate text-sm text-white/85">
+                    {preferredName || initialUser.fallbackFirstName}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditValue(preferredName ?? "");
+                      setIsEditing(true);
+                    }}
+                    className="shrink-0 text-sm text-white/40 transition-colors hover:text-white/70"
+                  >
+                    Edit
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <SettingsLabel icon={Globe}>Language</SettingsLabel>
+              <select
+                value={preferredLanguage}
+                onChange={(event) => {
+                  void savePreferredLanguage(event.target.value);
+                }}
+                disabled={isSavingLanguage}
+                className={`${settingsInputClass} cursor-pointer appearance-none`}
+              >
+                {PREFERRED_LANGUAGES.map((language) => (
+                  <option key={language} value={language} className="bg-[#13131f]">
+                    {language}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="border-t border-white/5" />
 
           <button
             type="button"
