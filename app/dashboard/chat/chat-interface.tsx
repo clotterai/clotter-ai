@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Square } from "lucide-react";
+import { Mic, Plus, Square } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ClotterLogo } from "@/app/dashboard/components/clotter-logo";
@@ -178,8 +178,8 @@ function PdfIcon({ className }: { className?: string }) {
 const CHAT_INPUT_LINE_HEIGHT = 20;
 const CHAT_INPUT_MAX_LINES = 4;
 
-const inputUtilityButtonClass =
-  "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-white/50 transition-all duration-150 hover:border-white/20 hover:bg-white/[0.08] hover:text-white/80 disabled:cursor-not-allowed disabled:opacity-40";
+const nakedIconButtonClass =
+  "inline-flex shrink-0 items-center justify-center text-white/40 transition-colors duration-150 hover:text-white/70 disabled:cursor-not-allowed disabled:opacity-40";
 
 const sendButtonClass =
   "chat-send-btn inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-pink-500 to-orange-500 text-white shadow-[0_0_24px_-8px_rgba(236,72,153,0.55)] ring-1 ring-white/10 transition-all duration-150 hover:scale-[1.03] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:scale-100";
@@ -1018,7 +1018,8 @@ export function ChatInterface({
     if (!textarea) return;
 
     const maxHeight = CHAT_INPUT_LINE_HEIGHT * CHAT_INPUT_MAX_LINES;
-    textarea.style.height = `${CHAT_INPUT_LINE_HEIGHT}px`;
+    textarea.style.height = "auto";
+    textarea.style.minHeight = `${CHAT_INPUT_LINE_HEIGHT}px`;
     const nextHeight = Math.min(
       Math.max(textarea.scrollHeight, CHAT_INPUT_LINE_HEIGHT),
       maxHeight,
@@ -1298,10 +1299,8 @@ export function ChatInterface({
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={isLoading}
-              className={`${inputUtilityButtonClass} ${
-                selectedAttachment
-                  ? "border-pink-500/30 bg-pink-500/10 text-pink-400"
-                  : ""
+              className={`${nakedIconButtonClass} ${
+                selectedAttachment ? "text-pink-400 hover:text-pink-300" : ""
               }`}
               aria-label="Attach image or PDF"
             >
@@ -1316,21 +1315,26 @@ export function ChatInterface({
               placeholder="Message Clotter AI..."
               rows={1}
               disabled={isLoading}
-              style={{ resize: "none", overflow: "hidden" }}
-              className="max-h-20 min-h-[20px] flex-1 resize-none bg-transparent py-0 text-[15px] leading-5 tracking-[-0.018em] text-white placeholder:text-white/35 focus:outline-none disabled:opacity-50"
+              style={{
+                resize: "none",
+                overflow: "hidden",
+                caretColor: "#EC4899",
+                wordBreak: "break-word",
+                overflowWrap: "break-word",
+                minHeight: CHAT_INPUT_LINE_HEIGHT,
+              }}
+              className="max-h-20 flex-1 resize-none bg-transparent py-0 text-[15px] leading-5 tracking-[-0.018em] text-white placeholder:text-white/35 focus:outline-none disabled:opacity-50"
             />
             <button
               type="button"
               onClick={toggleVoiceInput}
               disabled={isLoading}
-              className={`${inputUtilityButtonClass} ${
-                isRecording
-                  ? "chat-mic-pulse border-pink-500/40 bg-gradient-to-br from-pink-500/20 to-orange-500/10 text-pink-400"
-                  : ""
+              className={`${nakedIconButtonClass} ${
+                isRecording ? "text-pink-400 hover:text-pink-300" : ""
               }`}
               aria-label={isRecording ? "Stop voice input" : "Start voice input"}
             >
-              <MicIcon className="h-4 w-4" />
+              <Mic size={20} />
             </button>
             {isLoading ? (
               <button
