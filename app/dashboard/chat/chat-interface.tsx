@@ -499,6 +499,18 @@ export function ChatInterface({
   sessionId?: string | null;
   initialPromptKey?: string | null;
 }) {
+  function cleanMarkdown(text: string): string {
+    return text
+      .replace(/\*\*(.+?)\*\*/g, "$1")
+      .replace(/\*(.+?)\*/g, "$1")
+      .replace(/#{1,6}\s/g, "")
+      .replace(/^\s*[-*+]\s/gm, "• ")
+      .replace(/`(.+?)`/g, "$1")
+      .replace(/\[(.+?)\]\(.+?\)/g, "$1")
+      .replace(/_{1,2}(.+?)_{1,2}/g, "$1")
+      .trim();
+  }
+
   const router = useRouter();
   const { showToast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -1294,7 +1306,7 @@ export function ChatInterface({
                               isStreamingMessage ? "chat-streaming-content" : ""
                             }
                           >
-                            <MessageText content={message.content} />
+                            <MessageText content={cleanMarkdown(message.content)} />
                           </div>
                         ) : (
                           <span className="inline-block h-4 w-4" aria-hidden />
