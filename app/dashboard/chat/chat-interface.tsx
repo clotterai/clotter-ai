@@ -319,7 +319,7 @@ function MessageText({ content }: { content: string }) {
 
   if (paragraphs.length <= 1) {
     return (
-      <p className="whitespace-pre-wrap text-base leading-relaxed tracking-[-0.018em]">
+      <p className="whitespace-pre-wrap text-base leading-loose tracking-[-0.018em]">
         {content}
       </p>
     );
@@ -330,7 +330,7 @@ function MessageText({ content }: { content: string }) {
       {paragraphs.map((paragraph, index) => (
         <p
           key={index}
-          className="text-base leading-relaxed tracking-[-0.018em] last:mb-0"
+          className="text-base leading-loose tracking-[-0.018em] last:mb-0"
         >
           {paragraph}
         </p>
@@ -397,7 +397,7 @@ function AssistantMessageActions({
   const isDisliked = feedback === "dislike";
 
   return (
-    <div className="chat-actions-fade-in mt-2">
+    <div className="chat-actions-fade-in mt-3">
       <div className="flex items-center justify-between gap-2 py-2">
         <div className="flex items-center gap-1">
           <button
@@ -1235,7 +1235,7 @@ export function ChatInterface({
             </div>
           </div>
         ) : (
-          <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-3 py-4 pb-4 md:px-6 md:py-10 md:pb-4">
+          <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-6 md:px-8">
             {messages.map((message, index) => {
               const isStreamingMessage =
                 isLoading &&
@@ -1251,7 +1251,7 @@ export function ChatInterface({
                 {message.role === "user" ? (
                   <div className="flex justify-end">
                     <div className="flex max-w-[85%] flex-col items-end md:max-w-[85%]">
-                      <div className="rounded-2xl border border-pink-500/20 bg-gradient-to-r from-pink-500/15 to-orange-500/10 px-5 py-4 text-white">
+                      <div className="rounded-2xl border border-pink-500/20 bg-gradient-to-r from-pink-500/15 to-orange-500/10 px-6 py-4 text-white">
                         {message.attachment?.type === "image" && (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
@@ -1280,11 +1280,11 @@ export function ChatInterface({
                     </div>
                   </div>
                 ) : (
-                  <div className="flex w-full gap-2 md:gap-3">
+                  <div className="flex w-full gap-4">
                     <ChatAiAvatar thinking={isStreamingMessage} />
                     <div className="min-w-0 max-w-[85%] flex-1 md:max-w-none">
                       <div
-                        className={`rounded-2xl border border-white/[0.06] bg-white/[0.04] px-5 py-4 text-white/90 ${
+                        className={`rounded-2xl border border-white/[0.06] bg-white/[0.04] px-6 py-5 text-white/90 ${
                           isStreamingMessage ? "chat-streaming-bubble" : ""
                         }`}
                       >
