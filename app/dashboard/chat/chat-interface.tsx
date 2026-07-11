@@ -338,34 +338,13 @@ function ChatPlanetLogo({
   size?: 28 | 64;
   thinking?: boolean;
 }) {
-  const orbitSize = Math.round(size * 1.35);
-
   return (
     <div
-      className="relative inline-flex shrink-0 items-center justify-center"
-      style={{ width: orbitSize, height: orbitSize }}
+      className={`chat-planet-orb inline-flex shrink-0 items-center justify-center${
+        thinking ? " chat-planet-orb--thinking" : ""
+      }`}
     >
-      <div className="chat-planet-orbit pointer-events-none absolute inset-0 flex items-center justify-center">
-        <div
-          className="chat-planet-orbit-ring rounded-full border border-white/10"
-          style={{ width: orbitSize, height: orbitSize }}
-        />
-      </div>
-      <div
-        className={`chat-planet-orb relative flex items-center justify-center${
-          thinking ? " chat-planet-orb--thinking" : ""
-        }`}
-      >
-        <ClotterLogo size={size} />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 h-[1.5px] bg-white/20"
-          style={{
-            top: "50%",
-            transform: "translateY(-50%) rotate(-15deg)",
-          }}
-        />
-      </div>
+      <ClotterLogo size={size} />
     </div>
   );
 }
@@ -1084,21 +1063,12 @@ export function ChatInterface({
           to { transform: rotate(360deg); }
         }
 
-        @keyframes chat-planet-orbit-spin {
-          from { transform: rotate(0deg) scaleY(0.3); }
-          to { transform: rotate(-360deg) scaleY(0.3); }
-        }
-
         .chat-planet-orb {
           animation: chat-planet-spin 8s linear infinite;
         }
 
         .chat-planet-orb--thinking {
           animation: chat-ai-logo-spin 1s linear infinite;
-        }
-
-        .chat-planet-orbit-ring {
-          animation: chat-planet-orbit-spin 12s linear infinite;
         }
 
         @keyframes chat-ai-logo-spin {
