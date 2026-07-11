@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 const STORAGE_KEY = "clotter-content-planner";
@@ -57,6 +58,13 @@ const PIN_TYPE_LABELS: Record<string, string> = {
   trend: "Trend",
 };
 
+const LEGEND_ITEMS = [
+  { label: "AI Content", color: "bg-pink-500/50" },
+  { label: "Instagram", color: "bg-orange-500/50" },
+  { label: "YouTube", color: "bg-blue-500/50" },
+  { label: "LinkedIn", color: "bg-purple-500/50" },
+] as const;
+
 function formatPinTime(pinTime: string | null) {
   if (!pinTime) return null;
   const [hours, minutes] = pinTime.split(":");
@@ -67,13 +75,6 @@ function formatPinTime(pinTime: string | null) {
 }
 
 const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
-
-const PLATFORM_DOT: Record<Platform, string> = {
-  instagram: "bg-pink-500",
-  youtube: "bg-red-500",
-  tiktok: "bg-cyan-400",
-  linkedin: "bg-blue-500",
-};
 
 const PLATFORM_CHIP: Record<Platform, string> = {
   instagram:
@@ -114,17 +115,16 @@ function isToday(date: Date): boolean {
 
 function formatWeekLabel(weekStart: Date): string {
   const weekEnd = addDays(weekStart, 6);
-  const opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
-  const start = weekStart.toLocaleDateString("en-US", opts);
-  const end = weekEnd.toLocaleDateString("en-US", {
-    ...opts,
-    year: weekStart.getFullYear() !== weekEnd.getFullYear() ? "numeric" : undefined,
+  const start = weekStart.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
   });
-  const year =
-    weekStart.getFullYear() === weekEnd.getFullYear()
-      ? weekStart.getFullYear()
-      : `${weekStart.getFullYear()}–${weekEnd.getFullYear()}`;
-  return `${start} – ${end}, ${year}`;
+  const end = weekEnd.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  return `${start} – ${end}`;
 }
 
 function loadStore(): PlannerStore {
@@ -258,175 +258,135 @@ export function ContentPlanner() {
 
   return (
     <>
-      <div className="premium-feature-body">
-        <div className="mb-8 flex flex-wrap items-center gap-3">
+      <div className="flex flex-col gap-8">
+        <div className="flex flex-wrap items-center justify-center gap-3">
           <button
             type="button"
             onClick={goToPrevWeek}
-            className="premium-pill"
+            className="inline-flex items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04] p-2 text-white/50 transition-colors hover:bg-white/[0.08] hover:text-white/80"
             aria-label="Previous week"
           >
-            <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
-              <path
-                d="m15 18-6-6 6-6"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <ChevronLeft size={18} strokeWidth={1.75} />
           </button>
-          <span className="min-w-[200px] text-center text-sm font-semibold tracking-[-0.02em] text-white/80 sm:text-base">
+
+          <span className="min-w-[180px] text-center text-sm font-medium text-white/60 sm:min-w-[220px]">
             {formatWeekLabel(weekStart)}
           </span>
+
           <button
             type="button"
             onClick={goToNextWeek}
-            className="premium-pill"
+            className="inline-flex items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04] p-2 text-white/50 transition-colors hover:bg-white/[0.08] hover:text-white/80"
             aria-label="Next week"
           >
-            <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
-              <path
-                d="m9 18 6-6-6-6"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <ChevronRight size={18} strokeWidth={1.75} />
           </button>
+
           <button
             type="button"
             onClick={goToThisWeek}
-            className="premium-pill premium-pill--active"
+            className="rounded-full bg-gradient-to-r from-pink-500 to-orange-500 px-4 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
           >
             Today
           </button>
         </div>
 
-      <div className="relative z-10 flex-1 overflow-x-auto pb-8">
-        <div className="min-w-[720px]">
-          <div className="grid grid-cols-7 gap-3 sm:gap-4">
-            {weekDays.map(({ name, date }, index) => {
-              const dateKey = toDateKey(date);
-              const items = store[dateKey] ?? [];
-              const dayPins = pinsByDate[dateKey] ?? [];
-              const today = isToday(date);
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-7 md:gap-3">
+          {weekDays.map(({ name, date }) => {
+            const dateKey = toDateKey(date);
+            const items = store[dateKey] ?? [];
+            const dayPins = pinsByDate[dateKey] ?? [];
+            const today = isToday(date);
+            const isEmpty = items.length === 0 && dayPins.length === 0;
 
-              return (
-                <div
-                  key={dateKey}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => openDay(dateKey)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.preventDefault();
-                      openDay(dateKey);
-                    }
-                  }}
-                  className={`planner-day-card group cursor-pointer text-left${
-                    today ? " planner-day-card--today" : ""
-                  }`}
-                  style={{ animationDelay: `${index * 0.05}s` }}
-                >
-                  <div className="flex items-baseline justify-between gap-2">
-                    <span
-                      className={`text-xs font-semibold uppercase tracking-[0.08em] ${
-                        today ? "text-[#EC4899]" : "text-white/40"
-                      }`}
+            return (
+              <div
+                key={dateKey}
+                role="button"
+                tabIndex={0}
+                onClick={() => openDay(dateKey)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    openDay(dateKey);
+                  }
+                }}
+                className={`group flex min-h-[140px] cursor-pointer flex-col rounded-2xl border p-4 text-left transition-colors md:p-4 ${
+                  today
+                    ? "border-pink-500/40 bg-pink-500/5"
+                    : "border-white/[0.06] bg-white/[0.03] hover:border-white/[0.10] hover:bg-white/[0.05]"
+                }`}
+              >
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-white/25">
+                  {name}
+                </span>
+
+                {today ? (
+                  <span
+                    className="mt-1 text-2xl font-bold tabular-nums tracking-[-0.03em]"
+                    style={{
+                      background: "linear-gradient(135deg, #EC4899, #F97316)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                    }}
+                  >
+                    {date.getDate()}
+                  </span>
+                ) : (
+                  <span className="mt-1 text-2xl font-bold tabular-nums tracking-[-0.03em] text-white/80">
+                    {date.getDate()}
+                  </span>
+                )}
+
+                <div className="mt-3 flex flex-1 flex-col gap-1.5">
+                  {dayPins.map((pin) => (
+                    <button
+                      key={pin.id}
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setViewingPin(pin);
+                      }}
+                      className="truncate rounded-lg bg-pink-500/10 px-2 py-1 text-left text-[11px] text-white/60 transition-colors hover:bg-pink-500/15 hover:text-white/75"
+                      title={pin.content_text}
                     >
-                      {name}
+                      {PIN_TYPE_LABELS[pin.content_type] ?? pin.content_type}
+                    </button>
+                  ))}
+                  {items.map((item) => (
+                    <span
+                      key={item.id}
+                      className="truncate rounded-lg bg-white/[0.06] px-2 py-1 text-[11px] text-white/60"
+                      title={item.idea}
+                    >
+                      {item.idea}
                     </span>
-                    <div className="flex items-center gap-1.5">
-                      {dayPins.length > 0 && (
-                        <span className="flex items-center gap-0.5" aria-hidden>
-                          {dayPins.slice(0, 3).map((pin) => (
-                            <span
-                              key={pin.id}
-                              className="h-2 w-2 rounded-full bg-[#EC4899] shadow-[0_0_8px_#EC4899]"
-                              title={PIN_TYPE_LABELS[pin.content_type] ?? pin.content_type}
-                            />
-                          ))}
-                          {dayPins.length > 3 && (
-                            <span className="text-[9px] font-medium text-pink-300/80">
-                              +{dayPins.length - 3}
-                            </span>
-                          )}
-                        </span>
-                      )}
-                      <span
-                        className={`text-lg font-bold tabular-nums tracking-[-0.03em] ${
-                          today ? "text-white" : "text-white/70"
-                        }`}
-                      >
-                        {date.getDate()}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 flex min-h-[88px] flex-col gap-1.5">
-                    {dayPins.map((pin) => (
-                      <button
-                        key={pin.id}
-                        type="button"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          setViewingPin(pin);
-                        }}
-                        className="flex items-center gap-1.5 truncate rounded-md border border-pink-500/35 bg-pink-500/15 px-2 py-1 text-left text-[10px] font-medium leading-tight text-pink-100 sm:text-[11px]"
-                        title={pin.content_text}
-                      >
-                        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#EC4899]" />
-                        <span className="truncate">
-                          {PIN_TYPE_LABELS[pin.content_type] ?? pin.content_type}
-                        </span>
-                      </button>
-                    ))}
-                    {items.length === 0 && dayPins.length === 0 ? (
-                      <span className="mt-auto text-[11px] text-white/25 transition-colors group-hover:text-white/40">
-                        + Add content
-                      </span>
-                    ) : (
-                      items.map((item) => (
-                        <span
-                          key={item.id}
-                          className={`truncate rounded-md border px-2 py-1 text-[10px] font-medium leading-tight sm:text-[11px] ${PLATFORM_CHIP[item.platform]}`}
-                          title={item.idea}
-                        >
-                          {item.idea}
-                        </span>
-                      ))
-                    )}
-                  </div>
-
-                  {(items.length > 0 || dayPins.length > 0) && (
-                    <span className="mt-2 text-[10px] font-medium text-white/30">
-                      {items.length + dayPins.length} item
-                      {items.length + dayPins.length !== 1 ? "s" : ""}
+                  ))}
+                  {isEmpty && (
+                    <span className="mt-auto text-[11px] text-white/20 transition-colors group-hover:text-pink-400">
+                      + Add content
                     </span>
                   )}
                 </div>
-              );
-            })}
-          </div>
-
-          <div className="mt-10 flex flex-wrap gap-4 text-xs text-white/40">
-            <span className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-[#EC4899]" />
-              AI pinned content
-            </span>
-            {PLATFORMS.map((p) => (
-              <span key={p.id} className="flex items-center gap-2">
-                <span
-                  className={`h-2.5 w-2.5 rounded-full ${PLATFORM_DOT[p.id]}`}
-                />
-                {p.label}
-              </span>
-            ))}
-          </div>
+              </div>
+            );
+          })}
         </div>
-      </div>
+
+        <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+          {LEGEND_ITEMS.map((item) => (
+            <span
+              key={item.label}
+              className="flex items-center gap-2 text-[11px] text-white/30"
+            >
+              <span
+                className={`h-2 w-2 shrink-0 rounded-sm ${item.color}`}
+                aria-hidden
+              />
+              {item.label}
+            </span>
+          ))}
+        </div>
       </div>
 
       {modalDateKey && modalDate && (
@@ -482,7 +442,7 @@ export function ContentPlanner() {
                     key={pin.id}
                     className="flex items-start gap-3 rounded-xl border border-pink-500/35 bg-pink-500/10 p-3"
                   >
-                    <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[#EC4899]" />
+                    <span className="mt-1 h-2 w-2 shrink-0 rounded-sm bg-pink-500/50" />
                     <button
                       type="button"
                       onClick={() => setViewingPin(pin)}
@@ -506,7 +466,7 @@ export function ContentPlanner() {
                 {modalItems.map((item) => (
                   <li
                     key={item.id}
-                    className="flex items-start gap-3 rounded-xl border border-pink-500/30 bg-[#0D0D1A]/60 p-3"
+                    className="flex items-start gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] p-3"
                   >
                     <span
                       className={`mt-0.5 shrink-0 rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase ${PLATFORM_CHIP[item.platform]}`}
