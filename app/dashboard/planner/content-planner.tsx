@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 const STORAGE_KEY = "clotter-content-planner";
@@ -57,13 +57,6 @@ const PIN_TYPE_LABELS: Record<string, string> = {
   chat: "Chat",
   trend: "Trend",
 };
-
-const LEGEND_ITEMS = [
-  { label: "AI Content", color: "bg-pink-500/50" },
-  { label: "Instagram", color: "bg-orange-500/50" },
-  { label: "YouTube", color: "bg-blue-500/50" },
-  { label: "LinkedIn", color: "bg-purple-500/50" },
-] as const;
 
 function formatPinTime(pinTime: string | null) {
   if (!pinTime) return null;
@@ -256,136 +249,241 @@ export function ContentPlanner() {
       new Date(modalDateKey + "T12:00:00")
     : null;
 
+  const thisWeekCount = weekDays.reduce((total, { date }) => {
+    const key = toDateKey(date);
+    return total + (store[key]?.length ?? 0) + (pinsByDate[key]?.length ?? 0);
+  }, 0);
+
+  const platformCount = (() => {
+    const platforms = new Set<Platform>();
+    for (const { date } of weekDays) {
+      for (const item of store[toDateKey(date)] ?? []) {
+        platforms.add(item.platform);
+      }
+    }
+    return platforms.size;
+  })();
+
+  const consistencyLabel =
+    thisWeekCount > 0 ? "Keep it up!" : "Start planning";
+
+  const gradientNumberStyle = {
+    background: "linear-gradient(135deg, #EC4899, #F97316)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+  } as const;
+
+  const todayButtonStyle = {
+    background: "linear-gradient(135deg, #EC4899, #F97316)",
+  } as const;
+
   return (
     <>
-      <div className="flex flex-col gap-8">
-        <div className="flex flex-wrap items-center justify-center gap-3">
+      <div className="mb-6 mt-8 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={goToPrevWeek}
+          className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/8 bg-white/5 text-white/50 transition-colors hover:bg-white/10 hover:text-white/80"
+          aria-label="Previous week"
+        >
+          <ChevronLeft size={18} strokeWidth={1.75} />
+        </button>
+
+        <span className="text-sm font-medium text-white/50">
+          {formatWeekLabel(weekStart)}
+        </span>
+
+        <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={goToPrevWeek}
-            className="inline-flex items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04] p-2 text-white/50 transition-colors hover:bg-white/[0.08] hover:text-white/80"
-            aria-label="Previous week"
+            onClick={goToThisWeek}
+            className="rounded-full px-4 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+            style={todayButtonStyle}
           >
-            <ChevronLeft size={18} strokeWidth={1.75} />
+            Today
           </button>
-
-          <span className="min-w-[180px] text-center text-sm font-medium text-white/60 sm:min-w-[220px]">
-            {formatWeekLabel(weekStart)}
-          </span>
-
           <button
             type="button"
             onClick={goToNextWeek}
-            className="inline-flex items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04] p-2 text-white/50 transition-colors hover:bg-white/[0.08] hover:text-white/80"
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/8 bg-white/5 text-white/50 transition-colors hover:bg-white/10 hover:text-white/80"
             aria-label="Next week"
           >
             <ChevronRight size={18} strokeWidth={1.75} />
           </button>
-
-          <button
-            type="button"
-            onClick={goToThisWeek}
-            className="rounded-full bg-gradient-to-r from-pink-500 to-orange-500 px-4 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
-          >
-            Today
-          </button>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-7 md:gap-3">
-          {weekDays.map(({ name, date }) => {
-            const dateKey = toDateKey(date);
-            const items = store[dateKey] ?? [];
-            const dayPins = pinsByDate[dateKey] ?? [];
-            const today = isToday(date);
-            const isEmpty = items.length === 0 && dayPins.length === 0;
+      <div className="hidden grid-cols-7 gap-3 md:grid">
+        {weekDays.map(({ name, date }) => {
+          const dateKey = toDateKey(date);
+          const items = store[dateKey] ?? [];
+          const dayPins = pinsByDate[dateKey] ?? [];
+          const today = isToday(date);
+          const isEmpty = items.length === 0 && dayPins.length === 0;
 
-            return (
-              <div
-                key={dateKey}
-                role="button"
-                tabIndex={0}
-                onClick={() => openDay(dateKey)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    openDay(dateKey);
-                  }
-                }}
-                className={`group flex min-h-[140px] cursor-pointer flex-col rounded-2xl border p-4 text-left transition-colors md:p-4 ${
-                  today
-                    ? "border-pink-500/40 bg-pink-500/5"
-                    : "border-white/[0.06] bg-white/[0.03] hover:border-white/[0.10] hover:bg-white/[0.05]"
-                }`}
-              >
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-white/25">
+          return (
+            <div
+              key={dateKey}
+              role="button"
+              tabIndex={0}
+              onClick={() => openDay(dateKey)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  openDay(dateKey);
+                }
+              }}
+              className={`group flex min-h-[200px] cursor-pointer flex-col rounded-2xl border p-4 text-left transition-all duration-200 ${
+                today
+                  ? "border-pink-500/30 bg-pink-500/[0.04]"
+                  : "border-white/[0.06] bg-[#111114] hover:border-white/[0.12]"
+              }`}
+            >
+              <span className="text-[9px] font-bold uppercase tracking-widest text-white/25">
+                {name}
+              </span>
+
+              {today ? (
+                <span
+                  className="mb-3 mt-1 text-3xl font-bold tabular-nums"
+                  style={gradientNumberStyle}
+                >
+                  {date.getDate()}
+                </span>
+              ) : (
+                <span className="mb-3 mt-1 text-3xl font-bold tabular-nums text-white/80">
+                  {date.getDate()}
+                </span>
+              )}
+
+              <div className="flex flex-1 flex-col">
+                {dayPins.map((pin) => (
+                  <button
+                    key={pin.id}
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setViewingPin(pin);
+                    }}
+                    className="mb-1 truncate rounded-lg bg-white/[0.06] px-2 py-1 text-left text-[11px] text-white/60 transition-colors hover:text-white/80"
+                    title={pin.content_text}
+                  >
+                    {PIN_TYPE_LABELS[pin.content_type] ?? pin.content_type}
+                  </button>
+                ))}
+                {items.map((item) => (
+                  <span
+                    key={item.id}
+                    className="mb-1 truncate rounded-lg bg-white/[0.06] px-2 py-1 text-[11px] text-white/60"
+                    title={item.idea}
+                  >
+                    {item.idea}
+                  </span>
+                ))}
+                {isEmpty && (
+                  <span className="mt-auto flex cursor-pointer items-center gap-1 text-[11px] text-white/20 transition-colors hover:text-pink-400">
+                    <Plus size={12} strokeWidth={2} />
+                    Add content
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="flex flex-col gap-3 md:hidden">
+        {weekDays.map(({ name, date }) => {
+          const dateKey = toDateKey(date);
+          const items = store[dateKey] ?? [];
+          const dayPins = pinsByDate[dateKey] ?? [];
+          const today = isToday(date);
+          const isEmpty = items.length === 0 && dayPins.length === 0;
+
+          return (
+            <div
+              key={dateKey}
+              role="button"
+              tabIndex={0}
+              onClick={() => openDay(dateKey)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  openDay(dateKey);
+                }
+              }}
+              className={`group flex min-h-[80px] cursor-pointer flex-row gap-4 rounded-2xl border p-4 text-left transition-all duration-200 ${
+                today
+                  ? "border-pink-500/30 bg-pink-500/[0.04]"
+                  : "border-white/[0.06] bg-[#111114] hover:border-white/[0.12]"
+              }`}
+            >
+              <div className="flex shrink-0 flex-col">
+                <span className="text-[9px] font-bold uppercase tracking-widest text-white/25">
                   {name}
                 </span>
-
                 {today ? (
                   <span
-                    className="mt-1 text-2xl font-bold tabular-nums tracking-[-0.03em]"
-                    style={{
-                      background: "linear-gradient(135deg, #EC4899, #F97316)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                    }}
+                    className="mt-1 text-3xl font-bold tabular-nums"
+                    style={gradientNumberStyle}
                   >
                     {date.getDate()}
                   </span>
                 ) : (
-                  <span className="mt-1 text-2xl font-bold tabular-nums tracking-[-0.03em] text-white/80">
+                  <span className="mt-1 text-3xl font-bold tabular-nums text-white/80">
                     {date.getDate()}
                   </span>
                 )}
-
-                <div className="mt-3 flex flex-1 flex-col gap-1.5">
-                  {dayPins.map((pin) => (
-                    <button
-                      key={pin.id}
-                      type="button"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        setViewingPin(pin);
-                      }}
-                      className="truncate rounded-lg bg-pink-500/10 px-2 py-1 text-left text-[11px] text-white/60 transition-colors hover:bg-pink-500/15 hover:text-white/75"
-                      title={pin.content_text}
-                    >
-                      {PIN_TYPE_LABELS[pin.content_type] ?? pin.content_type}
-                    </button>
-                  ))}
-                  {items.map((item) => (
-                    <span
-                      key={item.id}
-                      className="truncate rounded-lg bg-white/[0.06] px-2 py-1 text-[11px] text-white/60"
-                      title={item.idea}
-                    >
-                      {item.idea}
-                    </span>
-                  ))}
-                  {isEmpty && (
-                    <span className="mt-auto text-[11px] text-white/20 transition-colors group-hover:text-pink-400">
-                      + Add content
-                    </span>
-                  )}
-                </div>
               </div>
-            );
-          })}
-        </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
-          {LEGEND_ITEMS.map((item) => (
-            <span
-              key={item.label}
-              className="flex items-center gap-2 text-[11px] text-white/30"
-            >
-              <span
-                className={`h-2 w-2 shrink-0 rounded-sm ${item.color}`}
-                aria-hidden
-              />
-              {item.label}
-            </span>
-          ))}
+              <div className="flex min-w-0 flex-1 flex-col justify-center">
+                {dayPins.map((pin) => (
+                  <button
+                    key={pin.id}
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setViewingPin(pin);
+                    }}
+                    className="mb-1 truncate rounded-lg bg-white/[0.06] px-2 py-1 text-left text-[11px] text-white/60 transition-colors hover:text-white/80"
+                    title={pin.content_text}
+                  >
+                    {PIN_TYPE_LABELS[pin.content_type] ?? pin.content_type}
+                  </button>
+                ))}
+                {items.map((item) => (
+                  <span
+                    key={item.id}
+                    className="mb-1 truncate rounded-lg bg-white/[0.06] px-2 py-1 text-[11px] text-white/60"
+                    title={item.idea}
+                  >
+                    {item.idea}
+                  </span>
+                ))}
+                {isEmpty && (
+                  <span className="flex cursor-pointer items-center gap-1 text-[11px] text-white/20 transition-colors hover:text-pink-400">
+                    <Plus size={12} strokeWidth={2} />
+                    Add content
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="mt-6 grid grid-cols-3 gap-3">
+        <div className="rounded-2xl border border-white/[0.06] bg-[#111114] p-4 text-center">
+          <p className="text-2xl font-bold text-white">{thisWeekCount}</p>
+          <p className="mt-1 text-[11px] text-white/30">This Week</p>
+        </div>
+        <div className="rounded-2xl border border-white/[0.06] bg-[#111114] p-4 text-center">
+          <p className="text-2xl font-bold text-white">{platformCount}</p>
+          <p className="mt-1 text-[11px] text-white/30">Platforms</p>
+        </div>
+        <div className="rounded-2xl border border-white/[0.06] bg-[#111114] p-4 text-center">
+          <p className="text-2xl font-bold text-white">{consistencyLabel}</p>
+          <p className="mt-1 text-[11px] text-white/30">Consistency</p>
         </div>
       </div>
 

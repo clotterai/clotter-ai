@@ -1,32 +1,31 @@
-import { PremiumBackground } from "../components/premium-background";
 import { ContentPlanner } from "./content-planner";
+
+const gradientTextStyle = {
+  background: "linear-gradient(135deg, #EC4899, #F97316)",
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+} as const;
 
 export default function PlannerPage() {
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-[#09090B]">
-      <PremiumBackground variant="feature" />
-
-      <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col px-4 py-6 sm:px-6 sm:py-8">
-        <header className="shrink-0">
-          <p className="premium-feature-label">Content Planner</p>
-          <div
-            aria-hidden
-            className="mt-2 h-[2px] w-8 rounded-full"
-            style={{
-              background: "linear-gradient(135deg, #EC4899, #F97316)",
-            }}
-          />
-          <h1 className="mt-4 text-3xl font-bold leading-tight tracking-[-0.02em] text-white">
+    <div className="min-h-screen bg-[#09090B]">
+      <div className="px-6 py-8 md:px-10">
+        <header>
+          <p
+            className="text-[10px] font-semibold uppercase tracking-[0.2em]"
+            style={gradientTextStyle}
+          >
+            CONTENT PLANNER
+          </p>
+          <h1 className="mt-2 text-4xl font-bold text-white md:text-5xl">
             Plan your week.
           </h1>
-          <p className="mt-1 max-w-sm text-sm text-white/35">
-            Map your content, stay consistent, grow faster.
+          <p className="mt-2 text-sm text-white/35">
+            Schedule your content. Stay consistent. Grow faster.
           </p>
         </header>
 
-        <div className="mt-8 flex min-h-0 flex-1 flex-col">
-          <ContentPlanner />
-        </div>
+        <ContentPlanner />
       </div>
     </div>
   );
