@@ -1,8 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { Check } from "lucide-react";
 import type { ContentHistoryItem, CreatorProfile } from "@/lib/memory/types";
-import { getMissingProfileFields } from "@/lib/memory/getCreatorContext";
+import {
+  getProfileCompletionFieldStatuses,
+  type ProfileCompletionFieldStatus,
+} from "@/lib/memory/getCreatorContext";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   premiumGradientButtonStyle,
@@ -63,45 +67,150 @@ const PROFILE_FIELDS: {
   { key: "unique_angle", label: "Unique angle", type: "textarea" },
 ];
 
+const gradientTextStyle = {
+  background: "linear-gradient(135deg, #EC4899, #F97316)",
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+} as const;
+
+const gradientBadgeStyle = {
+  background: "linear-gradient(135deg, #EC4899, #F97316)",
+} as const;
+
+const SPARKLE_POSITIONS = [
+  { top: "8%", left: "50%" },
+  { top: "18%", left: "88%" },
+  { top: "50%", left: "95%" },
+  { top: "82%", left: "78%" },
+  { top: "92%", left: "42%" },
+  { top: "72%", left: "8%" },
+  { top: "38%", left: "2%" },
+  { top: "12%", left: "14%" },
+];
+
+function SparkleAnimation() {
+  return (
+    <div className="pointer-events-none absolute inset-0" aria-hidden>
+      {SPARKLE_POSITIONS.map((position, index) => (
+        <span
+          key={index}
+          className="memory-sparkle absolute h-1.5 w-1.5 rounded-full bg-gradient-to-br from-pink-400 to-orange-400"
+          style={{
+            ...position,
+            animationDelay: `${index * 0.25}s`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 function CompletionRing({ percent }: { percent: number }) {
-  const radius = 54;
+  const size = 160;
+  const strokeWidth = 8;
+  const radius = size / 2 - strokeWidth / 2;
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (percent / 100) * circumference;
+  const [animatedPercent, setAnimatedPercent] = useState(0);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      setAnimatedPercent(percent);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [percent]);
+
+  const offset =
+    circumference - (Math.min(Math.max(animatedPercent, 0), 100) / 100) * circumference;
 
   return (
-    <div className="memory-completion-ring relative flex h-36 w-36 items-center justify-center">
-      <svg className="h-full w-full -rotate-90" viewBox="0 0 120 120">
-        <circle
-          cx="60"
-          cy="60"
-          r={radius}
-          fill="none"
-          stroke="rgba(99,102,241,0.15)"
-          strokeWidth="8"
-        />
-        <circle
-          cx="60"
-          cy="60"
-          r={radius}
-          fill="none"
-          stroke="url(#memory-ring-gradient)"
-          strokeWidth="8"
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          className="memory-completion-ring-progress"
-        />
+    <div
+      className="relative flex items-center justify-center"
+      style={{ width: size, height: size }}
+    >
+      {percent === 100 && <SparkleAnimation />}
+      <svg
+        className="h-full w-full -rotate-90"
+        viewBox={`0 0 ${size} ${size}`}
+        aria-hidden
+      >
         <defs>
           <linearGradient id="memory-ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#EC4899" />
             <stop offset="100%" stopColor="#F97316" />
           </linearGradient>
         </defs>
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="rgba(255,255,255,0.1)"
+          strokeWidth={strokeWidth}
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="url(#memory-ring-gradient)"
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          className="memory-completion-ring-progress"
+        />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-heading text-3xl font-bold text-white">{percent}%</span>
-        <span className="text-xs text-white/40">Complete</span>
+        <span
+          className="text-3xl font-bold tabular-nums"
+          style={gradientTextStyle}
+        >
+          {percent}%
+        </span>
+        <span className="text-xs text-white/30">Complete</span>
       </div>
+    </div>
+  );
+}
+
+function ProfileCompletionFieldsList({
+  fields,
+}: {
+  fields: ProfileCompletionFieldStatus[];
+}) {
+  const hasMissing = fields.some((field) => !field.filled);
+
+  return (
+    <div className="mt-6 w-full max-w-xs">
+      <ul className="space-y-2.5">
+        {fields.map((field) => (
+          <li key={field.key} className="flex items-center gap-2.5">
+            {field.filled ? (
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/15">
+                <Check size={12} className="text-emerald-400" strokeWidth={2.5} />
+              </span>
+            ) : (
+              <span className="h-2 w-2 shrink-0 rounded-full bg-pink-500" aria-hidden />
+            )}
+            <span
+              className={`text-sm ${
+                field.filled ? "text-white/60" : "text-white/45"
+              }`}
+            >
+              {field.label}
+            </span>
+          </li>
+        ))}
+      </ul>
+      {hasMissing && (
+        <Link
+          href="/dashboard/onboarding"
+          className="mt-4 inline-flex text-sm font-medium transition-opacity hover:opacity-80"
+          style={gradientTextStyle}
+        >
+          Complete your profile
+        </Link>
+      )}
     </div>
   );
 }
@@ -234,9 +343,15 @@ export function MemoryDashboard() {
     return groups;
   }, [filteredHistory]);
 
-  const missingFields = useMemo(
-    () => getMissingProfileFields(profile as Record<string, unknown> | null),
+  const fieldStatuses = useMemo(
+    () =>
+      getProfileCompletionFieldStatuses(profile as Record<string, unknown> | null),
     [profile],
+  );
+
+  const missingFields = useMemo(
+    () => fieldStatuses.filter((field) => !field.filled),
+    [fieldStatuses],
   );
 
   async function saveProfileField(key: string, value: unknown) {
@@ -388,15 +503,21 @@ export function MemoryDashboard() {
 
       {tab === "profile" && (
         <div>
-          <div className="mb-10 flex flex-col items-start gap-8 lg:flex-row lg:items-center">
-            <CompletionRing percent={completion} />
-            <div>
+          <div className="mb-10 flex flex-col gap-10 lg:flex-row lg:items-start">
+            <div className="flex flex-col items-center lg:items-start">
+              <CompletionRing percent={completion} />
+              <ProfileCompletionFieldsList fields={fieldStatuses} />
+            </div>
+            <div className="flex-1">
               <div className="flex flex-wrap items-center gap-3">
                 <p className="text-xl font-bold text-white">
                   Your AI gets smarter as you add more
                 </p>
                 {completion === 100 && (
-                  <span className="rounded-full border border-white/[0.12] bg-white/[0.06] px-3 py-1 text-xs font-semibold text-white/60">
+                  <span
+                    className="rounded-full px-3 py-1 text-xs font-semibold text-white"
+                    style={gradientBadgeStyle}
+                  >
                     Profile Complete
                   </span>
                 )}
@@ -414,22 +535,6 @@ export function MemoryDashboard() {
                     {missingFields.length} field{missingFields.length !== 1 ? "s" : ""}{" "}
                     remaining for 100% AI memory
                   </p>
-                  <ul className="mt-3 space-y-2">
-                    {missingFields.map((field) => (
-                      <li
-                        key={field.key}
-                        className="text-sm text-white/50"
-                      >
-                        {field.label}
-                      </li>
-                    ))}
-                  </ul>
-                  <Link
-                    href="/dashboard/onboarding"
-                    className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-white/50 transition-colors hover:text-white/75"
-                  >
-                    Complete your profile
-                  </Link>
                 </div>
               )}
             </div>

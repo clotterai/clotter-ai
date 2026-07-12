@@ -2397,7 +2397,23 @@ h6,
 }
 
 .memory-completion-ring-progress {
-  transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: stroke-dashoffset 1.5s ease-in-out;
+}
+
+@keyframes memory-sparkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.memory-sparkle {
+  animation: memory-sparkle 2.4s ease-in-out infinite;
 }
 
 .memory-tag {

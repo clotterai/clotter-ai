@@ -111,9 +111,9 @@ export async function hasCreatorProfile(
 export const PROFILE_COMPLETION_FIELDS = [
   { key: "niche", label: "Niche" },
   { key: "platforms", label: "Platforms" },
-  { key: "audience_age", label: "Audience size" },
+  { key: "audience_size", label: "Audience size", profileKey: "current_followers" },
   { key: "content_style", label: "Content style" },
-  { key: "biggest_goal", label: "Goals" },
+  { key: "goals", label: "Goals", profileKey: "biggest_goal" },
   { key: "posting_frequency", label: "Posting frequency" },
   { key: "unique_angle", label: "Unique angle" },
   { key: "preferred_name", label: "Preferred name" },
@@ -121,9 +121,46 @@ export const PROFILE_COMPLETION_FIELDS = [
 
 export const PROFILE_COMPLETION_TOTAL = PROFILE_COMPLETION_FIELDS.length;
 
+export type ProfileCompletionFieldStatus = {
+  key: string;
+  label: string;
+  filled: boolean;
+};
+
 function isProfileFieldFilled(value: unknown): boolean {
+  if (value == null) return false;
   if (Array.isArray(value)) return value.length > 0;
-  return typeof value === "string" && value.trim().length > 0;
+  if (typeof value === "string") return value.trim() !== "";
+  return false;
+}
+
+function getCompletionFieldValue(
+  profile: Record<string, unknown> | null,
+  field: (typeof PROFILE_COMPLETION_FIELDS)[number],
+): unknown {
+  if (!profile) return undefined;
+
+  if (field.key === "audience_size") {
+    return profile.current_followers ?? profile.audience_size;
+  }
+
+  if (field.key === "goals") {
+    return profile.biggest_goal ?? profile.goals;
+  }
+
+  const profileKey =
+    "profileKey" in field && field.profileKey ? field.profileKey : field.key;
+  return profile[profileKey as string];
+}
+
+export function getProfileCompletionFieldStatuses(
+  profile: Record<string, unknown> | null,
+): ProfileCompletionFieldStatus[] {
+  return PROFILE_COMPLETION_FIELDS.map((field) => ({
+    key: field.key,
+    label: field.label,
+    filled: isProfileFieldFilled(getCompletionFieldValue(profile, field)),
+  }));
 }
 
 export function calculateProfileCompletion(
@@ -131,24 +168,17 @@ export function calculateProfileCompletion(
 ): number {
   if (!profile) return 0;
 
-  const filled = PROFILE_COMPLETION_FIELDS.filter((field) =>
-    isProfileFieldFilled(profile[field.key]),
-  );
+  const filled = getProfileCompletionFieldStatuses(profile).filter(
+    (field) => field.filled,
+  ).length;
 
-  return Math.round((filled.length / PROFILE_COMPLETION_TOTAL) * 100);
+  return Math.round((filled / PROFILE_COMPLETION_TOTAL) * 100);
 }
 
 export function getMissingProfileFields(
   profile: Record<string, unknown> | null,
 ): { key: string; label: string }[] {
-  if (!profile) {
-    return PROFILE_COMPLETION_FIELDS.map((field) => ({
-      key: field.key,
-      label: field.label,
-    }));
-  }
-
-  return PROFILE_COMPLETION_FIELDS.filter(
-    (field) => !isProfileFieldFilled(profile[field.key]),
-  ).map((field) => ({ key: field.key, label: field.label }));
+  return getProfileCompletionFieldStatuses(profile)
+    .filter((field) => !field.filled)
+    .map(({ key, label }) => ({ key, label }));
 }
