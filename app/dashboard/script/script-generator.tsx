@@ -11,6 +11,7 @@ import {
   PremiumInput,
   PremiumLoadingSkeleton,
   PremiumPillGroup,
+  premiumPillActiveStyle,
   PremiumResultsHeader,
   PremiumTextarea,
 } from "@/app/dashboard/components/premium-ui";
@@ -99,7 +100,6 @@ type ScriptSectionCardProps = {
   content: string;
   onCopy: () => void;
   copied: boolean;
-  delay?: number;
 };
 
 function ScriptSectionCard({
@@ -108,21 +108,25 @@ function ScriptSectionCard({
   content,
   onCopy,
   copied,
-  delay = 0,
 }: ScriptSectionCardProps) {
   return (
-    <article
-      className="premium-script-section"
-      style={{ animationDelay: `${delay}s` }}
-    >
+    <article className="relative rounded-2xl border border-white/[0.06] bg-[#111114] p-5 transition-all duration-200 hover:border-white/[0.12]">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="premium-script-section-label">{label}</p>
-          {badge && <span className="premium-script-section-badge">{badge}</span>}
+          <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/25">
+            {label}
+          </p>
+          {badge && (
+            <span className="mt-1 inline-block text-[11px] text-white/35">
+              {badge}
+            </span>
+          )}
         </div>
         <PremiumCopyButton onClick={onCopy} copied={copied} />
       </div>
-      <p className="premium-result-text mt-4 whitespace-pre-wrap">{content}</p>
+      <p className="mt-4 whitespace-pre-wrap text-[13px] leading-relaxed text-white/75">
+        {content}
+      </p>
     </article>
   );
 }
@@ -185,8 +189,8 @@ export function ScriptGenerator() {
   }
 
   return (
-    <div className="premium-feature-body">
-        <section className="premium-form-section">
+    <div className="space-y-8">
+        <section className="space-y-6">
           <div>
             <PremiumFieldLabel htmlFor="script-topic">Video topic</PremiumFieldLabel>
             <PremiumTextarea
@@ -201,22 +205,32 @@ export function ScriptGenerator() {
 
           <div>
             <PremiumFieldLabel>Platform</PremiumFieldLabel>
-            <div className="premium-platform-grid">
-              {platforms.map((option) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  onClick={() => setPlatform(option.id)}
-                  disabled={isLoading}
-                  aria-pressed={platform === option.id}
-                  className={`premium-platform-card${
-                    platform === option.id ? " premium-platform-card--active" : ""
-                  }`}
-                >
-                  <span className="premium-platform-card-label">{option.label}</span>
-                  <span className="premium-platform-card-desc">{option.description}</span>
-                </button>
-              ))}
+            <div className="grid gap-2 sm:grid-cols-2">
+              {platforms.map((option) => {
+                const isActive = platform === option.id;
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => setPlatform(option.id)}
+                    disabled={isLoading}
+                    aria-pressed={isActive}
+                    className={`rounded-2xl border p-4 text-left transition-all duration-200 ${
+                      isActive
+                        ? "border-pink-500/50"
+                        : "border-white/[0.06] bg-white/[0.03] hover:border-white/15"
+                    }`}
+                    style={isActive ? premiumPillActiveStyle : undefined}
+                  >
+                    <span className="block text-xs font-medium text-white">
+                      {option.label}
+                    </span>
+                    <span className="mt-1 block text-[11px] text-white/35">
+                      {option.description}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -301,14 +315,15 @@ export function ScriptGenerator() {
               <button
                 type="button"
                 onClick={() => void copyText(buildFullScript(script), "full")}
-                className="premium-pill premium-pill--active"
+                className="rounded-full border border-pink-500/50 px-4 py-2 text-xs font-medium text-white transition-all duration-150"
+                style={premiumPillActiveStyle}
               >
                 {copiedKey === "full" ? "Copied!" : "Copy full script"}
               </button>
               <button
                 type="button"
                 onClick={() => void generateScript()}
-                className="premium-pill"
+                className="rounded-full border border-white/[0.06] bg-white/[0.03] px-4 py-2 text-xs text-white/40 transition-all duration-150 hover:border-white/15 hover:text-white/60"
               >
                 Regenerate
               </button>
@@ -324,7 +339,6 @@ export function ScriptGenerator() {
               content={script.hook}
               onCopy={() => void copyText(script.hook, "hook")}
               copied={copiedKey === "hook"}
-              delay={0.05}
             />
 
             <ScriptSectionCard
@@ -332,7 +346,6 @@ export function ScriptGenerator() {
               content={script.opening}
               onCopy={() => void copyText(script.opening, "opening")}
               copied={copiedKey === "opening"}
-              delay={0.1}
             />
 
             {script.sections.map((section, index) => (
@@ -345,7 +358,6 @@ export function ScriptGenerator() {
                   void copyText(section.content, `section-${index}`)
                 }
                 copied={copiedKey === `section-${index}`}
-                delay={0.15 + index * 0.05}
               />
             ))}
 
@@ -355,7 +367,6 @@ export function ScriptGenerator() {
               content={script.cta}
               onCopy={() => void copyText(script.cta, "cta")}
               copied={copiedKey === "cta"}
-              delay={0.2 + script.sections.length * 0.05}
             />
           </section>
         )}

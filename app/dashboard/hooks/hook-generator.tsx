@@ -80,8 +80,8 @@ export function HookGenerator() {
   }
 
   return (
-    <div className="premium-feature-body">
-        <section className="premium-form-section">
+    <div className="space-y-8">
+        <section className="space-y-6">
           <div>
             <PremiumFieldLabel htmlFor="hook-topic">Video topic</PremiumFieldLabel>
             <PremiumTextarea

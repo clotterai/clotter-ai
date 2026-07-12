@@ -1,5 +1,10 @@
-import type { ReactNode } from "react";
-import { PremiumBackground } from "./premium-background";
+import type { CSSProperties, ReactNode } from "react";
+
+const gradientTextStyle: CSSProperties = {
+  background: "linear-gradient(135deg, #EC4899, #F97316)",
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+};
 
 type FeaturePageShellProps = {
   label: string;
@@ -7,7 +12,6 @@ type FeaturePageShellProps = {
   subtitle: string;
   children: ReactNode;
   headerExtra?: ReactNode;
-  wide?: boolean;
 };
 
 export function FeaturePageShell({
@@ -16,26 +20,25 @@ export function FeaturePageShell({
   subtitle,
   children,
   headerExtra,
-  wide = false,
 }: FeaturePageShellProps) {
   return (
-    <div className="premium-feature-page relative flex min-h-screen flex-col overflow-hidden bg-[#09090B]">
-      <PremiumBackground variant="feature" />
-
-      <div
-        className={`relative z-10 mx-auto flex w-full flex-1 flex-col px-4 py-6 sm:px-6 sm:py-8 ${
-          wide ? "max-w-[1400px]" : "max-w-2xl"
-        }`}
-      >
-        <header className="premium-feature-header shrink-0">
-          <p className="premium-feature-label">{label}</p>
-          <div aria-hidden className="premium-feature-title-underline" />
-          <h1 className="premium-feature-title">{title}</h1>
-          <p className="premium-feature-subtitle">{subtitle}</p>
+    <div className="min-h-screen bg-[#09090B]">
+      <div className="px-6 py-8 md:px-10">
+        <header>
+          <p
+            className="text-[10px] font-semibold uppercase tracking-[0.2em]"
+            style={gradientTextStyle}
+          >
+            {label}
+          </p>
+          <h1 className="mt-2 text-4xl font-bold text-white md:text-5xl">
+            {title}
+          </h1>
+          <p className="mt-2 text-sm text-white/35">{subtitle}</p>
           {headerExtra}
         </header>
 
-        <div className="mt-8 flex min-h-0 flex-1 flex-col">{children}</div>
+        <div className="mt-8">{children}</div>
       </div>
     </div>
   );

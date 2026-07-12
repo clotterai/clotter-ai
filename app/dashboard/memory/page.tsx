@@ -5,7 +5,7 @@ export default function MemoryPage() {
   return (
     <FeaturePageShell
       label="AI Memory"
-      title="Your Creator Brain"
+      title="Your Creator Brain."
       subtitle="The more Clotter knows you, the better it gets."
     >
       <MemoryDashboard />

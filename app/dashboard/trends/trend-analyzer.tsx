@@ -40,9 +40,9 @@ const VIRAL_LABELS: Record<ViralScore, string> = {
 };
 
 const VIRAL_BADGE: Record<ViralScore, string> = {
-  high: "border-emerald-500/35 bg-emerald-500/15 text-emerald-200",
-  medium: "border-amber-500/35 bg-amber-500/15 text-amber-200",
-  low: "border-white/15 bg-white/5 text-white/50",
+  high: "border-white/[0.12] bg-white/[0.06] text-white/60",
+  medium: "border-white/[0.12] bg-white/[0.06] text-white/50",
+  low: "border-white/[0.06] bg-white/[0.03] text-white/35",
 };
 
 export function TrendAnalyzer() {
@@ -108,8 +108,8 @@ export function TrendAnalyzer() {
   }
 
   return (
-    <div className="premium-feature-body">
-        <section className="premium-form-section">
+    <div className="space-y-8">
+        <section className="space-y-6">
           <div>
             <PremiumFieldLabel htmlFor="trend-niche">Your niche</PremiumFieldLabel>
             <PremiumTextarea
@@ -164,24 +164,28 @@ export function TrendAnalyzer() {
               {trends.map((trend, index) => (
                 <li
                   key={index}
-                  className="premium-trend-card"
-                  style={{ animationDelay: `${index * 0.08}s` }}
+                  className="relative rounded-2xl border border-white/[0.06] bg-[#111114] transition-all duration-200 hover:border-white/[0.12]"
                 >
                   <PremiumCopyButton
                     onClick={() => void copyTrend(trend, index)}
                     copied={copiedIndex === index}
-                    className="absolute right-5 top-5"
+                    className="absolute right-4 top-4"
                   />
                   <div className="flex items-start gap-3 border-b border-white/[0.06] px-5 py-4">
-                    <span className="premium-result-badge shrink-0">
+                    <span
+                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                      style={{
+                        background: "linear-gradient(135deg, #EC4899, #F97316)",
+                      }}
+                    >
                       {index + 1}
                     </span>
                     <div className="min-w-0 flex-1 pr-8">
-                      <h3 className="text-base font-semibold leading-snug tracking-[-0.02em] text-white">
+                      <h3 className="text-sm font-semibold leading-snug text-white">
                         {trend.topic}
                       </h3>
                       <span
-                        className={`mt-2 inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${VIRAL_BADGE[trend.viralScore]}`}
+                        className={`mt-2 inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${VIRAL_BADGE[trend.viralScore]}`}
                       >
                         {VIRAL_LABELS[trend.viralScore]} potential
                       </span>
@@ -190,7 +194,7 @@ export function TrendAnalyzer() {
 
                   <div className="space-y-4 px-5 py-4">
                     <div>
-                      <p className="premium-script-section-label">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/25">
                         Why it&apos;s trending
                       </p>
                       <div className="mt-1.5">
@@ -198,7 +202,9 @@ export function TrendAnalyzer() {
                       </div>
                     </div>
                     <div>
-                      <p className="premium-script-section-label">Content angle</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/25">
+                        Content angle
+                      </p>
                       <div className="mt-1.5">
                         <PremiumResultText>{trend.contentAngle}</PremiumResultText>
                       </div>

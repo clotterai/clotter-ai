@@ -4,6 +4,12 @@ import Link from "next/link";
 import type { ContentHistoryItem, CreatorProfile } from "@/lib/memory/types";
 import { getMissingProfileFields } from "@/lib/memory/getCreatorContext";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  premiumGradientButtonStyle,
+  premiumInputClassName,
+  premiumPillActiveStyle,
+  PremiumLoadingSkeleton,
+} from "@/app/dashboard/components/premium-ui";
 
 type Tab = "profile" | "history" | "preferences";
 
@@ -340,24 +346,21 @@ export function MemoryDashboard() {
   }
 
   if (loading) {
-    return (
-      <div className="premium-feature-body">
-        <div className="premium-skeleton-card mx-auto max-w-md" style={{ height: 120 }} />
-        <p className="premium-loading-label mt-6 text-center">
-          Loading your Creator Brain
-          <span className="premium-loading-dots" aria-hidden>
-            <span>.</span>
-            <span>.</span>
-            <span>.</span>
-          </span>
-        </p>
-      </div>
-    );
+    return <PremiumLoadingSkeleton count={3} />;
   }
 
+  const cardClassName =
+    "rounded-2xl border border-white/[0.06] bg-[#111114] p-4 transition-all duration-200 hover:border-white/[0.12]";
+
+  const pillDefaultClassName =
+    "rounded-full border border-white/[0.06] bg-white/[0.03] px-4 py-2 text-xs text-white/40 transition-all duration-150 hover:border-white/15 hover:text-white/60";
+
+  const pillActiveClassName =
+    "rounded-full border border-pink-500/50 px-4 py-2 text-xs font-medium text-white transition-all duration-150";
+
   return (
-    <div className="premium-feature-body">
-      <div className="memory-tabs mb-8 flex flex-wrap gap-2">
+    <div className="space-y-8">
+      <div className="flex flex-wrap gap-2">
         {(
           [
             ["profile", "Creator Profile"],
@@ -369,7 +372,8 @@ export function MemoryDashboard() {
             key={id}
             type="button"
             onClick={() => setTab(id)}
-            className={`memory-tab${tab === id ? " memory-tab--active" : ""}`}
+            className={tab === id ? pillActiveClassName : pillDefaultClassName}
+            style={tab === id ? premiumPillActiveStyle : undefined}
           >
             {label}
           </button>
@@ -377,36 +381,36 @@ export function MemoryDashboard() {
       </div>
 
       {error && (
-        <p className="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-4 text-sm text-red-300">
+        <p className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
           {error}
         </p>
       )}
 
       {tab === "profile" && (
-        <div className="memory-tab-panel captions-fade-in">
+        <div>
           <div className="mb-10 flex flex-col items-start gap-8 lg:flex-row lg:items-center">
             <CompletionRing percent={completion} />
             <div>
               <div className="flex flex-wrap items-center gap-3">
-                <p className="font-heading text-xl font-bold text-white">
+                <p className="text-xl font-bold text-white">
                   Your AI gets smarter as you add more
                 </p>
                 {completion === 100 && (
-                  <span className="rounded-full border border-emerald-400/35 bg-emerald-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-emerald-200">
+                  <span className="rounded-full border border-white/[0.12] bg-white/[0.06] px-3 py-1 text-xs font-semibold text-white/60">
                     Profile Complete
                   </span>
                 )}
               </div>
-              <p className="mt-2 max-w-md text-sm leading-relaxed text-white/45">
+              <p className="mt-2 max-w-md text-sm leading-relaxed text-white/35">
                 Every field you complete helps Clotter personalize scripts, captions,
                 hooks, and ideas to match your voice and audience.
               </p>
               {missingFields.length > 0 && (
-                <div className="mt-5 rounded-xl border border-[#EC4899]/25 bg-[#EC4899]/10 px-4 py-4">
-                  <p className="text-sm font-semibold text-white/90">
+                <div className="mt-5 rounded-2xl border border-white/[0.06] bg-[#111114] p-4">
+                  <p className="text-sm font-semibold text-white">
                     Complete your profile to unlock personalized AI
                   </p>
-                  <p className="mt-1 text-xs text-white/45">
+                  <p className="mt-1 text-xs text-white/35">
                     {missingFields.length} field{missingFields.length !== 1 ? "s" : ""}{" "}
                     remaining for 100% AI memory
                   </p>
@@ -414,18 +418,17 @@ export function MemoryDashboard() {
                     {missingFields.map((field) => (
                       <li
                         key={field.key}
-                        className="flex items-center gap-2 text-sm text-white/65"
+                        className="text-sm text-white/50"
                       >
-                        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#EC4899]" />
                         {field.label}
                       </li>
                     ))}
                   </ul>
                   <Link
                     href="/dashboard/onboarding"
-                    className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-[#FB923C] transition-colors hover:text-[#FECDD3]"
+                    className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-white/50 transition-colors hover:text-white/75"
                   >
-                    Complete your profile →
+                    Complete your profile
                   </Link>
                 </div>
               )}
@@ -444,11 +447,11 @@ export function MemoryDashboard() {
               return (
                 <div
                   key={key}
-                  className={`memory-field-card${filled ? " memory-field-card--complete" : ""}`}
+                  className={`${cardClassName}${filled ? " border-white/[0.10]" : ""}`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-semibold uppercase tracking-[0.1em] text-white/35">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/25">
                         {label}
                       </p>
                       {isEditing ? (
@@ -456,7 +459,7 @@ export function MemoryDashboard() {
                           <textarea
                             value={editValue}
                             onChange={(e) => setEditValue(e.target.value)}
-                            className="captions-textarea mt-2 !min-h-[80px] w-full resize-none !py-3"
+                            className={`${premiumInputClassName} mt-2 !min-h-[80px]`}
                             autoFocus
                           />
                         ) : (
@@ -464,12 +467,12 @@ export function MemoryDashboard() {
                             type="text"
                             value={editValue}
                             onChange={(e) => setEditValue(e.target.value)}
-                            className="captions-textarea mt-2 !min-h-0 w-full !py-3"
+                            className={`${premiumInputClassName} mt-2 !min-h-0 !py-3`}
                             autoFocus
                           />
                         )
                       ) : (
-                        <p className="mt-2 text-[15px] leading-relaxed text-white/85">
+                        <p className="mt-2 text-sm leading-relaxed text-white/75">
                           {formatProfileValue(value)}
                         </p>
                       )}
@@ -480,14 +483,15 @@ export function MemoryDashboard() {
                           type="button"
                           onClick={() => commitEdit(key, type)}
                           disabled={saving}
-                          className="script-action-btn script-action-btn--primary !px-3 !py-2 text-xs"
+                          className="rounded-full px-3 py-2 text-xs font-semibold text-white transition-all duration-150 hover:brightness-110 disabled:opacity-70"
+                          style={premiumGradientButtonStyle}
                         >
                           Save
                         </button>
                         <button
                           type="button"
                           onClick={() => setEditingField(null)}
-                          className="script-action-btn !px-3 !py-2 text-xs"
+                          className={pillDefaultClassName}
                         >
                           Cancel
                         </button>
@@ -496,7 +500,7 @@ export function MemoryDashboard() {
                       <button
                         type="button"
                         onClick={() => startEdit(key, value)}
-                        className="script-action-btn shrink-0 !px-3 !py-2 text-xs"
+                        className={`${pillDefaultClassName} shrink-0 !px-3 !py-2`}
                       >
                         Edit
                       </button>
@@ -510,29 +514,32 @@ export function MemoryDashboard() {
       )}
 
       {tab === "history" && (
-        <div className="memory-tab-panel captions-fade-in">
+        <div>
           {stats && (
-            <p className="mb-6 text-sm text-white/50">
+            <p className="mb-6 text-sm text-white/35">
               You&apos;ve generated{" "}
-              <span className="text-[#EC4899]">{stats.script} scripts</span>,{" "}
-              <span className="text-[#EC4899]">{stats.caption} captions</span>,{" "}
-              <span className="text-[#EC4899]">{stats.hook} hooks</span>
+              <span className="text-white/60">{stats.script} scripts</span>,{" "}
+              <span className="text-white/60">{stats.caption} captions</span>,{" "}
+              <span className="text-white/60">{stats.hook} hooks</span>
               {stats.idea > 0 && (
                 <>
-                  , <span className="text-[#EC4899]">{stats.idea} ideas</span>
+                  , <span className="text-white/60">{stats.idea} ideas</span>
                 </>
               )}
             </p>
           )}
 
           {topTopics.length > 0 && (
-            <div className="memory-field-card mb-6">
-              <p className="text-xs font-semibold uppercase tracking-[0.1em] text-white/35">
+            <div className={`${cardClassName} mb-6`}>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/25">
                 Most used topics
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {topTopics.map(({ topic, count }) => (
-                  <span key={topic} className="memory-tag memory-tag--neutral">
+                  <span
+                    key={topic}
+                    className="rounded-full border border-white/[0.06] bg-white/[0.03] px-3 py-1 text-xs text-white/50"
+                  >
                     {topic} ({count})
                   </span>
                 ))}
@@ -546,28 +553,30 @@ export function MemoryDashboard() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search history..."
-              className="captions-textarea !min-h-0 flex-1 !py-3.5"
+              className={`${premiumInputClassName} !min-h-0 flex-1 !py-3.5`}
             />
             <div className="flex flex-wrap gap-2">
-              {["all", "script", "caption", "hook", "idea", "trend"].map((filter) => (
-                <button
-                  key={filter}
-                  type="button"
-                  onClick={() => setHistoryFilter(filter)}
-                  className={`captions-tone-pill${
-                    historyFilter === filter ? " captions-tone-pill--active" : ""
-                  }`}
-                >
-                  {filter === "all" ? "All" : typeLabel(filter)}
-                </button>
-              ))}
+              {["all", "script", "caption", "hook", "idea", "trend"].map((filter) => {
+                const isActive = historyFilter === filter;
+                return (
+                  <button
+                    key={filter}
+                    type="button"
+                    onClick={() => setHistoryFilter(filter)}
+                    className={isActive ? pillActiveClassName : pillDefaultClassName}
+                    style={isActive ? premiumPillActiveStyle : undefined}
+                  >
+                    {filter === "all" ? "All" : typeLabel(filter)}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           {filteredHistory.length === 0 ? (
-            <div className="memory-field-card py-12 text-center">
-              <p className="text-white/45">No content history yet.</p>
-              <p className="mt-2 text-sm text-white/30">
+            <div className={`${cardClassName} py-12 text-center`}>
+              <p className="text-sm font-semibold text-white">No content history yet</p>
+              <p className="mt-1 text-xs text-white/30">
                 Generate scripts, captions, or hooks — they&apos;ll appear here.
               </p>
             </div>
@@ -575,44 +584,41 @@ export function MemoryDashboard() {
             <div className="space-y-8">
               {Object.entries(groupedHistory).map(([type, items]) => (
                 <section key={type}>
-                  <h3 className="font-heading mb-4 text-lg font-bold text-white">
+                  <h3 className="mb-4 text-base font-semibold text-white">
                     {typeLabel(type)}s
                   </h3>
-                  <div className="memory-timeline space-y-3">
+                  <div className="space-y-3">
                     {items.map((item) => (
-                      <article key={item.id} className="memory-timeline-item">
-                        <div className="memory-timeline-dot" />
-                        <div className="memory-field-card flex-1">
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0 flex-1">
-                              <div className="flex flex-wrap items-center gap-2">
-                                <span className="memory-tag memory-tag--type">
-                                  {typeLabel(item.content_type)}
-                                </span>
-                                {item.platform && (
-                                  <span className="text-xs text-white/35">
-                                    {item.platform}
-                                  </span>
-                                )}
+                      <article key={item.id} className={cardClassName}>
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="rounded-full border border-white/[0.06] bg-white/[0.03] px-2.5 py-0.5 text-[11px] text-white/50">
+                                {typeLabel(item.content_type)}
+                              </span>
+                              {item.platform && (
                                 <span className="text-xs text-white/30">
-                                  {formatDate(item.created_at)}
+                                  {item.platform}
                                 </span>
-                              </div>
-                              <p className="mt-2 font-medium text-white/90">
-                                {item.topic || "Untitled"}
-                              </p>
-                              <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-white/45">
-                                {item.content_text}
-                              </p>
+                              )}
+                              <span className="text-xs text-white/25">
+                                {formatDate(item.created_at)}
+                              </span>
                             </div>
-                            <button
-                              type="button"
-                              onClick={() => void deleteHistoryItem(item.id)}
-                              className="script-action-btn shrink-0 !px-3 !py-2 text-xs text-red-300/80 hover:text-red-300"
-                            >
-                              Delete
-                            </button>
+                            <p className="mt-2 text-sm font-medium text-white/80">
+                              {item.topic || "Untitled"}
+                            </p>
+                            <p className="mt-2 line-clamp-3 text-[13px] leading-relaxed text-white/50">
+                              {item.content_text}
+                            </p>
                           </div>
+                          <button
+                            type="button"
+                            onClick={() => void deleteHistoryItem(item.id)}
+                            className="shrink-0 rounded-full border border-white/[0.06] bg-white/[0.03] px-3 py-2 text-xs text-white/40 transition-all duration-150 hover:border-white/15 hover:text-white/60"
+                          >
+                            Delete
+                          </button>
                         </div>
                       </article>
                     ))}
@@ -625,20 +631,20 @@ export function MemoryDashboard() {
       )}
 
       {tab === "preferences" && (
-        <div className="memory-tab-panel captions-fade-in">
-          <p className="mb-8 max-w-xl text-sm leading-relaxed text-white/45">
+        <div>
+          <p className="mb-8 max-w-xl text-sm leading-relaxed text-white/35">
             These preferences shape every response Clotter gives you.
           </p>
 
           <section className="mb-10">
-            <h3 className="font-heading text-lg font-bold text-white">Things you like</h3>
+            <h3 className="text-base font-semibold text-white">Things you like</h3>
             <div className="mt-4 flex flex-wrap gap-2">
               {likes.map((tag) => (
                 <button
                   key={tag}
                   type="button"
                   onClick={() => removeTag("like", tag)}
-                  className="memory-tag memory-tag--like"
+                  className="rounded-full border border-white/[0.06] bg-white/[0.03] px-3 py-1 text-xs text-white/50 transition-all duration-150 hover:border-white/15 hover:text-white/60"
                 >
                   {tag} ×
                 </button>
@@ -651,12 +657,13 @@ export function MemoryDashboard() {
                 onChange={(e) => setNewLike(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addTag("like", newLike)}
                 placeholder="Add something you like..."
-                className="captions-textarea !min-h-0 flex-1 !py-3.5"
+                className={`${premiumInputClassName} !min-h-0 flex-1 !py-3.5`}
               />
               <button
                 type="button"
                 onClick={() => addTag("like", newLike)}
-                className="script-action-btn script-action-btn--primary"
+                className="shrink-0 rounded-2xl px-4 py-3 text-xs font-semibold text-white transition-all duration-150 hover:brightness-110"
+                style={premiumGradientButtonStyle}
               >
                 Add
               </button>
@@ -667,7 +674,7 @@ export function MemoryDashboard() {
                   key={s}
                   type="button"
                   onClick={() => addTag("like", s)}
-                  className="captions-tone-pill text-xs"
+                  className={pillDefaultClassName}
                 >
                   + {s}
                 </button>
@@ -676,7 +683,7 @@ export function MemoryDashboard() {
           </section>
 
           <section>
-            <h3 className="font-heading text-lg font-bold text-white">
+            <h3 className="text-base font-semibold text-white">
               Things you dislike
             </h3>
             <div className="mt-4 flex flex-wrap gap-2">
@@ -685,7 +692,7 @@ export function MemoryDashboard() {
                   key={tag}
                   type="button"
                   onClick={() => removeTag("dislike", tag)}
-                  className="memory-tag memory-tag--dislike"
+                  className="rounded-full border border-white/[0.06] bg-white/[0.03] px-3 py-1 text-xs text-white/50 transition-all duration-150 hover:border-white/15 hover:text-white/60"
                 >
                   {tag} ×
                 </button>
@@ -698,12 +705,13 @@ export function MemoryDashboard() {
                 onChange={(e) => setNewDislike(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addTag("dislike", newDislike)}
                 placeholder="Add something you dislike..."
-                className="captions-textarea !min-h-0 flex-1 !py-3.5"
+                className={`${premiumInputClassName} !min-h-0 flex-1 !py-3.5`}
               />
               <button
                 type="button"
                 onClick={() => addTag("dislike", newDislike)}
-                className="script-action-btn script-action-btn--primary"
+                className="shrink-0 rounded-2xl px-4 py-3 text-xs font-semibold text-white transition-all duration-150 hover:brightness-110"
+                style={premiumGradientButtonStyle}
               >
                 Add
               </button>
@@ -714,7 +722,7 @@ export function MemoryDashboard() {
                   key={s}
                   type="button"
                   onClick={() => addTag("dislike", s)}
-                  className="captions-tone-pill text-xs"
+                  className={pillDefaultClassName}
                 >
                   + {s}
                 </button>
