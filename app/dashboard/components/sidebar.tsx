@@ -790,25 +790,47 @@ function SidebarProfileSection({ user: initialUser }: { user: SidebarUser }) {
   }, [initialUser.displayName, initialUser.preferredName, initialUser.avatarUrl]);
 
   useEffect(() => {
-    async function loadPreferredLanguage() {
+    async function loadProfileDetails() {
       try {
         const response = await fetch("/api/memory/profile");
         if (!response.ok) return;
 
         const data = (await response.json()) as {
-          profile?: { preferred_language?: string | null };
+          profile?: {
+            preferred_name?: string | null;
+            avatar_url?: string | null;
+            preferred_language?: string | null;
+          };
         };
 
-        const saved = data.profile?.preferred_language?.trim();
-        if (saved && PREFERRED_LANGUAGES.includes(saved as (typeof PREFERRED_LANGUAGES)[number])) {
+        const profile = data.profile;
+        if (!profile) return;
+
+        const preferred = profile.preferred_name?.trim();
+        if (preferred) {
+          setPreferredName(preferred);
+          setDisplayName(preferred);
+          setEditValue(preferred);
+        }
+
+        const avatar = profile.avatar_url?.trim();
+        if (avatar) {
+          setAvatarUrl(avatar);
+        }
+
+        const saved = profile.preferred_language?.trim();
+        if (
+          saved &&
+          PREFERRED_LANGUAGES.includes(saved as (typeof PREFERRED_LANGUAGES)[number])
+        ) {
           setPreferredLanguage(saved);
         }
       } catch {
-        // Keep default language on failure.
+        // Keep auth defaults on failure.
       }
     }
 
-    void loadPreferredLanguage();
+    void loadProfileDetails();
   }, []);
 
   useEffect(() => {

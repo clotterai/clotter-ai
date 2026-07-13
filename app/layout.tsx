@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
+const SUPABASE_URL =
+  process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://ldomjfqgtzdfnbadswdj.supabase.co";
+
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
@@ -59,6 +62,11 @@ export default function RootLayout({
       lang="en"
       className={`${jakarta.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href={SUPABASE_URL} />
+        <link rel="dns-prefetch" href="https://openrouter.ai" />
+      </head>
       <body
         className={`${jakarta.variable} flex min-h-full flex-col font-[family-name:var(--font-jakarta)]`}
       >

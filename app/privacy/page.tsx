@@ -1,6 +1,8 @@
 import { LegalPageShell } from "@/app/components/legal-page-shell";
 import type { Metadata } from "next";
 
+export const dynamic = "force-static";
+
 export const metadata: Metadata = {
   title: "Privacy Policy — Clotter AI",
   description: "How Clotter AI collects, uses, and protects your data.",

@@ -1,4 +1,3 @@
-import { hasCreatorProfile } from "@/lib/memory/getCreatorContext";
 import { createClient } from "@/lib/supabase/server";
 import { getDisplayName, getFirstNameFromUser } from "@/lib/user-display-name";
 import { headers } from "next/headers";
@@ -95,15 +94,13 @@ export default async function DashboardLayout({
   const pathname = getPathname(headerList);
   const isOnboarding = pathname === ONBOARDING_PATH;
 
-  const profileExists = await hasCreatorProfile(supabase, user.id);
+  const { data: profileRow } = await supabase
+    .from("creator_profiles")
+    .select("id")
+    .eq("user_id", user.id)
+    .maybeSingle();
 
-  const { data: creatorProfile } = profileExists
-    ? await supabase
-        .from("creator_profiles")
-        .select("preferred_name, avatar_url")
-        .eq("user_id", user.id)
-        .maybeSingle()
-    : { data: null };
+  const profileExists = Boolean(profileRow);
 
   if (!profileExists && pathname && !isOnboarding) {
     redirect(ONBOARDING_PATH);
@@ -113,11 +110,7 @@ export default async function DashboardLayout({
     redirect("/dashboard");
   }
 
-  const sidebarUser = toSidebarUser(
-    user,
-    creatorProfile?.preferred_name,
-    creatorProfile?.avatar_url,
-  );
+  const sidebarUser = toSidebarUser(user);
   return (
     <ToastProvider>
     <div className="dash-shell relative flex min-h-full overflow-hidden bg-[#0D0D1A] font-sans text-white">

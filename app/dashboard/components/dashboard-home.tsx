@@ -13,6 +13,9 @@ import {
   Type,
   Zap,
 } from "lucide-react";
+import { calculateProfileCompletion } from "@/lib/memory/getCreatorContext";
+import { createClient } from "@/lib/supabase/client";
+import { getDisplayName } from "@/lib/user-display-name";
 
 const CACHE_KEY = "clotter-daily-brief-v1";
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
@@ -70,17 +73,13 @@ type CreatorProfileData = {
   completion: number;
 };
 
-type DashboardHomeProps = {
-  greeting: string;
-  displayName: string;
-  creatorProfile: CreatorProfileData | null;
-};
-
-export function DashboardHome({
-  displayName,
-  creatorProfile,
-}: DashboardHomeProps) {
+export function DashboardHome() {
   const router = useRouter();
+  const [displayName, setDisplayName] = useState<string | null>(null);
+  const [creatorProfile, setCreatorProfile] = useState<CreatorProfileData | null>(
+    null,
+  );
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [opportunities, setOpportunities] = useState<string[]>([]);
   const [isLoadingOpportunities, setIsLoadingOpportunities] = useState(true);
   const [commandInput, setCommandInput] = useState("");
@@ -136,6 +135,60 @@ export function DashboardHome({
       setIsLoadingOpportunities(false);
     }
   }, []);
+
+  const fetchProfile = useCallback(async () => {
+    setIsLoadingProfile(true);
+
+    try {
+      const supabase = createClient();
+      const [authResult, profileResponse] = await Promise.all([
+        supabase.auth.getUser(),
+        fetch("/api/memory/profile"),
+      ]);
+
+      const user = authResult.data.user;
+      const profileData = (await profileResponse.json()) as {
+        profile?: {
+          preferred_name?: string | null;
+          niche?: string | null;
+          platforms?: string[] | null;
+        } | null;
+      };
+
+      if (user) {
+        setDisplayName(
+          getDisplayName(user, profileData.profile?.preferred_name ?? null),
+        );
+      } else {
+        setDisplayName("Creator");
+      }
+
+      const profile = profileData.profile;
+      if (profile) {
+        setCreatorProfile({
+          niches: profile.niche
+            ? profile.niche
+                .split(",")
+                .map((item) => item.trim())
+                .filter(Boolean)
+            : [],
+          platforms: Array.isArray(profile.platforms) ? profile.platforms : [],
+          completion: calculateProfileCompletion(profile),
+        });
+      } else {
+        setCreatorProfile(null);
+      }
+    } catch {
+      setDisplayName("Creator");
+      setCreatorProfile(null);
+    } finally {
+      setIsLoadingProfile(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchProfile();
+  }, [fetchProfile]);
 
   useEffect(() => {
     void fetchOpportunities();
@@ -237,15 +290,19 @@ export function DashboardHome({
             <h1 className="text-4xl font-semibold leading-[1.1] tracking-tight text-white md:text-5xl">
               Welcome back,
               <br />
-              <span
-                style={{
-                  background: "linear-gradient(135deg, #EC4899, #F97316)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
-              >
-                {displayName}
-              </span>
+              {displayName === null ? (
+                <span className="mt-2 inline-block h-10 w-48 animate-pulse rounded-lg bg-white/[0.06]" />
+              ) : (
+                <span
+                  style={{
+                    background: "linear-gradient(135deg, #EC4899, #F97316)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                  }}
+                >
+                  {displayName}
+                </span>
+              )}
             </h1>
             <p className="text-sm text-white/30">Your creative OS is ready.</p>
           </div>
@@ -374,7 +431,19 @@ export function DashboardHome({
           </div>
 
           <div className="rounded-2xl border border-white/[0.06] bg-[#111114] p-6">
-            {creatorProfile ? (
+            {isLoadingProfile ? (
+              <div className="space-y-5">
+                <div className="h-4 w-20 animate-pulse rounded bg-white/[0.06]" />
+                <div className="flex gap-2">
+                  <div className="h-7 w-24 animate-pulse rounded-full bg-white/[0.06]" />
+                  <div className="h-7 w-28 animate-pulse rounded-full bg-white/[0.06]" />
+                </div>
+                <div className="space-y-2">
+                  <div className="h-3 w-32 animate-pulse rounded bg-white/[0.04]" />
+                  <div className="h-1 animate-pulse rounded-full bg-white/[0.06]" />
+                </div>
+              </div>
+            ) : creatorProfile ? (
               <div className="space-y-5">
                 <div>
                   <p className="mb-2.5 text-[10px] tracking-[0.15em] text-white/20">
