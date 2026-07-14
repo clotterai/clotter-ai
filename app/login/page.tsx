@@ -126,17 +126,31 @@ export default function LoginPage() {
               Google sign-in doesn't work inside LinkedIn or Instagram. Please
               open Clotter AI in Chrome or Safari.
             </p>
-            <a
-              href="https://clotter.ai/login"
-              target="_blank"
-              rel="noreferrer"
+            <button
+              type="button"
+              onClick={() => {
+                const url = "https://clotter.ai/login";
+                if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                  window.location.href = url;
+                } else {
+                  const intent = `intent://${url.replace("https://", "")}#Intent;scheme=https;package=com.android.chrome;end`;
+                  window.location.href = intent;
+                  setTimeout(() => {
+                    window.location.href = url;
+                  }, 500);
+                }
+              }}
               className="block w-full rounded-xl py-3 text-sm font-semibold text-white"
               style={{
                 background: "linear-gradient(135deg, #EC4899, #F97316)",
               }}
             >
-              Open in Browser →
-            </a>
+              Open in Chrome →
+            </button>
+            <p className="mt-3 text-xs text-white/30">
+              Or copy this link:{" "}
+              <span className="text-pink-400">clotter.ai/login</span>
+            </p>
           </div>
         </div>
       )}
