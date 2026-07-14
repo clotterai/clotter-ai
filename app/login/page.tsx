@@ -1,9 +1,8 @@
-import { DashboardParticles } from "@/app/dashboard/components/particles";
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
-import { LoginForm } from "./login-form";
+"use client";
 
-export const dynamic = "force-dynamic";
+import { DashboardParticles } from "@/app/dashboard/components/particles";
+import { useEffect, useState } from "react";
+import { LoginForm } from "./login-form";
 
 const tickerItems =
   "AI Chat • Hook Generator • Caption Writer • Trend Analyzer • Creator Memory • Bubble AI • Script Writer • Content Ideas • ";
@@ -97,24 +96,50 @@ function LogoOrb({ size }: { size: 32 | 80 }) {
   );
 }
 
-export default async function LoginPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string }>;
-}) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export default function LoginPage() {
+  const [authError, setAuthError] = useState(false);
+  const [showBrowserWarning, setShowBrowserWarning] = useState(false);
 
-  if (user) {
-    redirect("/dashboard");
-  }
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("error") === "auth") setAuthError(true);
+  }, []);
 
-  const params = await searchParams;
-  const authError = params.error === "auth";
+  useEffect(() => {
+    const ua = navigator.userAgent || "";
+    const isInApp = /LinkedIn|Instagram|FBAN|FBAV|Twitter|Line\/|WhatsApp/i.test(
+      ua,
+    );
+    if (isInApp) setShowBrowserWarning(true);
+  }, []);
 
   return (
+    <>
+      {showBrowserWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-6">
+          <div className="max-w-sm w-full rounded-2xl border border-orange-500/30 bg-[#111114] p-6 text-center">
+            <div className="mb-3 text-3xl">⚠️</div>
+            <h2 className="mb-2 text-lg font-bold text-white">
+              Open in your browser
+            </h2>
+            <p className="mb-4 text-sm text-white/50">
+              Google sign-in doesn't work inside LinkedIn or Instagram. Please
+              open Clotter AI in Chrome or Safari.
+            </p>
+            <a
+              href="https://clotter.ai/login"
+              target="_blank"
+              rel="noreferrer"
+              className="block w-full rounded-xl py-3 text-sm font-semibold text-white"
+              style={{
+                background: "linear-gradient(135deg, #EC4899, #F97316)",
+              }}
+            >
+              Open in Browser →
+            </a>
+          </div>
+        </div>
+      )}
     <div className="relative min-h-screen overflow-x-hidden bg-[#0D0D1A] text-white">
       <style>{`
         html { scroll-behavior: smooth; }
@@ -499,5 +524,6 @@ export default async function LoginPage({
         </p>
       </footer>
     </div>
+    </>
   );
 }
