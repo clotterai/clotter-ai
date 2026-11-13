@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <radialGradient id="bubbleGrad" cx="35%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#F9A8D4"/>
+      <stop offset="50%" stop-color="#EC4899"/>
+      <stop offset="100%" stop-color="#F97316"/>
+    </radialGradient>
+  </defs>
+  <circle cx="50" cy="50" r="45" fill="url(#bubbleGrad)"/>
+</svg>
