@@ -1,6 +1,7 @@
 "use client";
 
 import { DashboardParticles } from "@/app/dashboard/components/particles";
+import { ClotterLogo } from "@/app/dashboard/components/clotter-logo";
 import { useEffect, useState } from "react";
 import { LoginForm } from "./login-form";
 
@@ -57,44 +58,6 @@ const steps = [
     description: "Content that fits your voice every time",
   },
 ];
-
-function LogoOrb({ size }: { size: 32 | 80 }) {
-  const gradientId = `login-orb-gradient-${size}`;
-
-  return (
-    <svg
-      viewBox="0 0 64 64"
-      width={size}
-      height={size}
-      fill="none"
-      aria-hidden
-      className="shrink-0"
-    >
-      <defs>
-        <linearGradient id={gradientId} x1="8" y1="8" x2="56" y2="56">
-          <stop offset="0%" stopColor="#EC4899" />
-          <stop offset="100%" stopColor="#F97316" />
-        </linearGradient>
-      </defs>
-      <circle
-        cx="32"
-        cy="32"
-        r="24"
-        fill={`url(#${gradientId})`}
-        opacity="0.95"
-      />
-      <circle
-        cx="32"
-        cy="32"
-        r="24"
-        stroke="rgba(255,255,255,0.25)"
-        strokeWidth="1.5"
-      />
-      <circle cx="24" cy="24" r="5" fill="rgba(255,255,255,0.35)" />
-      <circle cx="40" cy="38" r="3" fill="rgba(255,255,255,0.2)" />
-    </svg>
-  );
-}
 
 export default function LoginPage() {
   const [authError, setAuthError] = useState(false);
@@ -393,7 +356,7 @@ export default function LoginPage() {
         />
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 sm:px-10">
           <div className="flex items-center gap-3">
-            <LogoOrb size={32} />
+            <ClotterLogo size={32} />
             <span className="text-[15px] font-bold tracking-[-0.02em] text-white">
               Clotter AI
             </span>
@@ -408,7 +371,7 @@ export default function LoginPage() {
       <section className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 pb-16 pt-24 sm:px-10">
         <div className="mx-auto flex w-full max-w-4xl flex-col items-center text-center">
           <div className="login-hero-item login-hero-delay-1 login-hero-orb">
-            <LogoOrb size={80} />
+            <ClotterLogo size={80} />
           </div>
 
           <span className="login-hero-item login-hero-delay-2 mt-8 inline-flex items-center rounded-full bg-[#EC4899]/10 px-4 py-1.5 text-xs font-semibold tracking-[0.04em] text-[#EC4899]">

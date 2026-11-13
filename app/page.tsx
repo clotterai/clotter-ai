@@ -1,3 +1,4 @@
+import { ClotterLogo } from "@/app/dashboard/components/clotter-logo";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -13,7 +14,8 @@ export default async function Home() {
   return (
     <main className="min-h-screen bg-[#09090B] flex flex-col items-center justify-center px-4">
       <div className="text-center max-w-2xl mx-auto">
-        <div className="mb-8">
+        <div className="mb-8 flex flex-col items-center gap-4">
+          <ClotterLogo size={80} />
           <span className="text-4xl font-bold bg-gradient-to-r from-pink-500 to-orange-500 bg-clip-text text-transparent">
             Clotter AI
           </span>
